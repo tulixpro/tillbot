@@ -3,6 +3,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const db = require("./database");
 
 const app = express();
@@ -12,8 +13,9 @@ app.use(express.json({ limit: "30kb" }));
 
 const SECRET = process.env.JWT_SECRET;
 if (!SECRET || SECRET.length < 32) {
-  throw new Error("JWT_SECRET (mindestens 32 Zeichen) fehlt in Render Environment");
+  console.warn("WARNUNG: JWT_SECRET fehlt/ist zu kurz. Temporärer Schlüssel aktiv; bitte in Render dauerhaft setzen.");
 }
+const TOKEN_SECRET = SECRET && SECRET.length >= 32 ? SECRET : crypto.randomBytes(48).toString("hex");
 const FRONTEND = process.env.FRONTEND_ORIGIN || "https://tulixpro.github.io";
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", FRONTEND);
@@ -30,12 +32,12 @@ app.use("/api/login", authLimit);
 app.use("/api/register", authLimit);
 
 const normalizeUsername = (value) => String(value || "").trim().toLowerCase();
-const makeToken = (user) => jwt.sign({ sub: String(user.id) }, SECRET, { expiresIn: "7d" });
+const makeToken = (user) => jwt.sign({ sub: String(user.id) }, TOKEN_SECRET, { expiresIn: "7d" });
 
 function auth(req, res, next) {
   try {
     const raw = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-    const payload = jwt.verify(raw, SECRET);
+    const payload = jwt.verify(raw, TOKEN_SECRET);
     const user = db.prepare("SELECT id, username, role FROM users WHERE id = ?").get(Number(payload.sub));
     if (!user) return res.status(401).json({ error: "Konto nicht gefunden" });
     req.user = user;
