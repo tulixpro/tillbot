@@ -1,16 +1,42 @@
-import { pipeline } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
-const MODEL="HuggingFaceTB/SmolLM2-360M-Instruct";
-let generator=null, busy=false, conversations=JSON.parse(localStorage.getItem("tillbot-pages-chats")||"[]"), active=null;
-const $=id=>document.getElementById(id);
-function persist(){localStorage.setItem("tillbot-pages-chats",JSON.stringify(conversations));historyUI()}
-function historyUI(){let h=$("history");h.innerHTML="";conversations.forEach(c=>{let b=document.createElement("button");b.textContent=c.title;b.onclick=()=>{active=c;render()};h.append(b)})}
-function render(){let c=$("chat");c.innerHTML="";if(!active||!active.messages.length){c.innerHTML='<div class="welcome"><div class="cloud">☁</div><h1>Hallo! Ich bin TILLBOT.</h1><p>Your AI. Your World.</p><p class="muted">Lade das KI-Modell einmal und chatte anschließend lokal im Browser.</p><button id="loadModel" class="load">KI-Modell laden</button><div id="modelStatus" class="status">Noch nicht geladen</div></div>';if(generator)$("modelStatus").textContent="KI bereit ✓";$("loadModel").onclick=load;return}
-active.messages.forEach(m=>{let d=document.createElement("div");d.className="bubble "+(m.role==="user"?"user":"bot");d.textContent=m.content;c.append(d)});c.scrollTop=c.scrollHeight}
-async function load(){if(generator)return;const s=$("modelStatus");if(s)s.textContent="Modell wird heruntergeladen … (beim ersten Mal mehrere hundert MB)";try{generator=await pipeline("text-generation",MODEL,{device:"webgpu",dtype:"q4"});if(s)s.textContent="KI bereit ✓";}catch(e){if(s)s.textContent="Laden fehlgeschlagen: WebGPU/Browser prüfen. "+e.message;}}
-$("loadModel")?.addEventListener("click",load);
-async function send(){if(busy)return;let text=$("prompt").value.trim();if(!text)return;if(!generator){alert("Bitte zuerst „KI-Modell laden“ anklicken.");return}if(!active){active={id:Date.now(),title:text.slice(0,32),messages:[]};conversations.unshift(active)}active.messages.push({role:"user",content:text});$("prompt").value="";persist();render();busy=true;let wait=document.createElement("div");wait.className="bubble bot";wait.textContent="TILLBOT denkt …";$("chat").append(wait);
-try{let out=await generator(active.messages.map(m=>({role:m.role,content:m.content})),{max_new_tokens:180,temperature:.7,do_sample:true});let answer=out[0].generated_text.at(-1).content;active.messages.push({role:"assistant",content:answer});}catch(e){active.messages.push({role:"assistant",content:"Fehler beim Antworten: "+e.message})}finally{busy=false;persist();render()}}
-$("send").onclick=send;$("prompt").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
-$("newChat").onclick=()=>{active=null;render()};$("theme").onclick=()=>document.body.classList.toggle("dark");$("menu").onclick=()=>$("sidebar").classList.toggle("open")||document.querySelector("aside").classList.toggle("open");
-$("admin").onclick=()=>$("adminDialog").showModal();$("closeAdmin").onclick=()=>$("adminDialog").close();
-historyUI();render();
+
+const express = require("express");
+const app = express();
+
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
+
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("TILLBOT Server läuft!");
+});
+
+app.get("/api/status", (req, res) => {
+  res.json({
+    online: true,
+    name: "TILLBOT",
+    status: "Server läuft"
+  });
+});
+
+app.post("/api/chat", (req, res) => {
+  res.json({
+    answer: "TILLBOT Server ist verbunden! Deine Nachricht: " + req.body.message
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("TILLBOT läuft auf Port " + PORT);
+});
+
