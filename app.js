@@ -1,150 +1,18 @@
-
-const API = "https://tillbot.onrender.com";
-
-let busy = false;
-let conversations = JSON.parse(localStorage.getItem("tillbot-pages-chats") || "[]");
-let active = null;
-
-const $ = id => document.getElementById(id);
-
-function persist() {
-  localStorage.setItem("tillbot-pages-chats", JSON.stringify(conversations));
-  historyUI();
-}
-
-function historyUI() {
-  const h = $("history");
-  h.innerHTML = "";
-
-  conversations.forEach(c => {
-    const b = document.createElement("button");
-    b.textContent = c.title;
-    b.onclick = () => {
-      active = c;
-      render();
-    };
-    h.append(b);
-  });
-}
-
-function render() {
-  const c = $("chat");
-  c.innerHTML = "";
-
-  if (!active || !active.messages.length) {
-    c.innerHTML = `
-      <div class="welcome">
-        <div class="cloud">☁</div>
-        <h1>Hallo! Ich bin TILLBOT.</h1>
-        <p>Your AI. Your World.</p>
-        <p class="muted">Dein Chat ist mit dem TILLBOT-Server verbunden.</p>
-        <div class="status">TILLBOT Server online ✓</div>
-      </div>
-    `;
-    return;
-  }
-
-  active.messages.forEach(m => {
-    const d = document.createElement("div");
-    d.className = "bubble " + (m.role === "user" ? "user" : "bot");
-    d.textContent = m.content;
-    c.append(d);
-  });
-
-  c.scrollTop = c.scrollHeight;
-}
-
-async function send() {
-  if (busy) return;
-
-  const text = $("prompt").value.trim();
-  if (!text) return;
-
-  if (!active) {
-    active = {
-      id: Date.now(),
-      title: text.slice(0, 32),
-      messages: []
-    };
-    conversations.unshift(active);
-  }
-
-  active.messages.push({ role: "user", content: text });
-  $("prompt").value = "";
-
-  persist();
-  render();
-
-  busy = true;
-
-  const wait = document.createElement("div");
-  wait.className = "bubble bot";
-  wait.textContent = "TILLBOT denkt …";
-  $("chat").append(wait);
-
-  try {
-    const response = await fetch(API + "/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: text,
-        history: active.messages
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error("Server Fehler: " + response.status);
-    }
-
-    const data = await response.json();
-
-    active.messages.push({
-      role: "assistant",
-      content: data.answer || "Keine Antwort erhalten."
-    });
-
-  } catch (e) {
-    active.messages.push({
-      role: "assistant",
-      content: "Verbindungsfehler: " + e.message
-    });
-  } finally {
-    busy = false;
-    persist();
-    render();
-  }
-}
-
-$("send").onclick = send;
-
-$("prompt").addEventListener("keydown", e => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    send();
-  }
-});
-
-$("newChat").onclick = () => {
-  active = null;
-  render();
-};
-
-$("theme").onclick = () =>
-  document.body.classList.toggle("dark");
-
-$("menu").onclick = () => {
-  $("sidebar").classList.toggle("open");
-  document.querySelector("aside").classList.toggle("open");
-};
-
-$("admin").onclick = () =>
-  $("adminDialog").showModal();
-
-$("closeAdmin").onclick = () =>
-  $("adminDialog").close();
-
-historyUI();
-render();
-
+const API="https://tillbot.onrender.com", $=id=>document.getElementById(id);let token=localStorage.getItem("tb-token"),user=null,registerMode=false,activeId=null,chats=[],busy=false,history=[];
+const headers=()=>({"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{})});
+async function api(path,opts={}){let r=await fetch(API+path,{...opts,headers:{...headers(),...(opts.headers||{})}}),d=await r.json().catch(()=>({error:"Serverantwort ungültig"}));if(!r.ok)throw Error(d.error||d.answer||"HTTP "+r.status);return d}
+function authMode(reg){registerMode=reg;$("tabLogin").classList.toggle("selected",!reg);$("tabRegister").classList.toggle("selected",reg);$("authSubmit").textContent=reg?"Konto erstellen":"Anmelden";$("password").autocomplete=reg?"new-password":"current-password";$("authMsg").textContent=""}
+$("tabLogin").onclick=()=>authMode(false);$("tabRegister").onclick=()=>authMode(true);
+$("authSubmit").onclick=async()=>{let b=$("authSubmit");b.disabled=true;$("authMsg").textContent="";try{let d=await api(registerMode?"/api/register":"/api/login",{method:"POST",body:JSON.stringify({username:$("username").value,password:$("password").value})});token=d.token;user=d.user;localStorage.setItem("tb-token",token);await start()}catch(e){$("authMsg").textContent=e.message}finally{b.disabled=false}};
+$("password").onkeydown=e=>{if(e.key==="Enter")$("authSubmit").click()};
+async function start(){if(!token){$("auth").classList.remove("hidden");$("app").classList.add("hidden");return}try{let d=await api("/api/me");user=d.user;$("auth").classList.add("hidden");$("app").classList.remove("hidden");$("who").textContent="@"+user.username;$("admin").classList.toggle("hidden",user.role!=="admin");await loadChats()}catch{token=null;localStorage.removeItem("tb-token");start()}}
+async function loadChats(){chats=await api("/api/chats");$("history").innerHTML="";chats.forEach(c=>{let b=document.createElement("button");b.textContent=c.title;b.onclick=()=>openChat(c.id);$("history").append(b)});if(activeId&&chats.some(c=>c.id===activeId))await openChat(activeId);else{activeId=null;history=[];render()}}
+async function openChat(id){let d=await api("/api/chats/"+id);activeId=id;history=d.chat.history||[];render()}
+function render(){let el=$("chat");el.innerHTML="";if(!history.length){el.innerHTML='<div class="welcome"><div class="cloud">☁</div><h1>Hallo! Ich bin TILLBOT.</h1><p>Your AI. Your World.</p><p class="muted">Dein persönlicher KI-Assistent.</p></div>';return}history.forEach(m=>{let div=document.createElement("div");div.className="bubble "+(m.role==="user"?"user":"bot");div.textContent=m.content;el.append(div)});el.scrollTop=el.scrollHeight}
+async function send(){if(busy)return;let text=$("prompt").value.trim();if(!text)return;busy=true;$("send").disabled=true;$("prompt").value="";history.push({role:"user",content:text});render();let wait=document.createElement("div");wait.className="bubble bot";wait.textContent="TILLBOT denkt …";$("chat").append(wait);try{if(!activeId){let c=await api("/api/chats",{method:"POST",body:JSON.stringify({title:text.slice(0,70)||"Neuer Chat"})});activeId=c.id}let d=await api("/api/chat",{method:"POST",body:JSON.stringify({message:text,history})});history.push({role:"assistant",content:d.answer||"Keine Antwort"});await api("/api/chats/"+activeId,{method:"PUT",body:JSON.stringify({title:history.find(x=>x.role==="user")?.content?.slice(0,70)||"Chat",history})});await loadChats()}catch(e){history.push({role:"assistant",content:"Fehler: "+e.message})}finally{busy=false;$("send").disabled=false;render()}}
+$("send").onclick=send;$("prompt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}};
+$("newChat").onclick=()=>{activeId=null;history=[];render();$("prompt").focus()};$("logout").onclick=()=>{localStorage.removeItem("tb-token");token=null;user=null;start()};
+$("menu").onclick=()=>$("sidebar").classList.toggle("open");$("theme").onclick=()=>document.body.classList.toggle("light");
+$("settingsBtn").onclick=()=>$("settingsDialog").showModal();$("closeSettings").onclick=()=>$("settingsDialog").close();$("fontSize").onchange=e=>document.documentElement.style.fontSize=e.target.value+"px";
+$("admin").onclick=async()=>{$("adminDialog").showModal();try{let s=await api("/api/admin/stats");$("adminStats").textContent="Accounts: "+s.users+" · Chats: "+s.chats}catch(e){$("adminStats").textContent=e.message}};$("closeAdmin").onclick=()=>$("adminDialog").close();
+start();
