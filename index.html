@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#edf4f8"><link rel="manifest" href="manifest.json">
+<title>TILLBOT · Your AI. Your World.</title><link rel="stylesheet" href="style.css">
+</head><body>
+<div class="layout">
+<aside id="sidebar">
+<div class="brand"><span>☁</span> TILLBOT</div>
+<button id="newChat" class="new">＋ Neuer Chat</button>
+<div class="label">CHATVERLAUF</div><div id="history"></div>
+<div class="sidebottom"><button id="theme">☾ Design wechseln</button><button id="admin">♛ Admin-Demo</button></div>
+</aside>
+<main><header><button id="menu">☰</button><strong>TILLBOT</strong><span class="tag">Browser-KI · kostenlos</span></header>
+<div id="chat" class="chat"><div class="welcome"><div class="cloud">☁</div><h1>Hallo! Ich bin TILLBOT.</h1><p>Your AI. Your World.</p><p class="muted">Lade das KI-Modell einmal und chatte anschließend lokal im Browser.</p><button id="loadModel" class="load">KI-Modell laden</button><div id="modelStatus" class="status">Noch nicht geladen</div></div></div>
+<div class="composerArea"><div class="composer"><textarea id="prompt" rows="1" placeholder="Schreibe TILLBOT eine Nachricht …"></textarea><button id="send" title="Senden">➤</button></div><small>KI läuft auf deinem Gerät, wenn das Modell geladen ist. Antworten können Fehler enthalten.</small></div>
+</main></div>
+<dialog id="adminDialog"><h2>Admin-Demo</h2><p>Dies ist nur eine lokale UI-Demo. GitHub Pages kann keine sicheren Adminrechte oder Konten verwalten. Bitte keine echten Passwörter hier verwenden.</p><button id="closeAdmin">Schließen</button></dialog>
+<script type="module" src="app.js"></script><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js");</script>
+</body></html>
