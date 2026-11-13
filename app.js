@@ -1,42 +1,150 @@
 
-const express = require("express");
-const app = express();
+const API = "https://tillbot.onrender.com";
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+let busy = false;
+let conversations = JSON.parse(localStorage.getItem("tillbot-pages-chats") || "[]");
+let active = null;
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
+const $ = id => document.getElementById(id);
+
+function persist() {
+  localStorage.setItem("tillbot-pages-chats", JSON.stringify(conversations));
+  historyUI();
+}
+
+function historyUI() {
+  const h = $("history");
+  h.innerHTML = "";
+
+  conversations.forEach(c => {
+    const b = document.createElement("button");
+    b.textContent = c.title;
+    b.onclick = () => {
+      active = c;
+      render();
+    };
+    h.append(b);
+  });
+}
+
+function render() {
+  const c = $("chat");
+  c.innerHTML = "";
+
+  if (!active || !active.messages.length) {
+    c.innerHTML = `
+      <div class="welcome">
+        <div class="cloud">☁</div>
+        <h1>Hallo! Ich bin TILLBOT.</h1>
+        <p>Your AI. Your World.</p>
+        <p class="muted">Dein Chat ist mit dem TILLBOT-Server verbunden.</p>
+        <div class="status">TILLBOT Server online ✓</div>
+      </div>
+    `;
+    return;
   }
 
-  next();
-});
-
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("TILLBOT Server läuft!");
-});
-
-app.get("/api/status", (req, res) => {
-  res.json({
-    online: true,
-    name: "TILLBOT",
-    status: "Server läuft"
+  active.messages.forEach(m => {
+    const d = document.createElement("div");
+    d.className = "bubble " + (m.role === "user" ? "user" : "bot");
+    d.textContent = m.content;
+    c.append(d);
   });
+
+  c.scrollTop = c.scrollHeight;
+}
+
+async function send() {
+  if (busy) return;
+
+  const text = $("prompt").value.trim();
+  if (!text) return;
+
+  if (!active) {
+    active = {
+      id: Date.now(),
+      title: text.slice(0, 32),
+      messages: []
+    };
+    conversations.unshift(active);
+  }
+
+  active.messages.push({ role: "user", content: text });
+  $("prompt").value = "";
+
+  persist();
+  render();
+
+  busy = true;
+
+  const wait = document.createElement("div");
+  wait.className = "bubble bot";
+  wait.textContent = "TILLBOT denkt …";
+  $("chat").append(wait);
+
+  try {
+    const response = await fetch(API + "/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: text,
+        history: active.messages
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error("Server Fehler: " + response.status);
+    }
+
+    const data = await response.json();
+
+    active.messages.push({
+      role: "assistant",
+      content: data.answer || "Keine Antwort erhalten."
+    });
+
+  } catch (e) {
+    active.messages.push({
+      role: "assistant",
+      content: "Verbindungsfehler: " + e.message
+    });
+  } finally {
+    busy = false;
+    persist();
+    render();
+  }
+}
+
+$("send").onclick = send;
+
+$("prompt").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
 });
 
-app.post("/api/chat", (req, res) => {
-  res.json({
-    answer: "TILLBOT Server ist verbunden! Deine Nachricht: " + req.body.message
-  });
-});
+$("newChat").onclick = () => {
+  active = null;
+  render();
+};
 
-const PORT = process.env.PORT || 3000;
+$("theme").onclick = () =>
+  document.body.classList.toggle("dark");
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("TILLBOT läuft auf Port " + PORT);
-});
+$("menu").onclick = () => {
+  $("sidebar").classList.toggle("open");
+  document.querySelector("aside").classList.toggle("open");
+};
+
+$("admin").onclick = () =>
+  $("adminDialog").showModal();
+
+$("closeAdmin").onclick = () =>
+  $("adminDialog").close();
+
+historyUI();
+render();
 
