@@ -1,0 +1,9 @@
+{
+  "name": "TILLBOT",
+  "short_name": "TILLBOT",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#edf4f8",
+  "description": "Your AI. Your World."
+}
