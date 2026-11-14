@@ -716,3 +716,38 @@ body[data-beginner="on"] .beginnerHint{display:block}
 body[data-beginner="on"] .composer small{color:#b6c8d8}
 body[data-workspace="compact"] .settingsGroup{padding:14px}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+
+/* TILLBOT motion pass: subtle, fast and accessible */
+@keyframes tbFadeUp{from{opacity:0;transform:translate3d(0,14px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes tbSoftGlow{0%,100%{box-shadow:0 0 0 0 rgba(82,205,210,0)}50%{box-shadow:0 0 0 5px rgba(82,205,210,.045)}}
+@keyframes tbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes tbShimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.welcome{animation:tbFadeUp .65s cubic-bezier(.2,.75,.25,1) both}
+.welcome .cloud{animation:tbFloat 5s ease-in-out infinite}
+.welcome h1{animation:tbFadeUp .7s .06s both}
+.welcome .muted{animation:tbFadeUp .7s .12s both}
+.suggestions button{animation:tbFadeUp .45s both}
+.suggestions button:nth-child(2){animation-delay:.04s}
+.suggestions button:nth-child(3){animation-delay:.08s}
+.suggestions button:nth-child(4){animation-delay:.12s}
+.suggestions button:nth-child(5){animation-delay:.16s}
+.bubble{animation:tbFadeUp .24s cubic-bezier(.2,.75,.25,1) both}
+.composer:focus-within{animation:tbSoftGlow 2.8s ease-in-out infinite}
+.primary,#send{background-size:180% 180%;transition:transform .18s ease,filter .18s ease,background-position .4s ease}
+.primary:hover,#send:hover{background-position:100% 50%;filter:brightness(1.06)}
+.brandIcon{transition:transform .25s cubic-bezier(.2,.75,.25,1),box-shadow .25s}
+.brand:hover .brandIcon{transform:rotate(-5deg) scale(1.04);box-shadow:0 9px 28px #29b9d733}
+#history button{transition:transform .16s ease,background .16s ease,border-color .16s ease}
+#history button:hover{transform:translateX(3px)}
+.authbox{animation:tbFadeUp .42s cubic-bezier(.2,.75,.25,1) both}
+dialog[open]{animation:tbFadeUp .22s ease both}
+dialog::backdrop{animation:tbBackdrop .2s ease both}
+@keyframes tbBackdrop{from{opacity:0}to{opacity:1}}
+/* Smooth but restrained loading affordance */
+.streamingAnswer{animation:tbFadeUp .22s ease both}
+.thinkingOrb{animation:tbPulse 1.4s ease-in-out infinite, tbSoftGlow 2.8s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+ .welcome,.welcome .cloud,.welcome h1,.welcome .muted,.suggestions button,.bubble,.composer:focus-within,.authbox,dialog[open],dialog::backdrop,.streamingAnswer,.thinkingOrb{animation:none!important}
+ .brandIcon,#history button,.primary,#send{transition:none!important}
+}
