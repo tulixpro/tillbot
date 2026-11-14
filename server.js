@@ -67,6 +67,16 @@ function admin(req, res, next) {
 
 app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
 app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
+// Public, privacy-safe operational notices; never expose logs or user data.
+app.get("/api/notifications", async (_req,res)=>{
+ try{
+  const m=await getMaintenance();
+  if(m.enabled)return res.set("Cache-Control","no-store").json({notice:m.message,level:"critical"});
+  const mem=process.memoryUsage(),ratio=mem.heapUsed/Math.max(mem.heapTotal,1);
+  if(ratio>.88)return res.set("Cache-Control","no-store").json({notice:"Der Server ist gerade stark ausgelastet. Antworten können länger dauern.",level:"warning"});
+  return res.set("Cache-Control","no-store").json({notice:null,level:"info"});
+ }catch{return res.set("Cache-Control","no-store").json({notice:"Der Systemstatus ist momentan nicht verfügbar.",level:"warning"})}
+});
 
 app.post("/api/register", async (req, res) => {
   if (!(await verifyCaptcha(req.body.captchaToken, req.ip))) return res.status(403).json({ error: "CAPTCHA fehlgeschlagen. Bitte erneut bestätigen." });
