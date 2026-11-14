@@ -453,9 +453,14 @@ body[data-theme="light"] .messageActions button{color:#496579;border-color:#dcea
 .photoPreview{display:flex;align-items:center;gap:10px;padding:8px}.photoPreview img{max-width:100px;max-height:80px;border-radius:10px;object-fit:cover}.photoPreview button{border:1px solid #ffffff20;background:#ffffff08;border-radius:9px;padding:7px 10px;color:inherit}.voiceMsg{font-size:12px;color:#83b7c9;padding:2px 8px;min-height:0}.voiceMsg:empty{display:none}
 
 /* Responsive release v13 */
-.systemNotice{position:sticky;top:0;z-index:20;padding:11px 18px;text-align:center;font-size:13px;font-weight:600;background:#f59e0b;color:#241600;border-bottom:1px solid #fbbf24}
-.systemNotice.critical{background:#dc2626;color:white;border-color:#f87171}
+.systemNotice{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:center;gap:12px;padding:13px 20px;text-align:left;font-size:13px;font-weight:550;line-height:1.5;color:#e9fbff;background:linear-gradient(110deg,#102d45f5,#123b50f5);border-bottom:1px solid #67e8f955;box-shadow:0 8px 28px #03111b35;backdrop-filter:blur(18px)}
+.systemNotice:before{content:"";flex:0 0 10px;width:10px;height:10px;border-radius:50%;background:#5eead4;box-shadow:0 0 0 5px #5eead41b,0 0 18px #5eead477}
+.systemNotice.warning{border-color:#fbbf2455;background:linear-gradient(110deg,#382b18f5,#43331bf5);color:#fff3d2}
+.systemNotice.warning:before{background:#fbbf24;box-shadow:0 0 0 5px #fbbf241b,0 0 18px #fbbf2477}
+.systemNotice.critical{border-color:#fb718555;background:linear-gradient(110deg,#451b2af5,#391b2bf5);color:#ffe9ef}
+.systemNotice.critical:before{background:#fb7185;box-shadow:0 0 0 5px #fb71851b,0 0 18px #fb718577}
 .systemNotice.hidden{display:none!important}
+@media(max-width:600px){.systemNotice{padding:12px 14px;font-size:12px;gap:10px}}
 @media(max-width:760px){
  .layout{height:100dvh;min-height:0}
  aside{position:fixed;left:0;top:0;bottom:0;height:100dvh;width:min(84vw,300px);z-index:40;transform:translateX(-105%);box-shadow:20px 0 60px #0005}
