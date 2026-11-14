@@ -77,3 +77,97 @@ body[data-theme="light"] .settingsGroup select,body[data-theme="light"] .setting
 .passwordField{display:flex;align-items:stretch;gap:8px;width:100%;margin:10px 0}
 .passwordField input{flex:1;min-width:0}
 .passwordField button{flex-shrink:0;padding:10px 13px}
+
+/* TILLBOT 3.0 — refined product UI */
+:root{--radius-xl:22px;--radius-lg:15px;--ease:cubic-bezier(.2,.75,.25,1)}
+body{background:radial-gradient(ellipse at 0% 0%,#172b4b 0,transparent 42%),radial-gradient(ellipse at 100% 0%,#123b3c 0,transparent 38%),#080d18;transition:background .35s ease}
+body:before{opacity:.12;filter:none}
+.layout{background:linear-gradient(180deg,#0b1220e8,#080e18f2)}
+aside{background:#0b1220e8;border-right:1px solid #ffffff0b;backdrop-filter:blur(28px)}
+.brand{margin-bottom:14px}.brandIcon{overflow:hidden;border-radius:13px;background:#111b2b;border:1px solid #ffffff14;box-shadow:0 8px 24px #0003}
+.brandIcon img,.avatar img,.cloud img{width:100%;height:100%;object-fit:cover;display:block}
+.brandIcon img{mix-blend-mode:screen}
+.sideProfile .avatar{overflow:hidden;padding:0;background:#101827;border:1px solid #ffffff18}
+.newChat{border-radius:13px;padding:13px 15px;background:linear-gradient(120deg,#5c6cff,#37c9b7);box-shadow:0 8px 24px #5465ff24}
+.sidebottom button{background:#ffffff04;border-color:#ffffff0a;color:#b7c5d9}
+.sidebottom button:hover{background:#ffffff0c;border-color:#ffffff18;color:#fff}
+#history button{border-radius:10px;padding:10px 12px;font-size:13px}
+#history button:hover{background:#ffffff09}
+header{background:#0b1220b8;border-color:#ffffff0b}
+.headTitle strong{font-size:17px;letter-spacing:-.5px}.headTitle strong span{color:#6b91ff}
+.tag{padding:7px 10px;border:1px solid #ffffff10;background:#ffffff05;border-radius:10px;font-size:12px}
+.chat{gap:18px}
+.welcome{max-width:720px}
+.cloud{width:62px;height:62px;margin:0 auto 20px;border-radius:18px;overflow:hidden;filter:none;box-shadow:0 12px 35px #4c78ff22}
+.cloud img{opacity:.9}
+.welcome .eyebrow{color:#94a7ff}
+.welcome h1{font-size:clamp(34px,4.3vw,54px);line-height:1.08;letter-spacing:-2.5px}
+.welcome h1 span{background:linear-gradient(100deg,#8b9bff,#55d8c3);background-clip:text}
+.welcome .muted{max-width:460px;margin:14px auto 0;color:#93a2b9;line-height:1.7}
+.suggestions button{background:#101827;border:1px solid #ffffff0d;color:#bdc9dc;padding:11px 15px;border-radius:12px}
+.suggestions button:hover{border-color:#7185ff55;background:#151e30}
+.composerArea{padding-bottom:22px}
+.composer{max-width:920px;border:1px solid #29354b;background:#111827;border-radius:21px;padding:9px;box-shadow:0 18px 55px #0003}
+.composer:focus-within{border-color:#667bff;box-shadow:0 0 0 4px #667bff12,0 18px 55px #0003}
+.composer textarea{padding:13px 14px;line-height:1.5;color:#e9eef9}
+.composer #photoBtn,.composer #voiceBtn{border:1px solid #ffffff12;background:#182235;color:#aebbd1;border-radius:13px}
+.composer #photoBtn:hover,.composer #voiceBtn:hover{background:#202d45;color:white}
+.composer #send{border-radius:14px;min-width:72px;background:linear-gradient(135deg,#6478ff,#37bda9);box-shadow:0 5px 18px #657aff20}
+.composerArea>small{color:#65748b;font-size:10px}
+.bubble{max-width:76%;padding:16px 19px;line-height:1.7;border-radius:18px}
+.bubble.user{background:linear-gradient(135deg,#5368e8,#3a9fa9);box-shadow:0 8px 25px #3456d515}
+.bubble.bot{background:#111a29;border:1px solid #ffffff0c;color:#dce5f4}
+.auth{background:radial-gradient(ellipse at 50% 0%,#18264a,transparent 55%),#080d18}
+.authbox{background:#101827e8;border:1px solid #ffffff12;border-radius:24px;box-shadow:0 30px 100px #0005}
+.authIcon{width:54px;height:54px;margin-bottom:15px}
+.authbox .eyebrow{color:#94a7ff}
+.authbox h1{font-size:32px;letter-spacing:-1.7px}
+.authbox p{color:#8f9eb5;font-size:14px}
+.authbox input{background:#0b1220;border-color:#ffffff12}
+.tabs button{background:#0b1220;border-color:#ffffff0b}.tabs .selected{background:#26365b;border-color:#7185ff55}
+.authbox .primary{background:linear-gradient(120deg,#6478ff,#37bda9);border-radius:13px}
+dialog{background:#101827;border-color:#ffffff16;border-radius:22px;max-width:520px;max-height:min(85vh,780px);overflow:auto;box-shadow:0 35px 120px #0008}
+dialog::backdrop{background:#03060dcc;backdrop-filter:blur(9px)}
+.settingsGroup{border-color:#ffffff0b;padding:18px 0}
+.settingsGroup h3{font-size:14px;letter-spacing:.1px;color:#e3eaf7}
+.settingsGroup p{font-size:12px;color:#91a0b7;line-height:1.7}
+.settingsGroup select,.settingsGroup input{background:#0b1220;border-color:#ffffff12;color:#e6edf8;padding:12px}
+.settingsGroup label{color:#8291aa}
+.settingsHead h2{font-size:29px;letter-spacing:-1.3px}
+.settingsKicker{color:#8b9bff}
+.secondaryButton{border-color:#ffffff17;color:#aab8ce}
+.adminSetup .primary{background:linear-gradient(120deg,#6478ff,#37bda9)}
+.versionBadge{background:#0d1422;border-color:#ffffff12;color:#74839b}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #8293ff;outline-offset:3px}
+@media(max-width:700px){aside{background:#0b1220f5;box-shadow:20px 0 60px #0005}header{height:64px}.chat{padding:20px 15px}.composerArea{padding:10px 12px 16px}.composer{gap:6px;padding:7px}.composer #photoBtn,.composer #voiceBtn{min-width:42px;width:42px;padding:0;font-size:12px}.composer #send{min-width:54px}.welcome h1{font-size:34px}.suggestions{gap:7px}.suggestions button{font-size:12px;padding:9px 11px}}
+body[data-theme="light"]{background:#f3f6fb;color:#17243a}
+body[data-theme="light"] .layout{background:#f3f6fb}
+body[data-theme="light"] aside,body[data-theme="light"] header{background:#ffffffeb;border-color:#dce4ef}
+body[data-theme="light"] .sidebottom button{color:#52617a;background:#f6f8fc;border-color:#e7edf5}
+body[data-theme="light"] .tag{background:#f5f7fb;color:#52617a;border-color:#e5eaf3}
+body[data-theme="light"] .composer{background:#fff;border-color:#dce4ef}
+body[data-theme="light"] .composer textarea{color:#17243a}
+body[data-theme="light"] .composer #photoBtn,body[data-theme="light"] .composer #voiceBtn{background:#f3f6fb;color:#52617a;border-color:#e1e8f1}
+body[data-theme="light"] .bubble.bot{background:#fff;color:#24334b;border-color:#e5eaf2}
+body[data-theme="light"] .welcome h1{color:#17243a}
+body[data-theme="light"] .welcome .muted{color:#64748b}
+body[data-theme="light"] .suggestions button{background:#fff;color:#52617a;border-color:#e0e7f0}
+body[data-theme="light"] dialog{background:#fff;color:#17243a}
+body[data-theme="light"] .settingsGroup select,body[data-theme="light"] .settingsGroup input{background:#f5f7fb;color:#17243a;border-color:#dce4ef}
+body[data-theme="light"] .settingsGroup h3{color:#24334b}
+body[data-theme="light"] .settingsGroup p{color:#64748b}
+body[data-theme="light"] .settingsHead p{color:#64748b}
+body[data-theme="light"] .auth{background:#eef3fb}
+body[data-theme="light"] .authbox{background:#fff;color:#17243a;border-color:#e2e8f0}
+body[data-theme="light"] .authbox h1{color:#17243a}
+body[data-theme="light"] .authbox input{background:#f6f8fc;color:#17243a;border-color:#dce4ef}
+body[data-theme="light"] .tabs button{background:#f4f7fb;color:#52617a}
+body[data-theme="light"] .tabs .selected{background:#e4eaff;color:#3447a5}
+body[data-theme="compact"]{}
+body[data-workspace="compact"] .bubble{padding:10px 14px;font-size:14px;line-height:1.5}
+body[data-workspace="compact"] .chat{gap:10px;padding-top:18px;padding-bottom:18px}
+body[data-workspace="compact"] .composerArea{padding-top:7px;padding-bottom:12px}
+body[data-workspace="compact"] .suggestions{margin-top:16px}
+body[data-workspace="focus"] aside,body[data-workspace="focus"] .versionBadge{opacity:.18;transition:opacity .2s}
+body[data-workspace="focus"] aside:hover{opacity:1}
+body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-right:clamp(20px,8vw,110px)}
