@@ -648,3 +648,9 @@ body{min-height:100%;min-height:100dvh}
   .composerArea{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
   #sidebar{padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom))}
 }
+
+/* Safari keyboard: size the mobile shell to the actually visible viewport */
+@media(max-width:820px){
+ .layout{height:var(--tb-visual-height,100dvh)!important;max-height:var(--tb-visual-height,100dvh)!important}
+ #app main{height:var(--tb-visual-height,100dvh)!important;max-height:var(--tb-visual-height,100dvh)!important}
+}
