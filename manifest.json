@@ -3,9 +3,9 @@
   "short_name": "TILLBOT",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#071b32",
-  "theme_color": "#0b2438",
-  "description": "TILLBOT AI Workspace",
+  "background_color": "#080d18",
+  "theme_color": "#0b1020",
+  "description": "TILLBOT – Dein persönlicher, anpassbarer KI-Workspace.",
   "icons": [
     {
       "src": "./icons/tillbot.svg",
