@@ -70,3 +70,5 @@ header strong{letter-spacing:-.6px}
 .settingsPrivacy{font-size:11px;color:var(--muted);line-height:1.5;margin-top:15px}
 body[data-theme="light"] .settingsGroup select,body[data-theme="light"] .settingsGroup input{background:#f4faff;color:#17334b}
 @media(max-width:520px){dialog{padding:20px}.settingsHead h2{font-size:23px}}
+
+.captchaBox{margin:12px 0;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:0}.captchaBox small{font-size:10px;color:var(--muted);text-align:center}.captchaBox.hidden{display:none!important}
