@@ -16,9 +16,9 @@ app.use(express.json({ limit: "3mb" }));
 
 const SECRET = process.env.JWT_SECRET;
 if (!SECRET || SECRET.length < 32) {
-  console.warn("WARNUNG: JWT_SECRET fehlt/ist zu kurz. Temporärer Schlüssel aktiv; bitte in Render dauerhaft setzen.");
+  throw new Error("JWT_SECRET fehlt oder ist zu kurz (mindestens 32 Zeichen). In Render dauerhaft setzen; Serverstart wird aus Sicherheitsgründen abgebrochen.");
 }
-const TOKEN_SECRET = SECRET && SECRET.length >= 32 ? SECRET : crypto.randomBytes(48).toString("hex");
+const TOKEN_SECRET = SECRET;
 const FRONTEND = process.env.FRONTEND_ORIGIN || "https://tulixpro.github.io";
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", FRONTEND);
@@ -29,6 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/api", (req, res, next) => { res.setHeader("Cache-Control", "no-store"); next(); });
 app.use("/api", rateLimit({ windowMs: 60_000, limit: 30, standardHeaders: true, legacyHeaders: false }));
 const authLimit = rateLimit({ windowMs: 15 * 60_000, limit: 8, message: { error: "Zu viele Versuche. Bitte 15 Minuten warten." } });
 app.use("/api/login", authLimit);
@@ -42,7 +43,7 @@ async function verifyCaptcha(token, ip) {
   try {
     const form = new URLSearchParams({secret, response:token});
     if (ip) form.set("remoteip", ip);
-    const result = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:form});
+    const result = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:form,signal:AbortSignal.timeout(8000)});
     const data = await result.json();
     return data.success === true;
   } catch { return false; }
