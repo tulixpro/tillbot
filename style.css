@@ -72,3 +72,8 @@ body[data-theme="light"] .settingsGroup select,body[data-theme="light"] .setting
 @media(max-width:520px){dialog{padding:20px}.settingsHead h2{font-size:23px}}
 
 .captchaBox{margin:12px 0;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:0}.captchaBox small{font-size:10px;color:var(--muted);text-align:center}.captchaBox.hidden{display:none!important}
+
+/* Password visibility control */
+.passwordField{display:flex;align-items:stretch;gap:8px;width:100%;margin:10px 0}
+.passwordField input{flex:1;min-width:0}
+.passwordField button{flex-shrink:0;padding:10px 13px}
