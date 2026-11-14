@@ -2,6 +2,6 @@
   "name":"tillbot-2","version":"2.0.0","private":true,
   "main":"windows/main.cjs",
   "scripts":{"start":"node server.js","desktop":"electron ."},
-  "dependencies":{"bcryptjs":"^3.0.2","better-sqlite3":"^12.4.1","express":"^5.1.0","express-rate-limit":"^8.1.0","helmet":"^8.1.0","jsonwebtoken":"^9.0.2"},
+  "dependencies":{"bcryptjs":"^3.0.2","pg":"^8.16.3","express":"^5.1.0","express-rate-limit":"^8.1.0","helmet":"^8.1.0","jsonwebtoken":"^9.0.2"},
   "devDependencies":{"electron":"^39.0.0"}
 }
