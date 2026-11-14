@@ -170,7 +170,7 @@ app.get("/api/admin/metrics", auth, admin, async (_req, res) => {
   });
 });
 
-app.post("/api/chat", auth, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
+app.post("/api/chat", auth, (req,res,next)=>{if(/^(1|true|yes)$/i.test(process.env.MAINTENANCE_MODE||""))return res.status(503).json({error:String(process.env.MAINTENANCE_MESSAGE||"TILLBOT wird gewartet.").slice(0,300)});next()}, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "GROQ_API_KEY fehlt in Render" });
   const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
   const messages = [{ role: "system", content: "Du bist TILLBOT, ein freundlicher KI-Assistent. Antworte verständlich, überwiegend Deutsch." },
