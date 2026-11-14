@@ -279,3 +279,29 @@ input:focus,textarea:focus{outline:none;border-color:#45d8cb;box-shadow:0 0 0 3p
   .authbox{padding:20px 15px}
 }
 @media(hover:none){button:hover{transform:none;filter:none}}
+
+
+/* Composer refresh: app-like input dock, responsive controls and icon cloud */
+.cloud{width:92px;height:72px;margin:0 auto 16px;display:grid;place-items:center;filter:none}
+.cloud img{width:100%;height:100%;object-fit:contain}
+.composer{position:relative;align-items:stretch;flex-wrap:wrap;gap:8px;padding:10px 12px 8px;border-radius:24px!important;background:rgba(9,25,39,.92)!important;border:1px solid #8de9df35!important;backdrop-filter:blur(22px);max-width:860px}
+.composer #prompt{flex:1 1 100%;width:100%;min-height:48px;max-height:190px;padding:9px 10px 5px;line-height:1.55;background:transparent;color:#f5fbff;border:0;outline:none;resize:none;overflow-y:auto}
+.composerTools{display:flex;align-items:center;gap:7px;width:100%;padding-top:7px;border-top:1px solid #ffffff10}
+.composerTools button,.composer #photoBtn,.composer #voiceBtn{flex:0 0 auto;height:38px;min-width:38px;padding:0 12px;border-radius:13px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:650;background:#ffffff0a;border:1px solid #ffffff13;color:#b8d4e6}
+.composerTools #clearPrompt{font-size:17px}
+.composerTools #photoBtn,.composerTools #voiceBtn{min-width:40px}
+.composerTools #send{margin-left:auto;width:42px;height:42px;min-width:42px;border-radius:15px;font-size:23px}
+.composerTools button:hover{background:#ffffff16;border-color:#7ce7d455}
+.composerArea>small{font-size:10px;color:#799ab0;letter-spacing:.1px}
+.photoPreview{max-width:860px;margin:0 auto 10px}
+@media(max-width:760px){
+ .cloud{width:74px;height:58px;margin-bottom:12px}
+ .composerArea{padding:7px 10px max(12px,env(safe-area-inset-bottom))}
+ .composer{padding:9px 10px 8px;border-radius:20px!important;gap:5px}
+ .composer #prompt{min-height:45px;max-height:125px;font-size:16px;padding:6px 5px}
+ .composerTools{gap:5px;padding-top:7px}
+ .composerTools button,.composer #photoBtn,.composer #voiceBtn{height:39px;min-width:38px;padding:0 9px;border-radius:12px;font-size:12px}
+ .composerTools #send{width:42px;height:42px;min-width:42px;border-radius:14px}
+ .composerArea>small{font-size:9px;margin-top:6px}
+}
+@media(max-width:370px){.composerTools button,.composer #photoBtn,.composer #voiceBtn{padding:0 7px;font-size:11px}.composerTools #send{min-width:39px;width:39px}}
