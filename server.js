@@ -105,7 +105,7 @@ app.post("/api/login", async (req, res) => {
 app.post("/api/admin/bootstrap", auth, rateLimit({ windowMs: 15 * 60_000, limit: 3, message: { error: "Zu viele Admin-Setup-Versuche. Bitte später erneut." } }), async (req, res) => {
   const setupSecret = process.env.ADMIN_SETUP_SECRET;
   const adminUsername = normalizeUsername(process.env.ADMIN_USERNAME);
-  if (!setupSecret || !adminUsername) return res.status(503).json({ error: "Admin-Setup in Render nicht konfiguriert" });
+  if (!setupSecret || !adminUsername) return res.status(503).json({ error: "Admin-Setup in Render nicht konfiguriert (ADMIN_SETUP_SECRET und ADMIN_USERNAME prüfen)" });
   if (req.user.username !== adminUsername || req.body.setupSecret !== setupSecret) {
     return res.status(403).json({ error: "Setup-Code oder Admin-Benutzer falsch" });
   }
