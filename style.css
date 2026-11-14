@@ -236,3 +236,46 @@ body:before{opacity:.28;background-size:760px 420px;filter:blur(2px)}
 .primary{background:linear-gradient(115deg,#22d7a8,#34b7ff 58%,#f0ffff);color:#062335;box-shadow:0 8px 28px #28cdb52b}
 .primary:hover{filter:brightness(1.08);box-shadow:0 10px 32px #32caff40}
 input:focus,textarea:focus{outline:none;border-color:#45d8cb;box-shadow:0 0 0 3px #45d8cb20}
+
+
+/* Mobile-first polish: phone and tablet */
+@media (max-width: 760px){
+  .layout{height:100dvh;min-height:100dvh;overflow:hidden;position:relative}
+  #sidebar{position:fixed;inset:0 auto 0 0;z-index:50;width:min(82vw,300px);height:100dvh;transform:translateX(-105%);transition:transform .22s ease;box-shadow:18px 0 60px #0005;padding:16px;overflow-y:auto}
+  #sidebar.open{transform:translateX(0)}
+  main{width:100%;height:100dvh;min-height:0}
+  header{height:58px;flex:0 0 58px;padding:0 12px;gap:10px}
+  #menu{display:grid;place-items:center;width:40px;height:40px;padding:0;font-size:20px;background:#ffffff0b;border:1px solid #ffffff18}
+  header strong{font-size:16px}.tag{font-size:11px;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chat{padding:16px 12px;gap:12px}
+  .welcome{width:100%;padding:10px 2px}
+  .cloud{font-size:52px}
+  .welcome h1{font-size:clamp(27px,8vw,36px);letter-spacing:-1px;margin:10px 0}
+  .welcome .muted{font-size:14px;line-height:1.5;max-width:330px;margin:0 auto}
+  .suggestions{gap:7px;margin-top:18px}
+  .suggestions button{font-size:12px;padding:9px 12px}
+  .bubble{max-width:94%;padding:12px 14px;font-size:15px}
+  .composerArea{padding:8px 10px max(10px,env(safe-area-inset-bottom))}
+  .composer{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-radius:17px}
+  #prompt{flex:1 1 100%;width:100%;padding:8px 9px;font-size:16px;min-height:42px;max-height:130px}
+  .composerTools{display:flex;gap:6px;width:100%;align-items:center}
+  .composerTools button{flex:1;min-width:0!important;height:40px;padding:6px 8px;font-size:13px;border-radius:11px}
+  .composerTools #send{flex:0 0 46px;font-size:22px}
+  .composerArea small{font-size:10px;margin-top:7px}
+  .quotaStatus{font-size:10px}
+  .auth{padding:14px;min-height:100dvh;align-items:center}
+  .authbox{padding:24px 19px;border-radius:21px;width:min(440px,100%)}
+  .authbox h1{font-size:27px}
+  .authbox p{font-size:14px}
+  .captchaBox{overflow:hidden;max-width:100%}
+  dialog{max-height:88dvh;overflow:auto;padding:20px 16px}
+  .versionBadge{font-size:8px!important;opacity:.45}
+}
+@media(max-width:390px){
+  header small{letter-spacing:1px}
+  .headTitle strong{font-size:14px}
+  .tag{max-width:32%;font-size:10px}
+  .composerTools button{font-size:11px;padding:5px}
+  .authbox{padding:20px 15px}
+}
+@media(hover:none){button:hover{transform:none;filter:none}}
