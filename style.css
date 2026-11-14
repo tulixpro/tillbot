@@ -199,3 +199,12 @@ body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-ri
 .codeCard code{font:inherit}
 
 .assistantParagraph{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;margin:5px 0 12px}.assistantHeading{font-size:1.12em;font-weight:700;margin:15px 0 8px;color:#eaf6ff}.bubble.bot ul,.bubble.bot ol{padding-left:25px;margin:7px 0 13px;line-height:1.7}.bubble.bot li{padding:2px 0}
+
+/* Maintenance screen + admin control */
+.maintenanceScreen{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,#183d65 0%,#091322 55%,#050912 100%);color:#eaf4ff}
+.maintenanceScreen.hidden{display:none!important}.maintenanceCard{width:min(560px,100%);padding:clamp(26px,6vw,52px);border:1px solid #ffffff18;border-radius:26px;background:linear-gradient(145deg,#ffffff0b,#ffffff03);box-shadow:0 28px 90px #0005;text-align:center;backdrop-filter:blur(18px)}
+.maintenanceMark{width:66px;height:66px;margin:0 auto 24px;display:grid;place-items:center;border-radius:21px;background:linear-gradient(135deg,#60d9d0,#5288ff);font-size:32px;color:#07192a;box-shadow:0 10px 35px #55b9ff35}
+.maintenanceCard .eyebrow{letter-spacing:.18em;font-size:11px;color:#9cb7d6}.maintenanceCard h1{font-size:clamp(28px,5vw,42px);letter-spacing:-.04em;margin:15px 0}.maintenanceCard p{color:#b8c9df;line-height:1.7;margin:0 auto 24px;max-width:420px}.maintenanceCard small{display:block;margin-top:25px;color:#7f96b1}
+.maintenanceProgress{height:4px;overflow:hidden;border-radius:9px;background:#ffffff12}.maintenanceProgress span{display:block;width:40%;height:100%;border-radius:9px;background:linear-gradient(90deg,#61d7cb,#6c91ff);animation:maintain 2.1s ease-in-out infinite alternate}@keyframes maintain{from{transform:translateX(-10%)}to{transform:translateX(160%)}}
+.maintenanceStatus{font-weight:700;padding:10px 12px;border-radius:10px;background:#ffffff08}.maintenanceStatus.isOn{color:#ffbf75;background:#ffb34712}.maintenanceStatus.isOff{color:#65e4b3;background:#41d9a112}
+.maintenanceAdmin input{width:100%;margin:8px 0 12px;background:#0b1220;color:inherit;border:1px solid #ffffff18;border-radius:10px;padding:11px}
