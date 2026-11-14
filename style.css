@@ -682,3 +682,5 @@ button:hover{filter:none;transform:translateY(-1px)}
 .authbox h1{letter-spacing:-.8px}
 .versionBadge{background:rgba(8,18,31,.8);border-color:rgba(150,190,220,.14);color:#7f9cb5}
 @media(max-width:700px){.chat{padding:16px 13px}.composerArea{padding:9px 12px 14px}.welcome h1{letter-spacing:-1px}}
+
+.commandRow{display:flex;gap:8px}.commandRow input{flex:1;font-family:ui-monospace,monospace}.commandConsole pre{white-space:pre-wrap;overflow-wrap:anywhere;background:rgba(3,9,18,.65);border:1px solid var(--line,#26384b);border-radius:12px;padding:12px;min-height:58px;color:#b8d9e8;font:13px/1.55 ui-monospace,monospace}.commandConsole code{font-family:ui-monospace,monospace}
