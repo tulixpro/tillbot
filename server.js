@@ -207,7 +207,8 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
     });
     const data = await response.json();
     if (!response.ok) return res.status(502).json({ answer: "Groq Fehler: " + (data.error?.message || response.status) });
-    if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);\n    res.json({ answer: data.choices?.[0]?.message?.content || "Keine Antwort",quota:req.user.role==="admin"?{unlimited:true}:undefined });
+    if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);
+    res.json({ answer: data.choices?.[0]?.message?.content || "Keine Antwort",quota:req.user.role==="admin"?{unlimited:true}:undefined });
   } catch (error) {
     console.error("Chat API error:", error);
     res.status(500).json({ answer: error.name === "AbortError" ? "KI-Anfrage dauerte zu lange" : "KI-Serverfehler" });
