@@ -35,3 +35,5 @@ body[data-theme="forest"]{--bg1:#06271d;--bg2:#0c4932;--accent:#57df8a;--accent2
 body[data-theme="night"]{--bg1:#080b20;--bg2:#151b38;--accent:#9c7cff;--accent2:#4f9bff;--card:#171d3a;--panel:#090d25dd}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media(min-width:1100px){aside{width:290px;padding:24px}.chat{padding:clamp(28px,4vw,64px)}.composerArea{padding:16px 5vw 24px}.bubble{max-width:min(75%,850px);font-size:16px}}
+
+.metrics{margin:14px 0}.metricGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.metricGrid article{background:rgba(90,180,210,.09);border:1px solid rgba(100,220,220,.2);border-radius:12px;padding:12px;min-width:0}.metricGrid small{display:block;color:#8bbbd2;font-size:10px;letter-spacing:1px;margin-bottom:7px}.metricGrid strong{font-size:15px;overflow-wrap:anywhere}.metricsNote{font-size:12px;color:#89afc6}@media(max-width:500px){.metricGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
