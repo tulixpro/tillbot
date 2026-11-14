@@ -188,3 +188,12 @@ body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-ri
 /* Ticket UI */
 .settingsGroup textarea{width:100%;resize:vertical;background:#0b1220;color:inherit;border:1px solid #ffffff12;border-radius:10px;padding:12px;font:inherit}
 .ticketCard{border:1px solid #ffffff12;background:#ffffff04;border-radius:12px;padding:13px;margin:10px 0;font-size:12px;overflow-wrap:anywhere}.ticketCard p{line-height:1.6}.ticketStatus{float:right;border-radius:8px;background:#5368e822;color:#9fb0ff;padding:4px 7px}.ticketReply{border-left:2px solid #5b76ff;padding-left:10px}.ticketCard textarea,.ticketCard select{width:100%;margin:6px 0;background:#0b1220;color:inherit;border:1px solid #ffffff18;border-radius:8px;padding:9px}
+
+/* Assistant code blocks */
+.assistantText{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;margin:2px 0 10px}
+.codeCard{margin:12px 0;border:1px solid #ffffff18;border-radius:12px;overflow:hidden;background:#080d17;max-width:100%}
+.codeHead{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#ffffff08;border-bottom:1px solid #ffffff12;font-size:12px;color:#aebbd0}
+.codeHead span{margin-right:auto;font-family:monospace}
+.codeHead button{border:1px solid #ffffff20;background:#ffffff08;color:inherit;border-radius:7px;padding:6px 9px;cursor:pointer}
+.codeCard pre{margin:0;padding:14px;overflow:auto;max-width:100%;font:12.5px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#e4ecff;white-space:pre}
+.codeCard code{font:inherit}
