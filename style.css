@@ -184,3 +184,7 @@ body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-ri
 .adminActions{margin-top:18px;padding:16px;border:1px solid #ffffff12;border-radius:15px;background:#ffffff04}.adminActions h3{margin:0 0 8px}.adminActions p{font-size:12px;color:var(--muted);line-height:1.6}.adminActions button{margin:8px 8px 0 0}
 .metricGrid article{border:1px solid #ffffff12;background:#ffffff04;border-radius:13px;padding:14px}.metricGrid article small{color:#8291aa;letter-spacing:.08em}.metricGrid article strong{display:block;margin-top:8px;font-size:19px;overflow-wrap:anywhere}
 @media(max-width:700px){.composer{border-radius:22px}.composerTools{gap:5px}.composer #photoBtn,.composer #voiceBtn,.composerTools button{height:36px;min-width:36px;padding:0}.composer #send{height:38px;width:38px;min-width:38px}}
+
+/* Ticket UI */
+.settingsGroup textarea{width:100%;resize:vertical;background:#0b1220;color:inherit;border:1px solid #ffffff12;border-radius:10px;padding:12px;font:inherit}
+.ticketCard{border:1px solid #ffffff12;background:#ffffff04;border-radius:12px;padding:13px;margin:10px 0;font-size:12px;overflow-wrap:anywhere}.ticketCard p{line-height:1.6}.ticketStatus{float:right;border-radius:8px;background:#5368e822;color:#9fb0ff;padding:4px 7px}.ticketReply{border-left:2px solid #5b76ff;padding-left:10px}.ticketCard textarea,.ticketCard select{width:100%;margin:6px 0;background:#0b1220;color:inherit;border:1px solid #ffffff18;border-radius:8px;padding:9px}
