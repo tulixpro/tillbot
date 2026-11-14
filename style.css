@@ -684,3 +684,6 @@ button:hover{filter:none;transform:translateY(-1px)}
 @media(max-width:700px){.chat{padding:16px 13px}.composerArea{padding:9px 12px 14px}.welcome h1{letter-spacing:-1px}}
 
 .commandRow{display:flex;gap:8px}.commandRow input{flex:1;font-family:ui-monospace,monospace}.commandConsole pre{white-space:pre-wrap;overflow-wrap:anywhere;background:rgba(3,9,18,.65);border:1px solid var(--line,#26384b);border-radius:12px;padding:12px;min-height:58px;color:#b8d9e8;font:13px/1.55 ui-monospace,monospace}.commandConsole code{font-family:ui-monospace,monospace}
+
+/* Wartungsankündigung: ruhige, professionelle Admin-Eingabe */
+.maintenancePresetRow{display:flex;gap:9px;align-items:center;margin:8px 0 12px}.maintenancePresetRow select{flex:1;min-width:0;background:#0b1220;color:inherit;border:1px solid #ffffff20;border-radius:10px;padding:11px}.maintenanceAdmin textarea{width:100%;resize:vertical;min-height:78px;margin:8px 0 5px;background:#0b1220;color:inherit;border:1px solid #ffffff20;border-radius:10px;padding:12px;font:inherit;line-height:1.5}.maintenanceAdmin textarea:focus,.maintenancePresetRow select:focus{outline:2px solid #7399ff55;border-color:#7399ff80}.maintenanceHint{display:block;color:#8fa2bc;line-height:1.5;margin:3px 0 14px}
