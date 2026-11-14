@@ -128,6 +128,29 @@ app.get("/api/admin/stats", auth, admin, (_req, res) => res.json({
   chats: db.prepare("SELECT COUNT(*) n FROM chats").get().n
 }));
 
+
+app.get("/api/admin/metrics", auth, admin, (_req, res) => {
+  const mem = process.memoryUsage();
+  const dbInfo = db.pragma("page_count", { simple: true }) * db.pragma("page_size", { simple: true });
+  const cpu = process.cpuUsage();
+  const now = process.hrtime.bigint();
+  const elapsed = Number(now - (global.__tbCpuTime || now)) / 1e6;
+  const cpuDelta = global.__tbCpuUsage ? (cpu.user-global.__tbCpuUsage.user)+(cpu.system-global.__tbCpuUsage.system) : 0;
+  global.__tbCpuUsage = cpu; global.__tbCpuTime = now;
+  const cpuPercent = elapsed > 0 ? Math.min(100, Math.max(0, cpuDelta / (elapsed * 1000) * 100)) : 0;
+  res.set("Cache-Control", "no-store");
+  res.json({
+    status:"online", uptimeSeconds:Math.floor(process.uptime()),
+    cpuProcessPercent:Number(cpuPercent.toFixed(1)),
+    memory:{rss:mem.rss,heapUsed:mem.heapUsed,heapTotal:mem.heapTotal},
+    systemMemory:{total:require("os").totalmem(),free:require("os").freemem()},
+    loadAverage:require("os").loadavg(), databaseBytes:dbInfo,
+    users:db.prepare("SELECT COUNT(*) n FROM users").get().n,
+    chats:db.prepare("SELECT COUNT(*) n FROM chats").get().n,
+    node:process.version
+  });
+});
+
 app.post("/api/chat", auth, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "GROQ_API_KEY fehlt in Render" });
   const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
