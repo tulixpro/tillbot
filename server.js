@@ -7,6 +7,9 @@ const crypto = require("crypto");
 const { pool, initDatabase } = require("./database");
 
 const app = express();
+// Render forwards requests through one trusted edge proxy. Use a hop count (not `true`)
+// so client-supplied X-Forwarded-For values cannot bypass rate-limit IP checks.
+app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: "3mb" }));
