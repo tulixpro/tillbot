@@ -613,3 +613,8 @@ body{background:radial-gradient(ellipse at 15% 0%,#14304455,transparent 42%),var
 .powerTools button:hover{transform:translateY(-1px);border-color:#45cbd1;background:#163849}
 .powerTools button:focus-visible{outline:2px solid #52d9df;outline-offset:2px}
 @media(max-width:700px){.powerTools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:9px}.powerTools button{white-space:nowrap;min-height:36px}}
+
+/* Additional power actions: tidy icon chips */
+.powerTools button{box-shadow:inset 0 1px 0 #ffffff0a}
+.powerTools button:active{transform:scale(.97)}
+.powerTools{mask-image:linear-gradient(to right,black 94%,transparent)}
