@@ -225,11 +225,7 @@ body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-ri
 .bubble.bot.streaming{white-space:pre-wrap;overflow-wrap:anywhere}.bubble.bot.streaming:after{content:"";display:inline-block;width:7px;height:1em;margin-left:3px;vertical-align:-.12em;border-radius:2px;background:#86a8ff;animation:typingPulse .8s steps(2,end) infinite}@keyframes typingPulse{50%{opacity:0}}
 .composer:has(#prompt:focus-within){border-color:#719bff90!important}
 
-/* Searchable chat history polish */
-.chatSearch{width:100%;padding:10px 12px;border:1px solid #8ceaff25;border-radius:12px;background:#08283bd9;color:#eafaff;outline:none;font-size:13px;transition:border-color .2s,box-shadow .2s}.chatSearch::placeholder{color:#78a6bd}.chatSearch:focus{border-color:#39d8c0;box-shadow:0 0 0 3px #39d8c01b}.historyItem{width:100%;display:block;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;padding:10px 12px;border-color:transparent;background:transparent;color:#a9cce0}.historyItem:hover,.historyItem.active{background:#123c55;border-color:#4ad9c033;color:#f4ffff}.chatSearchEmpty{padding:12px;color:#729db4;font-size:12px;text-align:center}
-
-/* TILLBOT cloud palette: aqua, sky blue and white */
-:root{color-scheme:dark}
+/* Stable cloud theme: mint green, sky blue, white */
 body{background:radial-gradient(ellipse at 12% 18%,rgba(44,232,177,.34),transparent 38%),radial-gradient(ellipse at 88% 8%,rgba(64,164,255,.38),transparent 40%),radial-gradient(ellipse at 65% 95%,rgba(230,250,255,.18),transparent 36%),linear-gradient(145deg,#061b2b 0%,#073a52 48%,#062d3b 100%);background-attachment:fixed}
 body:before{opacity:.28;background-size:760px 420px;filter:blur(2px)}
 .auth{position:relative;isolation:isolate;background:transparent}
