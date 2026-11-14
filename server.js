@@ -141,7 +141,7 @@ async function getMaintenance(){
  const berlinHour=Number(berlinParts.find(p=>p.type==="hour")?.value||0),berlinMinute=Number(berlinParts.find(p=>p.type==="minute")?.value||0);
  const securityWindow=berlinHour===0&&berlinMinute<10;
  const manual=settings.maintenance_enabled==="true",enabled=manual||securityWindow;
- const message=securityWindow&&!manual?"🛡️ Sicherheitscheck läuft: Wir überprüfen, ob alles in Ordnung ist. Bitte habe etwas Geduld – TILLBOT ist gleich wieder da.":String(settings.maintenance_message||process.env.MAINTENANCE_MESSAGE||"TILLBOT wird gerade gewartet. Bitte später erneut versuchen.").slice(0,300);
+ const message=securityWindow&&!manual?"🛡️ TILLBOT-Sicherheitscheck läuft gerade\nWir prüfen im Hintergrund, ob alles sicher und funktionsfähig ist. Bitte hab einen kurzen Moment Geduld – der KI-Chat ist währenddessen pausiert. Gleich geht’s weiter!":String(settings.maintenance_message||process.env.MAINTENANCE_MESSAGE||"TILLBOT wird gerade gewartet. Bitte später erneut versuchen.").slice(0,300);
  return {enabled,message,mode:securityWindow&&!manual?"security":manual?"maintenance":"normal",securityCheck:securityWindow};
 }
 app.get("/api/maintenance",async(_req,res)=>{try{res.json(await getMaintenance())}catch{res.status(503).json({enabled:false,message:"Status derzeit nicht verfügbar"})}});
