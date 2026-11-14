@@ -144,6 +144,20 @@ app.delete("/api/chats/:id", auth, async (req, res) => {
   const result = await pool.query("DELETE FROM chats WHERE id=$1 AND user_id=$2", [Number(req.params.id), req.user.id]);
   res.json({ ok: result.rowCount > 0 });
 });
+
+// Admin user management (role changes are server-authorized).
+app.get("/api/admin/users", auth, admin, async (_req,res)=>{
+ const {rows}=await pool.query("SELECT id,username,role FROM users ORDER BY id ASC LIMIT 500");
+ res.set("Cache-Control","no-store");res.json(rows);
+});
+app.put("/api/admin/users/:id/role", auth, admin, async (req,res)=>{
+ const id=Number(req.params.id),role=req.body.role;
+ if(!Number.isInteger(id)||id<1||!["user","admin"].includes(role))return res.status(400).json({error:"Ungültige Benutzer-ID oder Rolle"});
+ if(id===Number(req.user.id)&&role!=="admin")return res.status(400).json({error:"Du kannst dir selbst nicht die Adminrechte entziehen."});
+ const {rows}=await pool.query("UPDATE users SET role=$1 WHERE id=$2 RETURNING id,username,role",[role,id]);
+ if(!rows[0])return res.status(404).json({error:"Benutzer nicht gefunden"});
+ res.json({user:rows[0]});
+});
 app.get("/api/admin/stats", auth, admin, async (_req, res) => { const [u,ch]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]); res.json({
   users: Number(u.rows[0].n),
   chats: Number(ch.rows[0].n)
