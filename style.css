@@ -509,3 +509,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 @keyframes tbFadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 @keyframes tbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @media(prefers-reduced-motion:reduce){.welcome .cloud img{animation:none}}
+
+/* Security audit panel */
+.securityAudit{border-color:#55d6a333!important;background:linear-gradient(135deg,#102f3c,#0b2638)!important}
+#securityAuditResult{display:grid;gap:8px;margin-top:12px}
+.auditSummary{font-weight:700;color:#9cebd2;margin:4px 0}
+.auditRow{display:grid;gap:4px;padding:10px 12px;border-radius:10px;border:1px solid #ffffff15;background:#071b2b88}
+.auditRow strong{font-size:13px}.auditRow small{font-size:12px;line-height:1.45;color:#a9c7d9}
+.auditOk{border-left:3px solid #38c99a}.auditFail{border-left:3px solid #ffb45f}
+.auditDisclaimer{color:#8db0c7;line-height:1.5}
