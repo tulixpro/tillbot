@@ -68,7 +68,7 @@ function admin(req, res, next) {
 app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
 app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
 
-app.put("/api/admin/announcement", auth, requireAdmin, async (req,res)=>{
+app.put("/api/admin/announcement", auth, admin, async (req,res)=>{
  const message=String(req.body.message||"").trim().slice(0,500);
  try{await pool.query("INSERT INTO app_settings(key,value) VALUES('public_announcement',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[message]);res.json({ok:true,message:"Ankündigung gespeichert."})}
  catch(e){console.error("announcement error",e);res.status(500).json({error:"Ankündigung konnte nicht gespeichert werden."})}
