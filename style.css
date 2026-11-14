@@ -384,3 +384,9 @@ body[data-theme="night"] .brandIcon,body[data-theme="forest"] .brandIcon{backgro
  .bubble{max-width:96%!important;overflow-wrap:anywhere}
 }
 @media(max-width:420px){header .headTitle strong{font-size:15px}.tag{max-width:32%;font-size:10px}.composerTools button{padding:0 7px!important;font-size:11px!important}.welcome h1 br{display:none}}
+
+/* Theme-aware cloud logo tile */
+body[data-theme="ocean"] .brandIcon img,body:not([data-theme]) .brandIcon img,body[data-theme="light"] .brandIcon img{content:url("./icons/tillbot.svg")}
+body[data-theme="forest"] .brandIcon img,body[data-theme="night"] .brandIcon img{content:url("./icons/tillbot-dark.svg")}
+body[data-theme="forest"] .brandIcon,body[data-theme="night"] .brandIcon{background:#081522!important;border-color:#ffffff18!important}
+body[data-theme="forest"] .authIcon img,body[data-theme="night"] .authIcon img{content:url("./icons/tillbot-dark.svg")}
