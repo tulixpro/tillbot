@@ -390,3 +390,17 @@ body[data-theme="ocean"] .brandIcon img,body:not([data-theme]) .brandIcon img,bo
 body[data-theme="forest"] .brandIcon img,body[data-theme="night"] .brandIcon img{content:url("./icons/tillbot-dark.svg")}
 body[data-theme="forest"] .brandIcon,body[data-theme="night"] .brandIcon{background:#081522!important;border-color:#ffffff18!important}
 body[data-theme="forest"] .authIcon img,body[data-theme="night"] .authIcon img{content:url("./icons/tillbot-dark.svg")}
+
+/* Chat history and message utility polish */
+.historyItem{display:flex;align-items:center;gap:4px;margin:3px 0;width:100%;min-width:0}
+.historyOpen{flex:1!important;min-width:0!important;text-align:left!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.historyActions{display:flex;gap:2px;opacity:.45;transition:opacity .15s}
+.historyItem:hover .historyActions,.historyItem:focus-within .historyActions{opacity:1}
+.historyActions button{width:29px;height:30px;min-width:29px;padding:0;border-radius:8px;background:#ffffff08;border:1px solid #ffffff12;color:#b9d7e7;font-size:13px}
+.messageActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;padding-top:8px;border-top:1px solid #ffffff12}
+.messageActions button{font-size:11px;color:#8fb4c9;background:#ffffff06;border:1px solid #ffffff12;padding:5px 9px;border-radius:8px;cursor:pointer}
+.messageActions button:hover{color:#d9fbff;background:#ffffff10}
+.messageActions button:disabled{opacity:.4;cursor:default}
+body[data-theme="light"] .messageActions{border-color:#dceaf2}
+body[data-theme="light"] .messageActions button{color:#496579;border-color:#dceaf2;background:#f7fbfd}
+@media(max-width:820px){.historyActions{opacity:1}.historyActions button{width:34px;height:34px}.messageActions button{padding:7px 10px;font-size:12px}}
