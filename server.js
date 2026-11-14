@@ -4,7 +4,7 @@ const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const db = require("./database");
+const { pool, initDatabase } = require("./database");
 
 const app = express();
 app.disable("x-powered-by");
@@ -48,11 +48,11 @@ async function verifyCaptcha(token, ip) {
 const normalizeUsername = (value) => String(value || "").trim().toLowerCase();
 const makeToken = (user) => jwt.sign({ sub: String(user.id) }, TOKEN_SECRET, { expiresIn: "7d" });
 
-function auth(req, res, next) {
+async function auth(req, res, next) {
   try {
     const raw = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
     const payload = jwt.verify(raw, TOKEN_SECRET);
-    const user = db.prepare("SELECT id, username, role FROM users WHERE id = ?").get(Number(payload.sub));
+    const { rows } = await pool.query("SELECT id, username, role FROM users WHERE id = $1", [Number(payload.sub)]); const user = rows[0];
     if (!user) return res.status(401).json({ error: "Konto nicht gefunden" });
     req.user = user;
     next();
@@ -81,7 +81,7 @@ app.post("/api/register", async (req, res) => {
     const user = { id: Number(result.lastInsertRowid), username, role: "user" };
     res.json({ token: makeToken(user), user });
   } catch (error) {
-    if (String(error).includes("UNIQUE")) return res.status(409).json({ error: "Username bereits vergeben" });
+    if (error.code === "23505") return res.status(409).json({ error: "Username bereits vergeben" });
     console.error("Register error:", error);
     res.status(500).json({ error: "Registrierung fehlgeschlagen" });
   }
@@ -90,7 +90,7 @@ app.post("/api/register", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   if (!(await verifyCaptcha(req.body.captchaToken, req.ip))) return res.status(403).json({ error: "CAPTCHA fehlgeschlagen. Bitte erneut bestätigen." });
   try {
-    const user = db.prepare("SELECT * FROM users WHERE username = ?").get(normalizeUsername(req.body.username));
+    const { rows } = await pool.query("SELECT * FROM users WHERE username = $1", [normalizeUsername(req.body.username)]); const user = rows[0];
     if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
       return res.status(401).json({ error: "Login falsch" });
     }
@@ -102,20 +102,20 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Admin erstmalig freischalten: eingeloggter passender Benutzer + ADMIN_SETUP_SECRET aus Render.
-app.post("/api/admin/bootstrap", auth, rateLimit({ windowMs: 15 * 60_000, limit: 3, message: { error: "Zu viele Admin-Setup-Versuche. Bitte später erneut." } }), (req, res) => {
+app.post("/api/admin/bootstrap", auth, rateLimit({ windowMs: 15 * 60_000, limit: 3, message: { error: "Zu viele Admin-Setup-Versuche. Bitte später erneut." } }), async (req, res) => {
   const setupSecret = process.env.ADMIN_SETUP_SECRET;
   const adminUsername = normalizeUsername(process.env.ADMIN_USERNAME);
   if (!setupSecret || !adminUsername) return res.status(503).json({ error: "Admin-Setup in Render nicht konfiguriert" });
   if (req.user.username !== adminUsername || req.body.setupSecret !== setupSecret) {
     return res.status(403).json({ error: "Setup-Code oder Admin-Benutzer falsch" });
   }
-  db.prepare("UPDATE users SET role='admin' WHERE id=?").run(req.user.id);
+  await pool.query("UPDATE users SET role='admin' WHERE id=$1", [req.user.id]);
   res.json({ ok: true, message: "Admin aktiviert. Bitte neu anmelden." });
 });
 
 app.get("/api/me", auth, (req, res) => res.json({ user: req.user }));
-app.get("/api/chats", auth, (req, res) => res.json(db.prepare("SELECT id,title,updated_at FROM chats WHERE user_id=? ORDER BY updated_at DESC").all(req.user.id)));
-app.post("/api/chats", auth, (req, res) => {
+app.get("/api/chats", auth, async (req, res) => { const { rows } = await pool.query("SELECT id,title,updated_at FROM chats WHERE user_id=$1 ORDER BY updated_at DESC", [req.user.id]); res.json(rows); });
+app.post("/api/chats", auth, async (req, res) => {
   const title = String(req.body.title || "Neuer Chat").slice(0, 100);
   const result = db.prepare("INSERT INTO chats(user_id,title) VALUES(?,?)").run(req.user.id, title);
   res.json({ id: Number(result.lastInsertRowid), title });
@@ -125,7 +125,7 @@ app.get("/api/chats/:id", auth, (req, res) => {
   if (!chat) return res.status(404).json({ error: "Chat nicht gefunden" });
   res.json({ chat: { id: chat.id, title: chat.title, history: JSON.parse(chat.history) } });
 });
-app.put("/api/chats/:id", auth, (req, res) => {
+app.put("/api/chats/:id", auth, async (req, res) => {
   const history = Array.isArray(req.body.history) ? req.body.history.slice(-100) : [];
   const safeHistory = history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
     .map(m => ({ role: m.role, content: m.content.slice(0, 12000) }));
@@ -145,9 +145,9 @@ app.get("/api/admin/stats", auth, admin, (_req, res) => res.json({
 }));
 
 
-app.get("/api/admin/metrics", auth, admin, (_req, res) => {
+app.get("/api/admin/metrics", auth, admin, async (_req, res) => {
   const mem = process.memoryUsage();
-  const dbInfo = db.pragma("page_count", { simple: true }) * db.pragma("page_size", { simple: true });
+  const dbInfo = Number((await pool.query("SELECT pg_database_size(current_database()) size")).rows[0].size); const [ur,cr]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]);
   const cpu = process.cpuUsage();
   const now = process.hrtime.bigint();
   const elapsed = Number(now - (global.__tbCpuTime || now)) / 1e6;
