@@ -404,3 +404,21 @@ body[data-theme="forest"] .authIcon img,body[data-theme="night"] .authIcon img{c
 body[data-theme="light"] .messageActions{border-color:#dceaf2}
 body[data-theme="light"] .messageActions button{color:#496579;border-color:#dceaf2;background:#f7fbfd}
 @media(max-width:820px){.historyActions{opacity:1}.historyActions button{width:34px;height:34px}.messageActions button{padding:7px 10px;font-size:12px}}
+
+/* Auth clarity + small-screen final polish */
+.captchaFallback{font-size:12px;color:#f0c98b;background:#9a6b1a18;border:1px solid #e8b45b35;border-radius:10px;padding:10px 12px;text-align:center;max-width:320px}
+.authbox{width:min(440px,calc(100vw - 28px));padding:clamp(22px,5vw,38px);border:1px solid #8ceaff22;border-radius:26px;background:linear-gradient(145deg,#0b2032f5,#081827f5);box-shadow:0 28px 90px #0005,0 1px #ffffff0b inset;backdrop-filter:blur(24px)}
+.authbox input{width:100%;min-width:0;border:1px solid #a8e5f21b;border-radius:13px;background:#ffffff08;color:#eafaff;padding:13px 14px;outline:none}
+.authbox input:focus{border-color:#55d9cf80;box-shadow:0 0 0 3px #35d9b510}
+.authbox h1{letter-spacing:-1.2px;font-size:clamp(27px,6vw,36px)}
+.authbox .primary{width:100%;padding:14px;margin-top:8px}
+.authIcon{width:62px;height:62px;margin:0 auto 14px}
+@media(max-width:820px){
+ .auth{display:flex!important;align-items:center;justify-content:center;padding:18px 0;min-height:100svh;height:auto;overflow-y:auto}
+ .authbox{margin:auto;padding:24px 20px;border-radius:22px}
+ .captchaBox{min-height:65px!important;overflow:visible!important}
+ .captchaBox iframe{max-width:100%}
+ .layout:not(.hidden){height:100svh!important;height:100dvh!important}
+ .composerArea small{display:block;text-align:center;line-height:1.35}
+ .chat{scroll-padding-bottom:20px}
+}
