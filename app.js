@@ -9,16 +9,27 @@ const passwordToggle=$("togglePassword");passwordToggle.onclick=()=>{const visib
 async function start(){if(!token){$("auth").classList.remove("hidden");$("app").classList.add("hidden");return}try{let d=await api("/api/me");user=d.user;$("auth").classList.add("hidden");$("app").classList.remove("hidden");$("who").textContent="@"+user.username;$("sideUser").textContent=user.username;$("admin").classList.toggle("hidden",user.role!=="admin");await loadChats()}catch{token=null;localStorage.removeItem("tb-token");start()}}
 async function loadChats(){chats=await api("/api/chats");$("history").innerHTML="";chats.forEach(c=>{let b=document.createElement("button");b.textContent="▸  "+c.title;b.onclick=()=>openChat(c.id);$("history").append(b)});if(activeId&&chats.some(c=>c.id===activeId))await openChat(activeId);else{activeId=null;history=[];render()}}
 async function openChat(id){let d=await api("/api/chats/"+id);activeId=id;history=d.chat.history||[];render();$("sidebar").classList.remove("open")}
+function renderPlainAssistant(root,text){
+ const lines=String(text||"").split("\n");let list=null,paragraph=[];
+ const flush=()=>{if(paragraph.length){const p=document.createElement("p");p.textContent=paragraph.join(" ");p.className="assistantParagraph";root.append(p);paragraph=[]}};
+ const closeList=()=>{if(list){root.append(list);list=null}};
+ lines.forEach(line=>{
+  const s=line.trim();if(!s){flush();closeList();return}
+  const h=s.match(/^(#{1,3})\s+(.+)$/);if(h){flush();closeList();const el=document.createElement("h"+Math.min(4,h[1].length+1));el.className="assistantHeading";el.textContent=h[2];root.append(el);return}
+  const bullet=s.match(/^[-*•]\s+(.+)$/),number=s.match(/^\d+[.)]\s+(.+)$/);
+  if(bullet||number){flush();const ordered=!!number;if(list&&list.tagName!==(ordered?"OL":"UL"))closeList();if(!list)list=document.createElement(ordered?"ol":"ul");const li=document.createElement("li");li.textContent=(bullet||number)[1];list.append(li);return}
+  closeList();paragraph.push(s)
+ });flush();closeList();
+}
 function renderAssistant(root,text){
  const chunks=String(text||"").split("```");
  chunks.forEach((chunk,i)=>{
-  if(i%2===0){if(chunk.trim()){const p=document.createElement("div");p.className="assistantText";p.textContent=chunk.trim();root.append(p)}return}
+  if(i%2===0){if(chunk.trim())renderPlainAssistant(root,chunk);return}
   const nl=chunk.indexOf("\n"),lang=(nl<0?chunk:chunk.slice(0,nl)).trim().slice(0,24)||"code",code=nl<0?"":chunk.slice(nl+1).replace(/\s+$/,"");
-  const card=document.createElement("section");card.className="codeCard";
-  const head=document.createElement("div");head.className="codeHead";
+  const card=document.createElement("section");card.className="codeCard";const head=document.createElement("div");head.className="codeHead";
   const label=document.createElement("span");label.textContent=lang;head.append(label);
   const copy=document.createElement("button");copy.type="button";copy.textContent="Kopieren";copy.onclick=async()=>{try{await navigator.clipboard.writeText(code);copy.textContent="Kopiert ✓";setTimeout(()=>copy.textContent="Kopieren",1400)}catch{copy.textContent="Nicht möglich"}};
-  const down=document.createElement("button");down.type="button";down.textContent="Download";down.onclick=()=>{const ext=({javascript:"js",js:"js",typescript:"ts",ts:"ts",python:"py",py:"py",html:"html",css:"css",json:"json",java:"java",c:"c",cpp:"cpp",sql:"sql",bash:"sh",sh:"sh"})[lang.toLowerCase()]||"txt";const blob=new Blob([code],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="tillbot-code."+ext;a.click();URL.revokeObjectURL(url)};
+  const down=document.createElement("button");down.type="button";down.textContent="Download";down.onclick=()=>{const ext=({javascript:"js",js:"js",typescript:"ts",ts:"ts",python:"py",py:"py",html:"html",css:"css",json:"json",java:"java",c:"c",cpp:"cpp",sql:"sql",bash:"sh",sh:"sh"})[lang.toLowerCase()]||"txt";const blob=new Blob([code],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="tillbot-code."+ext;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
   head.append(copy,down);const pre=document.createElement("pre"),cb=document.createElement("code");cb.textContent=code;pre.append(cb);card.append(head,pre);root.append(card)
  });
 }
