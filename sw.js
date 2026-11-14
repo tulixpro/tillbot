@@ -1,5 +1,5 @@
 const CACHE="tillbot-pages-v16";
-const CORE=["./","./index.html","./style.css?v=14","./app.js?v=16","./manifest.json?v=9","./icons/tillbot.svg","./icons/tillbot-dark.svg"];
+const CORE=["./","./index.html","./style.css?v=15","./app.js?v=17","./manifest.json?v=9","./icons/tillbot.svg","./icons/tillbot-dark.svg"];
 self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("tillbot-pages-")&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",event=>{const req=event.request;if(req.method!=="GET"||new URL(req.url).origin!==self.location.origin)return;if(req.mode==="navigate"){event.respondWith(fetch(req).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put("./index.html",copy));return response}).catch(()=>caches.match("./index.html")));return}event.respondWith(caches.match(req).then(cached=>cached||fetch(req).then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(req,copy))}return response}))) });
