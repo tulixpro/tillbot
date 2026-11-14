@@ -36,6 +36,9 @@ app.use("/api/login", authLimit);
 app.use("/api/register", authLimit);
 
 
+function makeCaptcha(){const a=2+Math.floor(Math.random()*8),b=1+Math.floor(Math.random()*8),op=Math.random()<.5?"+":"-",answer=op==="+"?a+b:a-b;return {question:`Was ist ${a} ${op} ${b}?`,answer:String(answer)}}
+app.get("/api/captcha",rateLimit({windowMs:60_000,limit:30}),(_req,res)=>{const c=makeCaptcha();res.json({question:c.question,token:jwt.sign({captchaAnswer:c.answer,purpose:"captcha"},TOKEN_SECRET,{expiresIn:"5m"})})});
+function verifyCaptcha(token, answer){try{const payload=jwt.verify(String(token||""),TOKEN_SECRET);return payload.purpose==="captcha"&&String(answer??"").trim()===payload.captchaAnswer}catch{return false}}
 async function verifyCaptcha(token, ip) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) { console.error("Turnstile Secret fehlt; CAPTCHA wird sicherheitshalber abgelehnt."); return false; }
