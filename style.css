@@ -779,3 +779,7 @@ dialog[open]{animation:tbMenuIn .2s cubic-bezier(.2,.75,.25,1) both}
  #sidebar.open,dialog[open],.settingsGroup,.adminActions,.adminHead,.photoPreview,.systemNotice,.popover:not(.hidden),.dropdown:not(.hidden),.menuPanel:not(.hidden),[role="menu"]:not([hidden]){animation:none!important}
  .chat,#history,dialog{scroll-behavior:auto}
 }
+
+/* Accessible built-in arithmetic CAPTCHA */
+.captchaBox{display:flex!important;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0 15px;padding:12px;border:1px solid #ffffff20;border-radius:12px;background:#081a2a;color:#d9f1ff}
+.captchaBox.hidden{display:none!important}.captchaQuestion{flex:1 1 100%;font-size:14px;font-weight:650;color:#9ee8db}.captchaBox input{min-width:0;flex:1;width:100px;padding:10px;border-radius:9px;border:1px solid #ffffff25;background:#0b1220;color:inherit}.captchaBox button{padding:9px 12px;border-radius:9px;color:#bcefff}

@@ -36,18 +36,9 @@ app.use("/api/login", authLimit);
 app.use("/api/register", authLimit);
 
 
-async function verifyCaptcha(token, ip) {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) { console.error("Turnstile Secret fehlt; CAPTCHA wird sicherheitshalber abgelehnt."); return false; }
-  if (!token) return false;
-  try {
-    const form = new URLSearchParams({secret, response:token});
-    if (ip) form.set("remoteip", ip);
-    const result = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:form,signal:AbortSignal.timeout(8000)});
-    const data = await result.json();
-    return data.success === true;
-  } catch { return false; }
-}
+function makeCaptcha(){const a=2+Math.floor(Math.random()*8),b=1+Math.floor(Math.random()*8),op=Math.random()<.5?"+":"-",answer=op==="+"?a+b:a-b;return {question:`Was ist ${a} ${op} ${b}?`,answer:String(answer)}}
+app.get("/api/captcha",rateLimit({windowMs:60_000,limit:30}),(_req,res)=>{const c=makeCaptcha();res.json({question:c.question,token:jwt.sign({captchaAnswer:c.answer,purpose:"captcha"},TOKEN_SECRET,{expiresIn:"5m"})})});
+function verifyCaptcha(token, answer){try{const payload=jwt.verify(String(token||""),TOKEN_SECRET);return payload.purpose==="captcha"&&String(answer??"").trim()===payload.captchaAnswer}catch{return false}}
 
 const normalizeUsername = (value) => String(value || "").trim().toLowerCase();
 const makeToken = (user) => jwt.sign({ sub: String(user.id) }, TOKEN_SECRET, { expiresIn: "7d" });
@@ -119,33 +110,38 @@ app.get("/api/notifications", async (_req,res)=>{
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
 app.post("/api/register", async (req, res) => {
-  const username = normalizeUsername(req.body.username);
-  const password = String(req.body.password || "");
+  const username = normalizeUsername(req.body?.username);
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (!verifyCaptcha(req.body?.captchaToken,req.body?.captchaAnswer)) return res.status(400).json({error:"CAPTCHA falsch oder abgelaufen. Bitte neue Aufgabe lösen."});
   if (!/^[a-z0-9_]{3,20}$/.test(username)) return res.status(400).json({ error: "Username: 3–20 Zeichen (a-z, 0-9, _)" });
   if (password.length < 10 || password.length > 128) return res.status(400).json({ error: "Passwort muss 10–128 Zeichen haben" });
   try {
     const hash = await bcrypt.hash(password, 12);
-    // Registrierungen sind immer normale Nutzer. Admin wird separat mit Setup-Code freigeschaltet.
-    const { rows } = await pool.query("INSERT INTO users (username, password_hash, role) VALUES ($1, $2, 'user') RETURNING id", [username, hash]);
-    const user = { id: Number(rows[0].id), username, role: "user" };
-    res.json({ token: makeToken(user), user });
+    const { rows } = await pool.query("INSERT INTO users (username, password_hash, role) VALUES ($1, $2, 'user') RETURNING id, username, role", [username, hash]);
+    const user = { id: Number(rows[0].id), username: rows[0].username, role: rows[0].role };
+    return res.status(201).json({ token: makeToken(user), user });
   } catch (error) {
     if (error.code === "23505") return res.status(409).json({ error: "Username bereits vergeben" });
-    console.error("Register error:", error);
-    res.status(500).json({ error: "Registrierung fehlgeschlagen" });
+    console.error("[auth/register] Datenbankfehler:", error.message, error.code);
+    return res.status(503).json({ error: "Registrierung aktuell nicht möglich. Datenbankverbindung in Render prüfen." });
   }
 });
 
 app.post("/api/login", async (req, res) => {
+  const username = normalizeUsername(req.body?.username);
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (!verifyCaptcha(req.body?.captchaToken,req.body?.captchaAnswer)) return res.status(400).json({error:"CAPTCHA falsch oder abgelaufen. Bitte neue Aufgabe lösen."});
+  if (!username || !password) return res.status(400).json({ error: "Username und Passwort eingeben." });
   try {
-    const { rows } = await pool.query("SELECT * FROM users WHERE username = $1", [normalizeUsername(req.body.username)]); const user = rows[0];
-    if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
-      return res.status(401).json({ error: "Login falsch" });
+    const { rows } = await pool.query("SELECT id, username, role, password_hash FROM users WHERE username = $1", [username]);
+    const user = rows[0];
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      return res.status(401).json({ error: "Username oder Passwort falsch" });
     }
-    res.json({ token: makeToken(user), user: { id: user.id, username: user.username, role: user.role } });
+    return res.json({ token: makeToken(user), user: { id: Number(user.id), username: user.username, role: user.role } });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Login fehlgeschlagen" });
+    console.error("[auth/login] Datenbankfehler:", error.message, error.code);
+    return res.status(503).json({ error: "Anmeldung aktuell nicht möglich. Datenbankverbindung in Render prüfen." });
   }
 });
 

@@ -1,0 +1,21 @@
+name: Validate Tillbot
+on:
+  push:
+    branches:
+      - fix/auth-register-login
+  pull_request:
+    branches:
+      - main
+      - feature/tillbot-ready-upgrade
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check app.js
+      - run: node --check server.js
+      - run: node --check database.js
+      - run: npm install
