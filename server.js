@@ -3,6 +3,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const { pool, initDatabase } = require("./database");
 
 const app = express();
@@ -70,6 +71,36 @@ function admin(req, res, next) {
 
 app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
 app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
+
+// Server health guard: local checks only, with a cooldown for owner notifications.
+const smtpReady = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS && process.env.ADMIN_ALERT_EMAIL);
+const mailer = smtpReady ? nodemailer.createTransport({
+  host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT) || 465,
+  secure: (Number(process.env.SMTP_PORT) || 465) === 465,
+  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 10000
+}) : null;
+let overloadSince = 0, lastOverloadMail = 0, overloadMailBusy = false;
+setInterval(async () => {
+  const memory = process.memoryUsage();
+  const heapRatio = memory.heapUsed / Math.max(memory.heapTotal, 1);
+  const rssLimit = Number(process.env.MEMORY_LIMIT_MB) || 0;
+  const rssRatio = rssLimit ? memory.rss / (rssLimit * 1024 * 1024) : 0;
+  if (heapRatio < 0.90 && rssRatio < 0.90) { overloadSince = 0; return; }
+  if (!overloadSince) overloadSince = Date.now();
+  if (!mailer || Date.now() - overloadSince < 120000 || Date.now() - lastOverloadMail < 30 * 60 * 1000 || overloadMailBusy) return;
+  overloadMailBusy = true;
+  try {
+    await mailer.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER, to: process.env.ADMIN_ALERT_EMAIL,
+      subject: "[TILLBOT] Server dauerhaft stark ausgelastet",
+      text: "TILLBOT meldet seit mindestens 2 Minuten hohe Speicherauslastung.\nHeap: " + Math.round(heapRatio * 100) + "%\nRSS: " + Math.round(memory.rss / 1048576) + " MB" + (rssLimit ? " / " + rssLimit + " MB" : "") + "\nZeit: " + new Date().toISOString() + "\nBitte Render-Metriken und Logs prüfen."
+    });
+    lastOverloadMail = Date.now();
+    console.warn("[health] overload alert sent");
+  } catch (error) { console.error("[health] overload alert mail failed:", error.message); }
+  finally { overloadMailBusy = false; }
+}, 60000).unref();
 
 app.put("/api/admin/announcement", auth, admin, async (req,res)=>{
  const message=String(req.body.message||"").trim().slice(0,500);

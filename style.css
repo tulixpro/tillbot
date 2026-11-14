@@ -687,3 +687,95 @@ button:hover{filter:none;transform:translateY(-1px)}
 
 /* Wartungsankündigung: ruhige, professionelle Admin-Eingabe */
 .maintenancePresetRow{display:flex;gap:9px;align-items:center;margin:8px 0 12px}.maintenancePresetRow select{flex:1;min-width:0;background:#0b1220;color:inherit;border:1px solid #ffffff20;border-radius:10px;padding:11px}.maintenanceAdmin textarea{width:100%;resize:vertical;min-height:78px;margin:8px 0 5px;background:#0b1220;color:inherit;border:1px solid #ffffff20;border-radius:10px;padding:12px;font:inherit;line-height:1.5}.maintenanceAdmin textarea:focus,.maintenancePresetRow select:focus{outline:2px solid #7399ff55;border-color:#7399ff80}.maintenanceHint{display:block;color:#8fa2bc;line-height:1.5;margin:3px 0 14px}
+
+
+/* TILLBOT polish · calm, crisp surfaces and accessible focus states */
+:root{--tb-panel:rgba(8,20,38,.78);--tb-line:rgba(180,220,255,.13);--tb-muted:#a9bdcf;--tb-accent:#70e5d0}
+body{background:radial-gradient(ellipse at 12% 4%,#254c72 0%,transparent 32%),radial-gradient(ellipse at 92% 10%,#164b55 0%,transparent 34%),linear-gradient(145deg,#07111f,#0a1d30 58%,#0a2730);background-attachment:fixed}
+body:before{opacity:.16}
+button,input,textarea,select{transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}
+button{border-color:var(--tb-line);background:rgba(22,48,73,.78)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #67e4d0;outline-offset:2px;box-shadow:0 0 0 4px #67e4d01c}
+.primary{background:linear-gradient(135deg,#21bfa4,#3288f6);box-shadow:0 8px 28px #208fc52b}
+aside{background:rgba(5,15,29,.84);border-right-color:var(--tb-line)}
+header{background:rgba(7,18,33,.72);border-bottom-color:var(--tb-line)}
+.bubble{border:1px solid var(--tb-line);box-shadow:0 10px 30px #00000012}
+.bubble.bot{background:rgba(17,34,52,.72);backdrop-filter:blur(14px)}
+.bubble.user{background:linear-gradient(135deg,#176a79,#245e9c);border-color:#8be8ff22}
+.chat{scrollbar-width:thin}
+.settingsGroup,.authbox,.maintenanceCard{border:1px solid var(--tb-line);box-shadow:0 24px 70px #00000020}
+.settingsGroup{background:rgba(13,29,46,.62);border-radius:18px;padding:20px}
+.settingsGroup h3{letter-spacing:-.25px}
+.toggleRow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;cursor:pointer}
+.toggleRow small{display:block;color:var(--tb-muted);font-size:12px;margin-top:4px}
+.toggleRow input{width:20px;height:20px;accent-color:#35cbb2}
+.streamingAnswer{color:#aab9c8!important;white-space:pre-wrap;line-height:1.75;font-size:.97em;opacity:.96}
+.streamingAnswer:empty:before{content:"Antwort wird erstellt …";color:#8ea5b9}
+body[data-beginner="on"] .beginnerHint{display:block}
+.beginnerHint{display:none;color:#a9c4d8;font-size:13px;line-height:1.55;padding:12px 14px;margin:12px auto;border:1px solid #8bbfe522;border-radius:12px;background:#0c263b88;max-width:620px}
+body[data-beginner="on"] .composer small{color:#b6c8d8}
+body[data-workspace="compact"] .settingsGroup{padding:14px}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+
+/* TILLBOT motion pass: subtle, fast and accessible */
+@keyframes tbFadeUp{from{opacity:0;transform:translate3d(0,14px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes tbSoftGlow{0%,100%{box-shadow:0 0 0 0 rgba(82,205,210,0)}50%{box-shadow:0 0 0 5px rgba(82,205,210,.045)}}
+@keyframes tbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes tbShimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.welcome{animation:tbFadeUp .65s cubic-bezier(.2,.75,.25,1) both}
+.welcome .cloud{animation:tbFloat 5s ease-in-out infinite}
+.welcome h1{animation:tbFadeUp .7s .06s both}
+.welcome .muted{animation:tbFadeUp .7s .12s both}
+.suggestions button{animation:tbFadeUp .45s both}
+.suggestions button:nth-child(2){animation-delay:.04s}
+.suggestions button:nth-child(3){animation-delay:.08s}
+.suggestions button:nth-child(4){animation-delay:.12s}
+.suggestions button:nth-child(5){animation-delay:.16s}
+.bubble{animation:tbFadeUp .24s cubic-bezier(.2,.75,.25,1) both}
+.composer:focus-within{animation:tbSoftGlow 2.8s ease-in-out infinite}
+.primary,#send{background-size:180% 180%;transition:transform .18s ease,filter .18s ease,background-position .4s ease}
+.primary:hover,#send:hover{background-position:100% 50%;filter:brightness(1.06)}
+.brandIcon{transition:transform .25s cubic-bezier(.2,.75,.25,1),box-shadow .25s}
+.brand:hover .brandIcon{transform:rotate(-5deg) scale(1.04);box-shadow:0 9px 28px #29b9d733}
+#history button{transition:transform .16s ease,background .16s ease,border-color .16s ease}
+#history button:hover{transform:translateX(3px)}
+.authbox{animation:tbFadeUp .42s cubic-bezier(.2,.75,.25,1) both}
+dialog[open]{animation:tbFadeUp .22s ease both}
+dialog::backdrop{animation:tbBackdrop .2s ease both}
+@keyframes tbBackdrop{from{opacity:0}to{opacity:1}}
+/* Smooth but restrained loading affordance */
+.streamingAnswer{animation:tbFadeUp .22s ease both}
+.thinkingOrb{animation:tbPulse 1.4s ease-in-out infinite, tbSoftGlow 2.8s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+ .welcome,.welcome .cloud,.welcome h1,.welcome .muted,.suggestions button,.bubble,.composer:focus-within,.authbox,dialog[open],dialog::backdrop,.streamingAnswer,.thinkingOrb{animation:none!important}
+ .brandIcon,#history button,.primary,#send{transition:none!important}
+}
+
+
+/* Interaction polish: menus, scroll affordances, and panel transitions */
+@keyframes tbMenuIn{from{opacity:0;transform:translate3d(0,-7px,0) scale(.985)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes tbSidebarIn{from{opacity:.65;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tbScrollHint{0%,100%{opacity:.5}50%{opacity:1}}
+#sidebar.open{animation:tbSidebarIn .2s cubic-bezier(.2,.75,.25,1) both}
+#history button{transform-origin:left center}
+#history button:active{transform:translateX(2px) scale(.99)}
+dialog[open]{animation:tbMenuIn .2s cubic-bezier(.2,.75,.25,1) both}
+.settingsGroup,.adminActions,.adminHead,.photoPreview,.systemNotice{animation:tbFadeUp .22s ease both}
+.popover,.dropdown,.menuPanel,[role="menu"]{transform-origin:top right}
+.popover:not(.hidden),.dropdown:not(.hidden),.menuPanel:not(.hidden),[role="menu"]:not([hidden]){animation:tbMenuIn .16s cubic-bezier(.2,.75,.25,1) both}
+/* Scroll containers feel natural and clearly indicate movement */
+.chat,#history,dialog{scroll-behavior:smooth;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#42647d transparent}
+.chat::-webkit-scrollbar,#history::-webkit-scrollbar,dialog::-webkit-scrollbar{width:7px}
+.chat::-webkit-scrollbar-thumb,#history::-webkit-scrollbar-thumb,dialog::-webkit-scrollbar-thumb{background:rgba(120,165,195,.24);border-radius:99px}
+.chat::-webkit-scrollbar-thumb:hover,#history::-webkit-scrollbar-thumb:hover,dialog::-webkit-scrollbar-thumb:hover{background:rgba(120,190,210,.42)}
+.chat .bubble{scroll-margin-block:18px}
+.chat:focus-visible{outline:2px solid #67e4d055;outline-offset:-3px}
+/* A subtle scroll-to-bottom affordance, if the app renders this control */
+#scrollToBottom,.scrollToBottom,.backToBottom{transition:opacity .18s,transform .18s,background .18s}
+#scrollToBottom:hover,.scrollToBottom:hover,.backToBottom:hover{transform:translateY(-2px)}
+#scrollToBottom:active,.scrollToBottom:active,.backToBottom:active{transform:scale(.96)}
+@media(prefers-reduced-motion:reduce){
+ #sidebar.open,dialog[open],.settingsGroup,.adminActions,.adminHead,.photoPreview,.systemNotice,.popover:not(.hidden),.dropdown:not(.hidden),.menuPanel:not(.hidden),[role="menu"]:not([hidden]){animation:none!important}
+ .chat,#history,dialog{scroll-behavior:auto}
+}
