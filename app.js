@@ -76,3 +76,16 @@ window.tillbotCaptchaOk=t=>{captchaToken=t;window.__tbCaptcha=t};window.tillbotC
 
 // Keyboard helpers: quick new conversation and close mobile drawer.
 document.addEventListener("keydown",e=>{if(e.key==="Escape")$("sidebar").classList.remove("open");if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("newChat").click()}});
+
+/* TILLBOT Power-Tools: funktionale Prompt-Aktionen */
+document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("click",()=>{
+ const p=$("prompt"), text=p.value.trim(), tool=btn.dataset.tool;
+ const templates={
+ study:"Du bist mein geduldiger Lerncoach. Erkläre Schritt für Schritt, stelle Verständnisfragen und gib am Ende eine kurze Übung. Thema: "+(text||"[Thema eintragen]"),
+ rewrite:"Verbessere meinen Text sprachlich, klar und natürlich. Erhalte die Aussage und gib zuerst die optimierte Version aus. Text: "+(text||"[Text einfügen]"),
+ summary:"Fasse das folgende Thema übersichtlich zusammen: wichtigste Punkte, einfache Erklärung und Merksatz. Thema/Text: "+(text||"[Inhalt einfügen]"),
+ creative:"Arbeite im Kreativmodus: entwickle mehrere originelle Ideen und einen konkreten Vorschlag. Thema: "+(text||"[Idee eintragen]"),
+ code:"Hilf mir beim Programmieren. Erkläre den Ansatz, schreibe sauberen Code und kommentiere wichtige Stellen. Aufgabe: "+(text||"[Programmieraufgabe]")
+ };
+ p.value=templates[tool]||text;p.focus();p.dispatchEvent(new Event("input"));
+}));
