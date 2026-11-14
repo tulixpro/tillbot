@@ -572,3 +572,37 @@ body[data-home-layout="minimal"] .welcome .cloud,body[data-home-layout="minimal"
 /* Studio section gets a clear visual anchor */
 .adminStudio{border:1px solid #43c9d933!important;background:linear-gradient(145deg,#0d2638,#102f43)!important;border-radius:20px!important;padding:20px!important}
 .adminStudio h3{color:#8cebe2!important}
+
+/* TILLBOT Modern Chat UI refresh */
+:root{--tb-glow:rgba(48,190,211,.12)}
+body{background:radial-gradient(ellipse at 15% 0%,#14304455,transparent 42%),var(--bg,#08111c)!important}
+#app main,.main{min-width:0}
+.composerArea{position:sticky!important;bottom:0;z-index:12;padding:14px max(14px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important;background:linear-gradient(180deg,transparent,#08111ce8 22%,#08111c 100%)!important;backdrop-filter:blur(16px)}
+.composer{border:1px solid #54758a55!important;border-radius:26px!important;background:linear-gradient(145deg,#122334,#0c1b2a)!important;box-shadow:0 12px 40px #0003,0 0 0 1px #ffffff05 inset!important;padding:12px 14px!important;transition:border-color .2s,box-shadow .2s}
+.composer:focus-within{border-color:#36c9d4aa!important;box-shadow:0 0 0 3px #31c4d21b,0 14px 42px #0004!important}
+#prompt{font-size:16px!important;line-height:1.55!important;max-height:180px!important;min-height:42px!important;color:#edf7ff!important}
+.composerTools{gap:8px!important;align-items:center!important;flex-wrap:wrap}
+.composerTools button{min-height:40px!important;min-width:40px!important;border-radius:14px!important;border:1px solid #ffffff12!important;background:#ffffff08!important;color:#cde8f7!important;transition:transform .15s,background .15s}
+.composerTools button:hover{background:#1a4054!important;border-color:#4dd5d455!important}.composerTools button:active{transform:scale(.96)}
+#send{background:linear-gradient(135deg,#29b9d7,#25c6a0)!important;color:#05202a!important;border:0!important;font-size:21px!important;font-weight:800!important;box-shadow:0 5px 16px #21bca533!important}
+#voiceBtn{background:#183b4b!important;color:#8de8e5!important;border-color:#38c5c544!important}
+#photoBtn{font-size:13px!important;font-weight:650!important}
+.chat{max-width:900px!important;margin-inline:auto!important;width:100%!important}
+.bubble.bot{background:linear-gradient(145deg,#111f2e,#0e1a28)!important;border-color:#8aaec014!important}
+.bubble.user{box-shadow:0 8px 22px #11a7b522!important}
+.suggestions button{border-radius:999px!important;border:1px solid #8ca8bd28!important;background:#102132!important;transition:all .18s!important}
+.suggestions button:hover{border-color:#35c8cf88!important;background:#153346!important;transform:translateY(-1px)}
+@media(max-width:700px){
+ body{font-size:15px!important}
+ .composerArea{padding:10px 10px calc(9px + env(safe-area-inset-bottom))!important}
+ .composer{border-radius:22px!important;padding:10px!important}
+ .composerTools{display:flex!important;gap:6px!important}
+ .composerTools button{min-height:42px!important}
+ #voiceBtn{flex:1!important}
+ .chat{padding:14px 12px 20px!important}
+ .bubble{max-width:96%!important;border-radius:18px!important}
+ .suggestions{gap:7px!important}
+ .suggestions button{font-size:12px!important;padding:8px 11px!important}
+ .homeHero h1{font-size:clamp(26px,8vw,38px)!important;letter-spacing:-.04em!important}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
