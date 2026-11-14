@@ -654,3 +654,31 @@ body{min-height:100%;min-height:100dvh}
  .layout{height:var(--tb-visual-height,100dvh)!important;max-height:var(--tb-visual-height,100dvh)!important}
  #app main{height:var(--tb-visual-height,100dvh)!important;max-height:var(--tb-visual-height,100dvh)!important}
 }
+
+/* Premium visual pass: restrained, crisp, less playful */
+:root{--accent:#58b8ff;--accent2:#5de0c1;--line:rgba(148,190,220,.14);--card:#111f30;--muted:#91a8bd}
+body{background:radial-gradient(ellipse at 15% 0%,rgba(45,105,155,.20),transparent 38%),radial-gradient(ellipse at 90% 12%,rgba(36,140,125,.13),transparent 34%),#07111e;background-attachment:fixed}
+body:before{opacity:.12;filter:none}
+.layout{background:rgba(5,13,24,.34)}
+aside{background:rgba(8,18,31,.88);border-right-color:rgba(150,190,220,.12);backdrop-filter:blur(26px)}
+.brandIcon,.avatar{background:linear-gradient(145deg,#2d8fd4,#24a88d);box-shadow:0 5px 18px rgba(35,145,180,.18)}
+.logo{letter-spacing:-.55px}
+header{background:rgba(8,18,31,.76);border-bottom-color:rgba(150,190,220,.12)}
+.tag{font-size:11px;letter-spacing:.35px;color:#8ea9c0}
+.chat{gap:18px;padding:clamp(18px,3vw,34px)}
+.welcome h1{letter-spacing:-1.35px;font-weight:760}
+.cloud{font-size:54px;filter:none;color:#65c9d9}
+.suggestions button{background:rgba(255,255,255,.035);border-color:rgba(150,190,220,.16);color:#b8cbdc;transition:background .16s,border-color .16s,transform .16s}
+.suggestions button:hover{background:rgba(83,175,220,.09);border-color:rgba(83,175,220,.32)}
+.bubble{border-radius:16px;padding:15px 18px;line-height:1.62}
+.bubble.user{background:linear-gradient(135deg,#176fa8,#168d80);border-bottom-right-radius:5px}
+.bubble.bot{background:rgba(17,31,48,.9);border:1px solid rgba(150,190,220,.12);border-bottom-left-radius:5px;box-shadow:0 5px 22px rgba(0,0,0,.08)}
+.composer{background:rgba(15,29,45,.92);border:1px solid rgba(150,190,220,.16);box-shadow:0 14px 40px rgba(0,0,0,.2);border-radius:17px}
+.composer:focus-within{border-color:rgba(82,190,220,.48);box-shadow:0 0 0 3px rgba(70,170,210,.08),0 14px 40px rgba(0,0,0,.2)}
+.composer #send,.primary{background:linear-gradient(135deg,#218dc9,#168f82);box-shadow:none}
+button{transition:background .16s,border-color .16s,transform .16s}
+button:hover{filter:none;transform:translateY(-1px)}
+.authbox{background:rgba(13,27,43,.94);border-color:rgba(150,190,220,.16);box-shadow:0 28px 90px rgba(0,0,0,.32)}
+.authbox h1{letter-spacing:-.8px}
+.versionBadge{background:rgba(8,18,31,.8);border-color:rgba(150,190,220,.14);color:#7f9cb5}
+@media(max-width:700px){.chat{padding:16px 13px}.composerArea{padding:9px 12px 14px}.welcome h1{letter-spacing:-1px}}
