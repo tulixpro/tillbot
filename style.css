@@ -751,3 +751,31 @@ dialog::backdrop{animation:tbBackdrop .2s ease both}
  .welcome,.welcome .cloud,.welcome h1,.welcome .muted,.suggestions button,.bubble,.composer:focus-within,.authbox,dialog[open],dialog::backdrop,.streamingAnswer,.thinkingOrb{animation:none!important}
  .brandIcon,#history button,.primary,#send{transition:none!important}
 }
+
+
+/* Interaction polish: menus, scroll affordances, and panel transitions */
+@keyframes tbMenuIn{from{opacity:0;transform:translate3d(0,-7px,0) scale(.985)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@keyframes tbSidebarIn{from{opacity:.65;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tbScrollHint{0%,100%{opacity:.5}50%{opacity:1}}
+#sidebar.open{animation:tbSidebarIn .2s cubic-bezier(.2,.75,.25,1) both}
+#history button{transform-origin:left center}
+#history button:active{transform:translateX(2px) scale(.99)}
+dialog[open]{animation:tbMenuIn .2s cubic-bezier(.2,.75,.25,1) both}
+.settingsGroup,.adminActions,.adminHead,.photoPreview,.systemNotice{animation:tbFadeUp .22s ease both}
+.popover,.dropdown,.menuPanel,[role="menu"]{transform-origin:top right}
+.popover:not(.hidden),.dropdown:not(.hidden),.menuPanel:not(.hidden),[role="menu"]:not([hidden]){animation:tbMenuIn .16s cubic-bezier(.2,.75,.25,1) both}
+/* Scroll containers feel natural and clearly indicate movement */
+.chat,#history,dialog{scroll-behavior:smooth;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#42647d transparent}
+.chat::-webkit-scrollbar,#history::-webkit-scrollbar,dialog::-webkit-scrollbar{width:7px}
+.chat::-webkit-scrollbar-thumb,#history::-webkit-scrollbar-thumb,dialog::-webkit-scrollbar-thumb{background:rgba(120,165,195,.24);border-radius:99px}
+.chat::-webkit-scrollbar-thumb:hover,#history::-webkit-scrollbar-thumb:hover,dialog::-webkit-scrollbar-thumb:hover{background:rgba(120,190,210,.42)}
+.chat .bubble{scroll-margin-block:18px}
+.chat:focus-visible{outline:2px solid #67e4d055;outline-offset:-3px}
+/* A subtle scroll-to-bottom affordance, if the app renders this control */
+#scrollToBottom,.scrollToBottom,.backToBottom{transition:opacity .18s,transform .18s,background .18s}
+#scrollToBottom:hover,.scrollToBottom:hover,.backToBottom:hover{transform:translateY(-2px)}
+#scrollToBottom:active,.scrollToBottom:active,.backToBottom:active{transform:scale(.96)}
+@media(prefers-reduced-motion:reduce){
+ #sidebar.open,dialog[open],.settingsGroup,.adminActions,.adminHead,.photoPreview,.systemNotice,.popover:not(.hidden),.dropdown:not(.hidden),.menuPanel:not(.hidden),[role="menu"]:not([hidden]){animation:none!important}
+ .chat,#history,dialog{scroll-behavior:auto}
+}
