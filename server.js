@@ -34,7 +34,7 @@ app.use("/api/register", authLimit);
 
 async function verifyCaptcha(token, ip) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) { console.warn("Turnstile Secret fehlt; CAPTCHA server check is disabled."); return true; } // Temporärer Login-Fallback bis TURNSTILE_SECRET_KEY gesetzt ist.
+  if (!secret) { console.error("Turnstile Secret fehlt; CAPTCHA wird sicherheitshalber abgelehnt."); return false; }
   if (!token) return false;
   try {
     const form = new URLSearchParams({secret, response:token});
@@ -85,6 +85,7 @@ app.get("/api/notifications", async (_req,res)=>{
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
 app.post("/api/register", async (req, res) => {
+  if (!process.env.TURNSTILE_SECRET_KEY) return res.status(503).json({ error: "CAPTCHA ist serverseitig nicht konfiguriert. Admin muss TURNSTILE_SECRET_KEY in Render setzen." });
   if (!(await verifyCaptcha(req.body.captchaToken, req.ip))) return res.status(403).json({ error: "CAPTCHA fehlgeschlagen. Bitte erneut bestätigen." });
   const username = normalizeUsername(req.body.username);
   const password = String(req.body.password || "");
