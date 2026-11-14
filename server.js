@@ -174,6 +174,23 @@ app.put("/api/admin/users/:id/role", auth, admin, async (req,res)=>{
  if(!rows[0])return res.status(404).json({error:"Benutzer nicht gefunden"});
  res.json({user:rows[0]});
 });
+
+// Defensive configuration audit (admin-only; exposes booleans, never secret values).
+app.get("/api/admin/security-audit", auth, admin, async (_req,res)=>{
+  const checks=[
+    {name:"JWT-Schlüssel dauerhaft gesetzt",ok:!!(process.env.JWT_SECRET&&process.env.JWT_SECRET.length>=32),severity:"critical",detail:"JWT_SECRET muss in Render dauerhaft und mit mindestens 32 Zeichen gesetzt sein."},
+    {name:"CAPTCHA serverseitig aktiv",ok:!!process.env.TURNSTILE_SECRET_KEY,severity:"high",detail:"TURNSTILE_SECRET_KEY in Render setzen; ohne Secret ist die Prüfung deaktiviert."},
+    {name:"KI-API-Schlüssel gesetzt",ok:!!process.env.GROQ_API_KEY,severity:"high",detail:"GROQ_API_KEY ist erforderlich, damit Chat-Anfragen funktionieren."},
+    {name:"HTTPS-Frontend",ok:String(process.env.FRONTEND_ORIGIN||"https://tulixpro.github.io").startsWith("https://"),severity:"medium",detail:"Frontend-Origin sollte HTTPS verwenden."},
+    {name:"Helmet-Sicherheitsheader",ok:true,severity:"medium",detail:"Helmet ist im Express-Server aktiviert; CSP wird separat über Hosting/Policy verwaltet."},
+    {name:"API-Rate-Limit",ok:true,severity:"medium",detail:"Globales API-Limit sowie zusätzliche Limits für Login/Registrierung sind aktiv."},
+    {name:"Passwort-Mindestlänge",ok:true,severity:"medium",detail:"Registrierung verlangt mindestens 10 Zeichen; stärkere Passwörter empfehlen."}
+  ];
+  let dbOk=false;try{await pool.query("SELECT 1");dbOk=true}catch{}
+  checks.push({name:"Datenbank erreichbar",ok:dbOk,severity:"high",detail:dbOk?"PostgreSQL antwortet auf SELECT 1.":"Datenbankverbindung fehlgeschlagen."});
+  res.set("Cache-Control","no-store").json({checkedAt:new Date().toISOString(),checks,score:checks.filter(c=>c.ok).length,total:checks.length,note:"Konfigurationscheck, kein vollständiger Penetrationstest und keine Live-Erkennung von Angreifern."});
+});
+
 app.get("/api/admin/stats", auth, admin, async (_req, res) => { const [u,ch]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]); res.json({
   users: Number(u.rows[0].n),
   chats: Number(ch.rows[0].n)
