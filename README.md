@@ -27,7 +27,7 @@ Required environment variables (set in the hosting provider's secret/environment
 - `DATABASE_URL` – PostgreSQL connection URL.
 - `JWT_SECRET` – stable random secret, at least 32 characters. Changing it invalidates existing sessions.
 - `GROQ_API_KEY` – key for the AI API.
-- `TURNSTILE_SECRET_KEY` – Cloudflare Turnstile secret; registration/login require successful server-side verification.
+- CAPTCHA: TILLBOT zeigt eine serverseitig signierte Rechenaufgabe; dafür ist kein Cloudflare-Sitekey nötig. `JWT_SECRET` muss gesetzt sein (mindestens 32 Zeichen).
 - `FRONTEND_ORIGIN` – allowed frontend origin, e.g. `https://tulixpro.github.io`.
 - `ADMIN_USERNAME` and `ADMIN_SETUP_SECRET` – one-time admin bootstrap configuration. Use a strong setup secret and remove/rotate it after setup where operationally possible.
 
@@ -40,7 +40,7 @@ Optional:
 
 ## Current features
 
-- Login and registration with CAPTCHA, account/session handling.
+- Login und Registrierung mit serverseitig geprüfter CAPTCHA-Aufgabe sowie Account-/Session-Verwaltung.
 - Persistent chat history, rename/delete chats, streaming AI responses.
 - 14 prompt shortcuts (Lerncoach, Text verbessern, Zusammenfassen, Kreativmodus, Codehilfe, Quiz, Übersetzen, Planer, Einfach erklären, Brainstorm, Story, Prüfungstraining, E-Mail, Debugger). These are prompt templates, not separate AI models.
 - Image attachment for **image analysis** (not image generation).
