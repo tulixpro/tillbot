@@ -558,3 +558,17 @@ body[data-home-layout="minimal"] .welcome .cloud,body[data-home-layout="minimal"
  #sidebar .historyOpen{font-size:14px!important}
 }
 .adminStudio{scroll-margin-top:18px}
+
+/* TILLBOT 2.0 visual cleanup: consistent chat messages and controls */
+.chat{gap:18px!important;padding:clamp(16px,3vw,32px)!important}
+.bubble{max-width:min(82%,780px)!important;padding:15px 18px!important;font-size:15.5px!important;line-height:1.68!important;border-radius:18px!important;box-shadow:0 5px 18px #07111c12!important}
+.bubble.user{background:linear-gradient(125deg,#168fc8,#17b99e)!important;color:#fff!important;border:1px solid #ffffff24!important;border-bottom-right-radius:6px!important}
+.bubble.bot{background:var(--card,#101d2d)!important;color:var(--text,#e8f2ff)!important;border:1px solid var(--line,#ffffff18)!important;border-bottom-left-radius:6px!important}
+.bubble p{margin:.25em 0 .8em!important}.bubble p:last-child{margin-bottom:0!important}
+.bubble pre{max-width:100%;overflow:auto;border-radius:12px;padding:14px;background:#07111d!important}
+.bubble code{font-size:.92em;overflow-wrap:anywhere}
+.bubble ul,.bubble ol{padding-left:1.4em}.bubble li+li{margin-top:.35em}
+@media(max-width:600px){.bubble{max-width:94%!important;padding:13px 15px!important;font-size:15px!important}.chat{gap:14px!important}}
+/* Studio section gets a clear visual anchor */
+.adminStudio{border:1px solid #43c9d933!important;background:linear-gradient(145deg,#0d2638,#102f43)!important;border-radius:20px!important;padding:20px!important}
+.adminStudio h3{color:#8cebe2!important}
