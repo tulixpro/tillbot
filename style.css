@@ -218,3 +218,6 @@ body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-ri
 .composer:focus-within{border-color:#6c9dff80!important;box-shadow:0 0 0 3px #6c9dff16,0 16px 44px #0004}
 #prompt{font-size:15px;line-height:1.6;min-height:44px;max-height:180px;resize:none}
 .composerTools button{transition:transform .15s,background .15s,border-color .15s}.composerTools button:hover{transform:translateY(-1px);background:#ffffff12}.composerTools #send{background:linear-gradient(135deg,#69d8ce,#7399ff);color:#071323;border:0;box-shadow:0 5px 18px #69baff2b}.composerTools #send:disabled{opacity:.45;box-shadow:none}
+
+.quotaAdmin input{width:100%;max-width:220px;margin:8px 0 12px;padding:11px;border:1px solid #ffffff20;border-radius:10px;background:#0b1220;color:inherit}.quotaAdmin{border-color:#7b9cff25}
+.codeHead button:last-child{background:#7399ff18;border-color:#7399ff30;color:#b9ceff}
