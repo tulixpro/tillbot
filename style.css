@@ -687,3 +687,32 @@ button:hover{filter:none;transform:translateY(-1px)}
 
 /* Wartungsankündigung: ruhige, professionelle Admin-Eingabe */
 .maintenancePresetRow{display:flex;gap:9px;align-items:center;margin:8px 0 12px}.maintenancePresetRow select{flex:1;min-width:0;background:#0b1220;color:inherit;border:1px solid #ffffff20;border-radius:10px;padding:11px}.maintenanceAdmin textarea{width:100%;resize:vertical;min-height:78px;margin:8px 0 5px;background:#0b1220;color:inherit;border:1px solid #ffffff20;border-radius:10px;padding:12px;font:inherit;line-height:1.5}.maintenanceAdmin textarea:focus,.maintenancePresetRow select:focus{outline:2px solid #7399ff55;border-color:#7399ff80}.maintenanceHint{display:block;color:#8fa2bc;line-height:1.5;margin:3px 0 14px}
+
+
+/* TILLBOT polish · calm, crisp surfaces and accessible focus states */
+:root{--tb-panel:rgba(8,20,38,.78);--tb-line:rgba(180,220,255,.13);--tb-muted:#a9bdcf;--tb-accent:#70e5d0}
+body{background:radial-gradient(ellipse at 12% 4%,#254c72 0%,transparent 32%),radial-gradient(ellipse at 92% 10%,#164b55 0%,transparent 34%),linear-gradient(145deg,#07111f,#0a1d30 58%,#0a2730);background-attachment:fixed}
+body:before{opacity:.16}
+button,input,textarea,select{transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}
+button{border-color:var(--tb-line);background:rgba(22,48,73,.78)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #67e4d0;outline-offset:2px;box-shadow:0 0 0 4px #67e4d01c}
+.primary{background:linear-gradient(135deg,#21bfa4,#3288f6);box-shadow:0 8px 28px #208fc52b}
+aside{background:rgba(5,15,29,.84);border-right-color:var(--tb-line)}
+header{background:rgba(7,18,33,.72);border-bottom-color:var(--tb-line)}
+.bubble{border:1px solid var(--tb-line);box-shadow:0 10px 30px #00000012}
+.bubble.bot{background:rgba(17,34,52,.72);backdrop-filter:blur(14px)}
+.bubble.user{background:linear-gradient(135deg,#176a79,#245e9c);border-color:#8be8ff22}
+.chat{scrollbar-width:thin}
+.settingsGroup,.authbox,.maintenanceCard{border:1px solid var(--tb-line);box-shadow:0 24px 70px #00000020}
+.settingsGroup{background:rgba(13,29,46,.62);border-radius:18px;padding:20px}
+.settingsGroup h3{letter-spacing:-.25px}
+.toggleRow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;cursor:pointer}
+.toggleRow small{display:block;color:var(--tb-muted);font-size:12px;margin-top:4px}
+.toggleRow input{width:20px;height:20px;accent-color:#35cbb2}
+.streamingAnswer{color:#aab9c8!important;white-space:pre-wrap;line-height:1.75;font-size:.97em;opacity:.96}
+.streamingAnswer:empty:before{content:"Antwort wird erstellt …";color:#8ea5b9}
+body[data-beginner="on"] .beginnerHint{display:block}
+.beginnerHint{display:none;color:#a9c4d8;font-size:13px;line-height:1.55;padding:12px 14px;margin:12px auto;border:1px solid #8bbfe522;border-radius:12px;background:#0c263b88;max-width:620px}
+body[data-beginner="on"] .composer small{color:#b6c8d8}
+body[data-workspace="compact"] .settingsGroup{padding:14px}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
