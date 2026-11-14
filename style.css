@@ -492,3 +492,20 @@ body[data-theme="light"] .messageActions button{color:#496579;border-color:#dcea
  .suggestions button{padding:8px 10px}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Clean motion + clear mobile navigation */
+.closeMenu{display:none}
+@media(max-width:820px){
+ #sidebar .closeMenu{display:flex;align-items:center;gap:9px;align-self:flex-end;margin:10px 12px 0;padding:8px 12px;border:1px solid #ffffff18;border-radius:12px;background:#ffffff08;color:#d9edf7;font-size:19px;cursor:pointer}
+ #sidebar .closeMenu span{font-size:12px;font-weight:600}
+ #sidebar{transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s!important}
+ #sidebar.open{box-shadow:18px 0 70px #0008,0 0 0 1px #ffffff0a!important}
+}
+button,.bubble,.composer,.authbox,.historyItem,.suggestions button,.codeCard,.ticketCard{transition:transform .16s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease}
+button:active{transform:scale(.97)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
+.bubble.bot{animation:tbFadeUp .22s ease both}
+.welcome .cloud img{filter:drop-shadow(0 8px 22px #5de5ff35);animation:tbFloat 5s ease-in-out infinite}
+@keyframes tbFadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@media(prefers-reduced-motion:reduce){.welcome .cloud img{animation:none}}
