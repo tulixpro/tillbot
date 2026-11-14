@@ -3,7 +3,6 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
 const { pool, initDatabase } = require("./database");
 
 const app = express();
