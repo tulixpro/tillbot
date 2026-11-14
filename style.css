@@ -333,3 +333,54 @@ input:focus,textarea:focus{outline:none;border-color:#45d8cb;box-shadow:0 0 0 3p
 @media(max-width:520px){.adminUserRow{align-items:flex-start}.adminUserRow select{max-width:105px}.maintenanceCard{padding:28px 20px!important;border-radius:22px!important}}
 
 @media(max-width:820px){.layout.hidden{display:none!important}}
+
+
+/* TILLBOT visual refresh v2: subtle cloud watermark, calm glass surfaces */
+body{background:radial-gradient(ellipse at 12% 12%,#164d5a 0%,transparent 36%),radial-gradient(ellipse at 88% 8%,#173e70 0%,transparent 38%),linear-gradient(145deg,#071321,#081827 58%,#071522)!important}
+body:after{content:"";position:fixed;pointer-events:none;z-index:0;right:-12vw;top:12vh;width:min(58vw,760px);height:min(58vw,760px);opacity:.055;background-repeat:no-repeat;background-size:contain;background-position:center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M120 390C70 390 35 355 35 310c0-45 35-80 80-85 15-70 75-115 145-115 65 0 115 40 135 95 15-7 30-10 45-10 40 0 70 30 70 70 0 40-30 70-70 70-5 35-35 55-75 55H120Z' fill='none' stroke='%2358e5cf' stroke-width='18'/%3E%3C/svg%3E)}
+#app, #auth, #maintenanceScreen{position:relative;z-index:1}
+.brandIcon{background:#fff!important;border:1px solid #dceaf2;box-shadow:0 7px 22px #0002!important;border-radius:14px!important}
+.brandIcon img,.authIcon img{width:82%;height:82%;object-fit:contain}
+.welcome{position:relative;z-index:1}
+.welcome .cloud{width:104px;height:78px;margin-bottom:20px;filter:drop-shadow(0 12px 22px #19cdb522)}
+.welcome .cloud img{width:100%;height:100%;object-fit:contain}
+.welcome h1{font-size:clamp(32px,4.2vw,56px);line-height:1.12}
+.welcome .muted{max-width:510px;font-size:16px;line-height:1.7}
+.suggestions button{border:1px solid #7cdacb24;background:#ffffff08;backdrop-filter:blur(12px);padding:11px 15px;border-radius:14px}
+.composer{max-width:900px;margin:0 auto;background:#0a1b2aee!important;border:1px solid #5bd9d12b!important;border-radius:23px!important;box-shadow:0 18px 55px #0003, inset 0 1px #ffffff08!important}
+.composer:focus-within{border-color:#55d9cf70!important;box-shadow:0 18px 55px #0003,0 0 0 3px #29c9b20b!important}
+.composerTools{border-color:#ffffff12!important}
+.composerTools button{background:#ffffff08!important;border:1px solid #ffffff12!important;border-radius:12px!important}
+.composerTools #send{background:linear-gradient(135deg,#35d9b5,#4c8fff)!important;border:0!important;box-shadow:0 7px 22px #398dff30}
+body[data-theme="light"]{background:linear-gradient(145deg,#f3f9ff,#eaf8f5 65%,#f4f7ff)!important}
+body[data-theme="light"]:after{opacity:.075}
+body[data-theme="light"] .composer{background:#ffffffed!important;border-color:#b9dce6!important;box-shadow:0 16px 45px #194c6810!important}
+body[data-theme="light"] .composerTools button{color:#34556a!important;background:#f4f9fc!important;border-color:#dceaf2!important}
+body[data-theme="light"] .composerTools{border-color:#e5eef4!important}
+body[data-theme="light"] .brandIcon{background:#fff!important}
+body[data-theme="night"] .brandIcon,body[data-theme="forest"] .brandIcon{background:#fff!important}
+/* Small-screen layout: fixed header, scrollable conversation, always-visible composer */
+@media(max-width:820px){
+ body{overflow:hidden!important}
+ .layout{display:flex!important;height:100dvh!important;min-height:100dvh!important;width:100vw!important;overflow:hidden!important}
+ main{display:flex!important;flex-direction:column!important;flex:1!important;min-width:0!important;width:100%!important;height:100dvh!important;overflow:hidden!important}
+ #sidebar{position:fixed!important;inset:0 auto 0 0!important;height:100dvh!important;width:min(86vw,320px)!important;z-index:150!important;transform:translateX(-110%);visibility:hidden;display:flex!important;overflow-y:auto!important;padding:18px!important;background:#071b2b!important;border-right:1px solid #8ceaff22;box-shadow:25px 0 70px #0008}
+ #sidebar.open{transform:translateX(0)!important;visibility:visible!important}
+ header{display:flex!important;flex:0 0 58px!important;height:58px!important;min-height:58px!important;padding:0 12px!important;gap:10px}
+ #menu{display:grid!important;flex:0 0 40px!important;width:40px!important;height:40px!important;place-items:center}
+ .chat{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;padding:22px 14px!important;overscroll-behavior:contain}
+ .composerArea{flex:0 0 auto!important;padding:7px 10px max(12px,env(safe-area-inset-bottom))!important;background:linear-gradient(transparent,#07152255)!important}
+ .welcome{padding:18px 4px!important;width:100%!important}
+ .welcome .cloud{width:78px;height:60px;margin-bottom:14px}
+ .welcome h1{font-size:clamp(29px,8vw,39px)!important;letter-spacing:-1.2px!important;line-height:1.13!important}
+ .welcome .muted{font-size:14px!important;max-width:340px}
+ .suggestions{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:18px}
+ .suggestions button{font-size:12px;padding:9px 11px}
+ .composer{padding:9px 10px 8px!important;border-radius:19px!important}
+ .composer #prompt{min-height:45px!important;max-height:125px!important;font-size:16px!important;line-height:1.45;padding:7px 5px!important}
+ .composerTools{display:flex!important;width:100%!important;gap:5px!important;padding-top:7px!important}
+ .composerTools button{height:39px!important;min-width:38px!important;padding:0 9px!important;font-size:12px!important}
+ .composerTools #send{width:42px!important;min-width:42px!important;height:42px!important;margin-left:auto!important}
+ .bubble{max-width:96%!important;overflow-wrap:anywhere}
+}
+@media(max-width:420px){header .headTitle strong{font-size:15px}.tag{max-width:32%;font-size:10px}.composerTools button{padding:0 7px!important;font-size:11px!important}.welcome h1 br{display:none}}
