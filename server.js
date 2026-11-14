@@ -69,6 +69,7 @@ app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
 app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
 
 app.post("/api/register", async (req, res) => {
+  if (!(await verifyCaptcha(req.body.captchaToken, req.ip))) return res.status(403).json({ error: "CAPTCHA fehlgeschlagen. Bitte erneut bestätigen." });
   const username = normalizeUsername(req.body.username);
   const password = String(req.body.password || "");
   if (!/^[a-z0-9_]{3,20}$/.test(username)) return res.status(400).json({ error: "Username: 3–20 Zeichen (a-z, 0-9, _)" });
@@ -87,6 +88,7 @@ app.post("/api/register", async (req, res) => {
 });
 
 app.post("/api/login", async (req, res) => {
+  if (!(await verifyCaptcha(req.body.captchaToken, req.ip))) return res.status(403).json({ error: "CAPTCHA fehlgeschlagen. Bitte erneut bestätigen." });
   try {
     const user = db.prepare("SELECT * FROM users WHERE username = ?").get(normalizeUsername(req.body.username));
     if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
@@ -100,7 +102,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 // Admin erstmalig freischalten: eingeloggter passender Benutzer + ADMIN_SETUP_SECRET aus Render.
-app.post("/api/admin/bootstrap", auth, (req, res) => {
+app.post("/api/admin/bootstrap", auth, rateLimit({ windowMs: 15 * 60_000, limit: 3, message: { error: "Zu viele Admin-Setup-Versuche. Bitte später erneut." } }), (req, res) => {
   const setupSecret = process.env.ADMIN_SETUP_SECRET;
   const adminUsername = normalizeUsername(process.env.ADMIN_USERNAME);
   if (!setupSecret || !adminUsername) return res.status(503).json({ error: "Admin-Setup in Render nicht konfiguriert" });
