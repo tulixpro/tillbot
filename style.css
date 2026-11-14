@@ -197,3 +197,5 @@ body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-ri
 .codeHead button{border:1px solid #ffffff20;background:#ffffff08;color:inherit;border-radius:7px;padding:6px 9px;cursor:pointer}
 .codeCard pre{margin:0;padding:14px;overflow:auto;max-width:100%;font:12.5px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#e4ecff;white-space:pre}
 .codeCard code{font:inherit}
+
+.assistantParagraph{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;margin:5px 0 12px}.assistantHeading{font-size:1.12em;font-weight:700;margin:15px 0 8px;color:#eaf6ff}.bubble.bot ul,.bubble.bot ol{padding-left:25px;margin:7px 0 13px;line-height:1.7}.bubble.bot li{padding:2px 0}
