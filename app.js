@@ -85,7 +85,7 @@ document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("clic
  rewrite:"Verbessere meinen Text sprachlich, klar und natürlich. Erhalte die Aussage und gib zuerst die optimierte Version aus. Text: "+(text||"[Text einfügen]"),
  summary:"Fasse das folgende Thema übersichtlich zusammen: wichtigste Punkte, einfache Erklärung und Merksatz. Thema/Text: "+(text||"[Inhalt einfügen]"),
  creative:"Arbeite im Kreativmodus: entwickle mehrere originelle Ideen und einen konkreten Vorschlag. Thema: "+(text||"[Idee eintragen]"),
- code:"Hilf mir beim Programmieren. Erkläre den Ansatz, schreibe sauberen Code und kommentiere wichtige Stellen. Aufgabe: "+(text||"[Programmieraufgabe]")
+ code:"Hilf mir beim Programmieren. Erkläre den Ansatz, schreibe sauberen Code und kommentiere wichtige Stellen. Aufgabe: "+(text||"[Programmieraufgabe]"),\n quiz:"Erstelle ein interaktives Lernquiz mit 5 Fragen zum Thema. Stelle immer nur eine Frage auf einmal, warte auf meine Antwort, korrigiere freundlich und erkläre kurz. Thema: "+(text||"[Thema]"),\n translate:"Übersetze den folgenden Text ins Englische. Gib zuerst die Übersetzung aus und nenne bei Bedarf wichtige Nuancen. Text: "+(text||"[Text]"),\n plan:"Erstelle einen realistischen Schritt-für-Schritt-Plan mit Etappen, Prioritäten und kleinen Aufgaben. Ziel: "+(text||"[Ziel]"),\n explain:"Erkläre das Thema super verständlich, mit einem Alltagsbeispiel und einer kurzen Zusammenfassung. Thema: "+(text||"[Thema]")
  };
  p.value=templates[tool]||text;p.focus();p.dispatchEvent(new Event("input"));
 }));
