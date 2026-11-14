@@ -67,26 +67,23 @@ function admin(req, res, next) {
 
 app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
 app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
+
+app.put("/api/admin/announcement", auth, requireAdmin, async (req,res)=>{
+ const message=String(req.body.message||"").trim().slice(0,500);
+ try{await pool.query("INSERT INTO app_settings(key,value) VALUES('public_announcement',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[message]);res.json({ok:true,message:"Ankündigung gespeichert."})}
+ catch(e){console.error("announcement error",e);res.status(500).json({error:"Ankündigung konnte nicht gespeichert werden."})}
+});
 app.get("/api/notifications", async (_req,res)=>{
  try{
   const m=await getMaintenance();
-  if(m.enabled)return res.set("Cache-Control","no-store").json({notice:m.message,level:"critical"});
+  const {rows:ann}=await pool.query("SELECT value FROM app_settings WHERE key='public_announcement'");const announcement=ann[0]?.value||null;
+  if(m.enabled)return res.set("Cache-Control","no-store").json({notice:m.message,announcement,level:"critical"});
   const mem=process.memoryUsage(),ratio=mem.heapUsed/Math.max(mem.heapTotal,1);
-  if(ratio>.88)return res.set("Cache-Control","no-store").json({notice:"Der Server ist gerade stark ausgelastet. Antworten können länger dauern.",level:"warning"});
-  return res.set("Cache-Control","no-store").json({notice:null,level:"info"});
+  if(ratio>.88)return res.set("Cache-Control","no-store").json({notice:"Der Server ist gerade stark ausgelastet. Antworten können länger dauern.",announcement,level:"warning"});
+  return res.set("Cache-Control","no-store").json({notice:null,announcement,level:"info"});
  }catch{return res.set("Cache-Control","no-store").json({notice:"Der Systemstatus ist momentan nicht verfügbar.",level:"warning"})}
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
-app.get("/api/notifications", async (_req,res)=>{
- try{
-  const m=await getMaintenance();
-  if(m.enabled)return res.set("Cache-Control","no-store").json({notice:m.message,level:"critical"});
-  const mem=process.memoryUsage(),ratio=mem.heapUsed/Math.max(mem.heapTotal,1);
-  if(ratio>.88)return res.set("Cache-Control","no-store").json({notice:"Der Server ist gerade stark ausgelastet. Antworten können länger dauern.",level:"warning"});
-  return res.set("Cache-Control","no-store").json({notice:null,level:"info"});
- }catch{return res.set("Cache-Control","no-store").json({notice:"Der Systemstatus ist momentan nicht verfügbar.",level:"warning"})}
-});
-
 app.post("/api/register", async (req, res) => {
   if (!(await verifyCaptcha(req.body.captchaToken, req.ip))) return res.status(403).json({ error: "CAPTCHA fehlgeschlagen. Bitte erneut bestätigen." });
   const username = normalizeUsername(req.body.username);
