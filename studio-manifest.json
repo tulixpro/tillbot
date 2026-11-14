@@ -1,0 +1,1 @@
+{"id":"./studio.html","name":"TILLBOT Studio – Admin Workspace","short_name":"TB Studio","description":"Installierbares TILLBOT Admin Studio","start_url":"./studio.html","scope":"./","display":"standalone","orientation":"any","background_color":"#07111e","theme_color":"#071523","icons":[{"src":"./icons/tillbot.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
