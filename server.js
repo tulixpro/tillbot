@@ -9,7 +9,7 @@ const db = require("./database");
 const app = express();
 app.disable("x-powered-by");
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(express.json({ limit: "30kb" }));
+app.use(express.json({ limit: "3mb" }));
 
 const SECRET = process.env.JWT_SECRET;
 if (!SECRET || SECRET.length < 32) {
@@ -128,20 +128,32 @@ app.get("/api/admin/stats", auth, admin, (_req, res) => res.json({
   chats: db.prepare("SELECT COUNT(*) n FROM chats").get().n
 }));
 
-app.post("/api/chat", auth, async (req, res) => {
+app.post("/api/chat", auth, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "GROQ_API_KEY fehlt in Render" });
   const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
   const messages = [{ role: "system", content: "Du bist TILLBOT, ein freundlicher KI-Assistent. Antworte verständlich, überwiegend Deutsch." },
     ...history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
       .map(m => ({ role: m.role, content: m.content.slice(0, 8000) }))];
-  if (req.body.message && messages.length === 1) messages.push({ role: "user", content: String(req.body.message).slice(0, 8000) });
+  const userText = String(req.body.message || "").slice(0, 8000);
+  const image = req.body.image;
+  if (image && typeof image.data === "string") {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(image.mime) || image.data.length > 2_500_000) {
+      return res.status(400).json({ answer: "Fotoformat nicht erlaubt oder Bild zu groß (bitte kleineres Foto verwenden)." });
+    }
+    messages.push({ role: "user", content: [
+      { type: "text", text: userText || "Bitte beschreibe dieses Bild." },
+      { type: "image_url", image_url: { url: "data:" + image.mime + ";base64," + image.data } }
+    ]});
+  } else if (userText) {
+    messages.push({ role: "user", content: userText });
+  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30_000);
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST", signal: controller.signal,
       headers: { Authorization: "Bearer " + process.env.GROQ_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: process.env.GROQ_MODEL || "openai/gpt-oss-120b", messages, max_completion_tokens: 800, temperature: 0.7 })
+      body: JSON.stringify({ model: process.env.GROQ_VISION_MODEL || (image ? "meta-llama/llama-4-scout-17b-16e-instruct" : (process.env.GROQ_MODEL || "openai/gpt-oss-120b")), messages, max_completion_tokens: 800, temperature: 0.7 })
     });
     const data = await response.json();
     if (!response.ok) return res.status(502).json({ answer: "Groq Fehler: " + (data.error?.message || response.status) });
