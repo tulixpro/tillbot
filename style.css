@@ -224,3 +224,6 @@ body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-ri
 
 .bubble.bot.streaming{white-space:pre-wrap;overflow-wrap:anywhere}.bubble.bot.streaming:after{content:"";display:inline-block;width:7px;height:1em;margin-left:3px;vertical-align:-.12em;border-radius:2px;background:#86a8ff;animation:typingPulse .8s steps(2,end) infinite}@keyframes typingPulse{50%{opacity:0}}
 .composer:has(#prompt:focus-within){border-color:#719bff90!important}
+
+/* Searchable chat history polish */
+.chatSearch{width:100%;padding:10px 12px;border:1px solid #8ceaff25;border-radius:12px;background:#08283bd9;color:#eafaff;outline:none;font-size:13px;transition:border-color .2s,box-shadow .2s}.chatSearch::placeholder{color:#78a6bd}.chatSearch:focus{border-color:#39d8c0;box-shadow:0 0 0 3px #39d8c01b}.historyItem{width:100%;display:block;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;padding:10px 12px;border-color:transparent;background:transparent;color:#a9cce0}.historyItem:hover,.historyItem.active{background:#123c55;border-color:#4ad9c033;color:#f4ffff}.chatSearchEmpty{padding:12px;color:#729db4;font-size:12px;text-align:center}
