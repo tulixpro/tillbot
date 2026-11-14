@@ -208,3 +208,13 @@ body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-ri
 .maintenanceProgress{height:4px;overflow:hidden;border-radius:9px;background:#ffffff12}.maintenanceProgress span{display:block;width:40%;height:100%;border-radius:9px;background:linear-gradient(90deg,#61d7cb,#6c91ff);animation:maintain 2.1s ease-in-out infinite alternate}@keyframes maintain{from{transform:translateX(-10%)}to{transform:translateX(160%)}}
 .maintenanceStatus{font-weight:700;padding:10px 12px;border-radius:10px;background:#ffffff08}.maintenanceStatus.isOn{color:#ffbf75;background:#ffb34712}.maintenanceStatus.isOff{color:#65e4b3;background:#41d9a112}
 .maintenanceAdmin input{width:100%;margin:8px 0 12px;background:#0b1220;color:inherit;border:1px solid #ffffff18;border-radius:10px;padding:11px}
+
+/* Daily quota + polished composer */
+.quotaStatus{font-size:11px;color:var(--muted,#91a2ba);padding:5px 2px 0;min-height:18px;display:flex;align-items:center;gap:6px}
+.quotaStatus:before{content:"";width:6px;height:6px;border-radius:50%;background:#5dd8b0;display:inline-block;flex:0 0 6px}
+.quotaStatus.adminQuota{color:#8da9ff}.quotaStatus.adminQuota:before{background:#8da9ff}
+.quotaStatus.quotaBlocked{color:#ffb875;font-weight:600}.quotaStatus.quotaBlocked:before{background:#ff9f43}
+.composer{border:1px solid #ffffff20!important;background:linear-gradient(145deg,#121b2b,#0b1220)!important;box-shadow:0 12px 42px #0003,0 0 0 1px #ffffff05 inset;transition:border-color .2s,box-shadow .2s}
+.composer:focus-within{border-color:#6c9dff80!important;box-shadow:0 0 0 3px #6c9dff16,0 16px 44px #0004}
+#prompt{font-size:15px;line-height:1.6;min-height:44px;max-height:180px;resize:none}
+.composerTools button{transition:transform .15s,background .15s,border-color .15s}.composerTools button:hover{transform:translateY(-1px);background:#ffffff12}.composerTools #send{background:linear-gradient(135deg,#69d8ce,#7399ff);color:#071323;border:0;box-shadow:0 5px 18px #69baff2b}.composerTools #send:disabled{opacity:.45;box-shadow:none}
