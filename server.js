@@ -34,7 +34,7 @@ app.use("/api/register", authLimit);
 
 async function verifyCaptcha(token, ip) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true; // CAPTCHA ist nur aktiv, wenn Secret in Render gesetzt wurde.
+  if (!secret) return false; // Fail closed: CAPTCHA muss serverseitig geprüft werden.
   if (!token) return false;
   try {
     const form = new URLSearchParams({secret, response:token});
@@ -67,6 +67,15 @@ function admin(req, res, next) {
 
 app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
 app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
+app.get("/api/notifications", async (_req,res)=>{
+ try{
+  const m=await getMaintenance();
+  if(m.enabled)return res.set("Cache-Control","no-store").json({notice:m.message,level:"critical"});
+  const mem=process.memoryUsage(),ratio=mem.heapUsed/Math.max(mem.heapTotal,1);
+  if(ratio>.88)return res.set("Cache-Control","no-store").json({notice:"Der Server ist gerade stark ausgelastet. Antworten können länger dauern.",level:"warning"});
+  return res.set("Cache-Control","no-store").json({notice:null,level:"info"});
+ }catch{return res.set("Cache-Control","no-store").json({notice:"Der Systemstatus ist momentan nicht verfügbar.",level:"warning"})}
+});
 // Public, privacy-safe operational notices; never expose logs or user data.
 app.get("/api/notifications", async (_req,res)=>{
  try{
