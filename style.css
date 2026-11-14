@@ -606,3 +606,10 @@ body{background:radial-gradient(ellipse at 15% 0%,#14304455,transparent 42%),var
  .homeHero h1{font-size:clamp(26px,8vw,38px)!important;letter-spacing:-.04em!important}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Power-Tools quick action rail */
+.powerTools{display:flex;gap:7px;flex-wrap:wrap;padding:0 2px 10px}
+.powerTools button{border:1px solid #29465b;background:rgba(17,34,51,.72);color:#c9e9f2;border-radius:999px;padding:7px 11px;font-size:12px;cursor:pointer;transition:transform .16s,border-color .16s,background .16s}
+.powerTools button:hover{transform:translateY(-1px);border-color:#45cbd1;background:#163849}
+.powerTools button:focus-visible{outline:2px solid #52d9df;outline-offset:2px}
+@media(max-width:700px){.powerTools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:9px}.powerTools button{white-space:nowrap;min-height:36px}}
