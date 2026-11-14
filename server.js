@@ -130,8 +130,7 @@ app.put("/api/chats/:id", auth, async (req, res) => {
   const safeHistory = history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
     .map(m => ({ role: m.role, content: m.content.slice(0, 12000) }));
   const title = String(req.body.title || "Chat").slice(0, 100);
-  const result = await pool.query("UPDATE chats SET title=$1,history=$2,updated_at=CURRENT_TIMESTAMP WHERE id=$3 AND user_id=$4"
-    .query([title, JSON.stringify(safeHistory), Number(req.params.id), req.user.id]);
+  const result = await pool.query("UPDATE chats SET title=$1,history=$2,updated_at=CURRENT_TIMESTAMP WHERE id=$3 AND user_id=$4", [title, JSON.stringify(safeHistory), Number(req.params.id), req.user.id]);
   if (!result.rowCount) return res.status(404).json({ error: "Chat nicht gefunden" });
   res.json({ ok: true });
 });
@@ -147,7 +146,7 @@ app.get("/api/admin/stats", auth, admin, async (_req, res) => { const [u,ch]=awa
 
 app.get("/api/admin/metrics", auth, admin, async (_req, res) => {
   const mem = process.memoryUsage();
-  const dbInfo = Number((await pool.query("SELECT pg_database_size(current_database()) size")).rows[0].size); const [ur,cr]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]); const [ur,cr]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]);
+  const dbInfo = Number((await pool.query("SELECT pg_database_size(current_database()) size")).rows[0].size); const [ur,cr]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]);
   const cpu = process.cpuUsage();
   const now = process.hrtime.bigint();
   const elapsed = Number(now - (global.__tbCpuTime || now)) / 1e6;
