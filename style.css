@@ -221,3 +221,6 @@ body[data-workspace="focus"] .chat{padding-left:clamp(20px,8vw,110px);padding-ri
 
 .quotaAdmin input{width:100%;max-width:220px;margin:8px 0 12px;padding:11px;border:1px solid #ffffff20;border-radius:10px;background:#0b1220;color:inherit}.quotaAdmin{border-color:#7b9cff25}
 .codeHead button:last-child{background:#7399ff18;border-color:#7399ff30;color:#b9ceff}
+
+.bubble.bot.streaming{white-space:pre-wrap;overflow-wrap:anywhere}.bubble.bot.streaming:after{content:"";display:inline-block;width:7px;height:1em;margin-left:3px;vertical-align:-.12em;border-radius:2px;background:#86a8ff;animation:typingPulse .8s steps(2,end) infinite}@keyframes typingPulse{50%{opacity:0}}
+.composer:has(#prompt:focus-within){border-color:#719bff90!important}
