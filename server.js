@@ -77,8 +77,8 @@ app.post("/api/register", async (req, res) => {
   try {
     const hash = await bcrypt.hash(password, 12);
     // Registrierungen sind immer normale Nutzer. Admin wird separat mit Setup-Code freigeschaltet.
-    const result = db.prepare("INSERT INTO users (username, password_hash, role) VALUES (?, ?, 'user')").run(username, hash);
-    const user = { id: Number(result.lastInsertRowid), username, role: "user" };
+    const { rows } = await pool.query("INSERT INTO users (username, password_hash, role) VALUES ($1, $2, 'user') RETURNING id", [username, hash]);
+    const user = { id: Number(rows[0].id), username, role: "user" };
     res.json({ token: makeToken(user), user });
   } catch (error) {
     if (error.code === "23505") return res.status(409).json({ error: "Username bereits vergeben" });
@@ -117,11 +117,11 @@ app.get("/api/me", auth, (req, res) => res.json({ user: req.user }));
 app.get("/api/chats", auth, async (req, res) => { const { rows } = await pool.query("SELECT id,title,updated_at FROM chats WHERE user_id=$1 ORDER BY updated_at DESC", [req.user.id]); res.json(rows); });
 app.post("/api/chats", auth, async (req, res) => {
   const title = String(req.body.title || "Neuer Chat").slice(0, 100);
-  const result = db.prepare("INSERT INTO chats(user_id,title) VALUES(?,?)").run(req.user.id, title);
-  res.json({ id: Number(result.lastInsertRowid), title });
+  const { rows } = await pool.query("INSERT INTO chats(user_id,title) VALUES($1,$2) RETURNING id", [req.user.id, title]);
+  res.json({ id: Number(rows[0].id), title });
 });
-app.get("/api/chats/:id", auth, (req, res) => {
-  const chat = db.prepare("SELECT * FROM chats WHERE id=? AND user_id=?").get(Number(req.params.id), req.user.id);
+app.get("/api/chats/:id", auth, async (req, res) => {
+  const { rows } = await pool.query("SELECT * FROM chats WHERE id=$1 AND user_id=$2", [Number(req.params.id), req.user.id]); const chat = rows[0];
   if (!chat) return res.status(404).json({ error: "Chat nicht gefunden" });
   res.json({ chat: { id: chat.id, title: chat.title, history: JSON.parse(chat.history) } });
 });
@@ -130,24 +130,24 @@ app.put("/api/chats/:id", auth, async (req, res) => {
   const safeHistory = history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
     .map(m => ({ role: m.role, content: m.content.slice(0, 12000) }));
   const title = String(req.body.title || "Chat").slice(0, 100);
-  const result = db.prepare("UPDATE chats SET title=?,history=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND user_id=?")
-    .run(title, JSON.stringify(safeHistory), Number(req.params.id), req.user.id);
-  if (!result.changes) return res.status(404).json({ error: "Chat nicht gefunden" });
+  const result = await pool.query("UPDATE chats SET title=$1,history=$2,updated_at=CURRENT_TIMESTAMP WHERE id=$3 AND user_id=$4"
+    .query([title, JSON.stringify(safeHistory), Number(req.params.id), req.user.id]);
+  if (!result.rowCount) return res.status(404).json({ error: "Chat nicht gefunden" });
   res.json({ ok: true });
 });
-app.delete("/api/chats/:id", auth, (req, res) => {
-  const result = db.prepare("DELETE FROM chats WHERE id=? AND user_id=?").run(Number(req.params.id), req.user.id);
-  res.json({ ok: !!result.changes });
+app.delete("/api/chats/:id", auth, async (req, res) => {
+  const result = await pool.query("DELETE FROM chats WHERE id=$1 AND user_id=$2", [Number(req.params.id), req.user.id]);
+  res.json({ ok: result.rowCount > 0 });
 });
-app.get("/api/admin/stats", auth, admin, (_req, res) => res.json({
-  users: db.prepare("SELECT COUNT(*) n FROM users").get().n,
-  chats: db.prepare("SELECT COUNT(*) n FROM chats").get().n
-}));
+app.get("/api/admin/stats", auth, admin, async (_req, res) => { const [u,ch]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]); res.json({
+  users: Number(u.rows[0].n),
+  chats: Number(ch.rows[0].n)
+}); });
 
 
 app.get("/api/admin/metrics", auth, admin, async (_req, res) => {
   const mem = process.memoryUsage();
-  const dbInfo = Number((await pool.query("SELECT pg_database_size(current_database()) size")).rows[0].size); const [ur,cr]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]);
+  const dbInfo = Number((await pool.query("SELECT pg_database_size(current_database()) size")).rows[0].size); const [ur,cr]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]); const [ur,cr]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]);
   const cpu = process.cpuUsage();
   const now = process.hrtime.bigint();
   const elapsed = Number(now - (global.__tbCpuTime || now)) / 1e6;
@@ -161,8 +161,8 @@ app.get("/api/admin/metrics", auth, admin, async (_req, res) => {
     memory:{rss:mem.rss,heapUsed:mem.heapUsed,heapTotal:mem.heapTotal},
     systemMemory:{total:require("os").totalmem(),free:require("os").freemem()},
     loadAverage:require("os").loadavg(), databaseBytes:dbInfo,
-    users:db.prepare("SELECT COUNT(*) n FROM users").get().n,
-    chats:db.prepare("SELECT COUNT(*) n FROM chats").get().n,
+    users:Number(ur.rows[0].n),
+    chats:Number(cr.rows[0].n),
     node:process.version
   });
 });
@@ -211,5 +211,5 @@ app.use((error, _req, res, _next) => {
 });
 
 const PORT = Number(process.env.PORT) || 3000;
-const server = app.listen(PORT, "0.0.0.0", () => console.log(`TILLBOT bereit auf 0.0.0.0:${PORT}`));
-server.on("error", error => { console.error("Port/Server error:", error); process.exit(1); });
+initDatabase().then(() => { const server = app.listen(PORT, "0.0.0.0", () => console.log(`TILLBOT bereit auf 0.0.0.0:${PORT}`));
+server.on("error", error => { console.error("Port/Server error:", error); process.exit(1); }); }).catch(error => { console.error("PostgreSQL Init fehlgeschlagen:", error); process.exit(1); });
