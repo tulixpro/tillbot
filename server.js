@@ -112,6 +112,7 @@ app.get("/api/notifications", async (_req,res)=>{
 app.post("/api/register", async (req, res) => {
   const username = normalizeUsername(req.body?.username);
   const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (!verifyCaptcha(req.body?.captchaToken,req.body?.captchaAnswer)) return res.status(400).json({error:"CAPTCHA falsch oder abgelaufen. Bitte neue Aufgabe lösen."});
   if (!/^[a-z0-9_]{3,20}$/.test(username)) return res.status(400).json({ error: "Username: 3–20 Zeichen (a-z, 0-9, _)" });
   if (password.length < 10 || password.length > 128) return res.status(400).json({ error: "Passwort muss 10–128 Zeichen haben" });
   try {
@@ -129,6 +130,7 @@ app.post("/api/register", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const username = normalizeUsername(req.body?.username);
   const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (!verifyCaptcha(req.body?.captchaToken,req.body?.captchaAnswer)) return res.status(400).json({error:"CAPTCHA falsch oder abgelaufen. Bitte neue Aufgabe lösen."});
   if (!username || !password) return res.status(400).json({ error: "Username und Passwort eingeben." });
   try {
     const { rows } = await pool.query("SELECT id, username, role, password_hash FROM users WHERE username = $1", [username]);
