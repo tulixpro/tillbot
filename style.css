@@ -523,3 +523,6 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .auditRow strong{font-size:13px}.auditRow small{font-size:12px;line-height:1.45;color:#a9c7d9}
 .auditOk{border-left:3px solid #38c99a}.auditFail{border-left:3px solid #ffb45f}
 .auditDisclaimer{color:#8db0c7;line-height:1.5}
+
+/* Admin user search and account summary */
+.adminUserTools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}.adminUserTools input{flex:1;min-width:180px}.adminUserSummary{font-size:.85rem;color:#9fc9df;margin:8px 0 12px}.adminUserTools button{white-space:nowrap}
