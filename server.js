@@ -119,33 +119,36 @@ app.get("/api/notifications", async (_req,res)=>{
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
 app.post("/api/register", async (req, res) => {
-  const username = normalizeUsername(req.body.username);
-  const password = String(req.body.password || "");
+  const username = normalizeUsername(req.body?.username);
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
   if (!/^[a-z0-9_]{3,20}$/.test(username)) return res.status(400).json({ error: "Username: 3–20 Zeichen (a-z, 0-9, _)" });
   if (password.length < 10 || password.length > 128) return res.status(400).json({ error: "Passwort muss 10–128 Zeichen haben" });
   try {
     const hash = await bcrypt.hash(password, 12);
-    // Registrierungen sind immer normale Nutzer. Admin wird separat mit Setup-Code freigeschaltet.
-    const { rows } = await pool.query("INSERT INTO users (username, password_hash, role) VALUES ($1, $2, 'user') RETURNING id", [username, hash]);
-    const user = { id: Number(rows[0].id), username, role: "user" };
-    res.json({ token: makeToken(user), user });
+    const { rows } = await pool.query("INSERT INTO users (username, password_hash, role) VALUES ($1, $2, 'user') RETURNING id, username, role", [username, hash]);
+    const user = { id: Number(rows[0].id), username: rows[0].username, role: rows[0].role };
+    return res.status(201).json({ token: makeToken(user), user });
   } catch (error) {
     if (error.code === "23505") return res.status(409).json({ error: "Username bereits vergeben" });
-    console.error("Register error:", error);
-    res.status(500).json({ error: "Registrierung fehlgeschlagen" });
+    console.error("[auth/register] Datenbankfehler:", error.message, error.code);
+    return res.status(503).json({ error: "Registrierung aktuell nicht möglich. Datenbankverbindung in Render prüfen." });
   }
 });
 
 app.post("/api/login", async (req, res) => {
+  const username = normalizeUsername(req.body?.username);
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (!username || !password) return res.status(400).json({ error: "Username und Passwort eingeben." });
   try {
-    const { rows } = await pool.query("SELECT * FROM users WHERE username = $1", [normalizeUsername(req.body.username)]); const user = rows[0];
-    if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
-      return res.status(401).json({ error: "Login falsch" });
+    const { rows } = await pool.query("SELECT id, username, role, password_hash FROM users WHERE username = $1", [username]);
+    const user = rows[0];
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      return res.status(401).json({ error: "Username oder Passwort falsch" });
     }
-    res.json({ token: makeToken(user), user: { id: user.id, username: user.username, role: user.role } });
+    return res.json({ token: makeToken(user), user: { id: Number(user.id), username: user.username, role: user.role } });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Login fehlgeschlagen" });
+    console.error("[auth/login] Datenbankfehler:", error.message, error.code);
+    return res.status(503).json({ error: "Anmeldung aktuell nicht möglich. Datenbankverbindung in Render prüfen." });
   }
 });
 
