@@ -1,9 +1,17 @@
 {
-  "name": "TILLBOT",
+  "name": "TILLBOT – AI Workspace",
   "short_name": "TILLBOT",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#edf4f8",
-  "description": "Your AI. Your World."
+  "background_color": "#071b32",
+  "theme_color": "#0b2438",
+  "description": "TILLBOT AI Workspace",
+  "icons": [
+    {
+      "src": "./icons/tillbot.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
