@@ -31,6 +31,20 @@ const authLimit = rateLimit({ windowMs: 15 * 60_000, limit: 8, message: { error:
 app.use("/api/login", authLimit);
 app.use("/api/register", authLimit);
 
+
+async function verifyCaptcha(token, ip) {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true; // CAPTCHA ist nur aktiv, wenn Secret in Render gesetzt wurde.
+  if (!token) return false;
+  try {
+    const form = new URLSearchParams({secret, response:token});
+    if (ip) form.set("remoteip", ip);
+    const result = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:form});
+    const data = await result.json();
+    return data.success === true;
+  } catch { return false; }
+}
+
 const normalizeUsername = (value) => String(value || "").trim().toLowerCase();
 const makeToken = (user) => jwt.sign({ sub: String(user.id) }, TOKEN_SECRET, { expiresIn: "7d" });
 
