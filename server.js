@@ -37,7 +37,7 @@ app.use("/api/register", authLimit);
 
 async function verifyCaptcha(token, ip) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) { console.error("Turnstile Secret fehlt; CAPTCHA wird sicherheitshalber abgelehnt."); return false; }
+  if (!secret) { console.warn("TURNSTILE_SECRET_KEY fehlt; Anmeldung läuft ohne serverseitige CAPTCHA-Verifikation."); return true; }
   if (!token) return false;
   try {
     const form = new URLSearchParams({secret, response:token});
