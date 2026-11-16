@@ -37,7 +37,8 @@ app.use("/api/register", authLimit);
 
 async function verifyCaptcha(token, ip) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) { console.warn("TURNSTILE_SECRET_KEY fehlt; Anmeldung läuft ohne serverseitige CAPTCHA-Verifikation."); return true; }
+  // Fail closed: never allow authentication when server-side CAPTCHA is unconfigured.
+  if (!secret) { console.error("TURNSTILE_SECRET_KEY fehlt; Login und Registrierung bleiben gesperrt."); return null; }
   if (!token) return false;
   try {
     const form = new URLSearchParams({secret, response:token});
@@ -88,7 +89,9 @@ app.get("/api/notifications", async (_req,res)=>{
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
 app.post("/api/register", async (req, res) => {
-  if (!(await verifyCaptcha(req.body.captchaToken, req.ip))) return res.status(403).json({ error: "CAPTCHA ungültig oder abgelaufen. Bitte erneut bestätigen." });
+  const captcha = await verifyCaptcha(req.body.captchaToken, req.ip);
+  if (captcha === null) return res.status(503).json({ error: "CAPTCHA serverseitig nicht konfiguriert. Bitte Betreiber kontaktieren." });
+  if (!captcha) return res.status(403).json({ error: "CAPTCHA ungültig oder abgelaufen. Bitte erneut bestätigen." });
   const username = normalizeUsername(req.body.username);
   const password = String(req.body.password || "");
   if (!/^[a-z0-9_]{3,20}$/.test(username)) return res.status(400).json({ error: "Username: 3–20 Zeichen (a-z, 0-9, _)" });
@@ -107,7 +110,9 @@ app.post("/api/register", async (req, res) => {
 });
 
 app.post("/api/login", async (req, res) => {
-  if (!(await verifyCaptcha(req.body.captchaToken, req.ip))) return res.status(403).json({ error: "CAPTCHA ungültig oder abgelaufen. Bitte erneut bestätigen." });
+  const captcha = await verifyCaptcha(req.body.captchaToken, req.ip);
+  if (captcha === null) return res.status(503).json({ error: "CAPTCHA serverseitig nicht konfiguriert. Bitte Betreiber kontaktieren." });
+  if (!captcha) return res.status(403).json({ error: "CAPTCHA ungültig oder abgelaufen. Bitte erneut bestätigen." });
   try {
     const { rows } = await pool.query("SELECT * FROM users WHERE username = $1", [normalizeUsername(req.body.username)]); const user = rows[0];
     if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
