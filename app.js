@@ -17,9 +17,9 @@ function authMode(reg){
  $("usernameHint").textContent=reg?"3–20 Zeichen: Kleinbuchstaben, Zahlen und Unterstrich.":"Gib deinen Benutzernamen ein.";
  $("authMsg").textContent="";
 }
-$("tabLogin").onclick=()=>authMode(false);$("tabRegister").onclick=()=>authMode(true);
+window.tillbotAuthMode=authMode;$("tabLogin").onclick=()=>authMode(false);$("tabRegister").onclick=()=>authMode(true);
 async function authRequest(path,body){let last;for(let attempt=0;attempt<2;attempt++){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);try{const response=await fetch(API+path,{method:"POST",headers:headers(),body:JSON.stringify(body),signal:controller.signal});const raw=await response.text();let data={};try{data=raw?JSON.parse(raw):{}}catch{}if(response.ok)return data;const err=Error(data.error||data.answer||"HTTP "+response.status);err.status=response.status;if(attempt===0&&[502,503,504].includes(response.status)){last=err;await new Promise(r=>setTimeout(r,1800));continue}throw err}catch(e){last=e;if(attempt===0&&(!e.status||e.name==="AbortError")){await new Promise(r=>setTimeout(r,1800));continue}if(e.name==="AbortError")throw Error("Der Server braucht zu lange zum Aufwachen. Bitte 1 Minute warten und erneut anmelden.");throw e}finally{clearTimeout(timer)}}throw last||Error("Anmeldung fehlgeschlagen")}
-$("authSubmit").onclick=async()=>{
+window.tillbotAuthSubmit=async()=>{
  const b=$("authSubmit"),username=$("username").value.trim().toLowerCase(),password=$("password").value;
  if(!/^[a-z0-9_]{3,20}$/.test(username)){ $("authMsg").textContent="Benutzername: 3–20 Zeichen (a–z, 0–9, _).";$("username").focus();return; }
  if(registerMode){
@@ -39,6 +39,7 @@ $("authSubmit").onclick=async()=>{
   if(/captcha/i.test(e.message)){window.__tbCaptcha="";captchaToken="";if(window.turnstile)window.turnstile.reset()}
  }finally{captchaToken="";window.__tbCaptcha="";if(window.turnstile){try{window.turnstile.reset()}catch{}}b.disabled=false}
 };
+$("authSubmit").onclick=window.tillbotAuthSubmit;
 $("password").onkeydown=e=>{if(e.key==="Enter")$("authSubmit").click()};
 $("confirmPassword").onkeydown=e=>{if(e.key==="Enter")$("authSubmit").click()};
 const passwordToggle=$("togglePassword");passwordToggle.onclick=()=>{const visible=$("password").type==="text";$("password").type=visible?"password":"text";passwordToggle.textContent=visible?"Anzeigen":"Verbergen";passwordToggle.setAttribute("aria-pressed",String(!visible));passwordToggle.setAttribute("aria-label",visible?"Passwort anzeigen":"Passwort verbergen")};
