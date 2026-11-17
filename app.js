@@ -3,12 +3,45 @@ const API="https://tillbot.onrender.com", $=id=>document.getElementById(id);
 const syncVisualViewport=()=>{if(window.visualViewport&&matchMedia("(max-width: 820px)").matches){document.documentElement.style.setProperty("--tb-visual-height",Math.round(window.visualViewport.height)+"px")}else{document.documentElement.style.removeProperty("--tb-visual-height")}};
 syncVisualViewport();window.visualViewport?.addEventListener("resize",syncVisualViewport);window.addEventListener("orientationchange",()=>setTimeout(syncVisualViewport,180));const captchaNode=document.querySelector(".cf-turnstile");const captchaEnabled=!!(captchaNode&&captchaNode.dataset.sitekey&&captchaNode.dataset.sitekey.length>20&&!captchaNode.dataset.sitekey.includes("HIER_EINTRAGEN"));$("captchaBox").classList.remove("hidden");if(!captchaEnabled){$("captchaBox").innerHTML="<p class=\"captchaFallback\">CAPTCHA ist momentan nicht konfiguriert. Bitte Admin informieren.</p>";}else{const captchaNote=$("captchaBox").querySelector("small");if(captchaNote)captchaNote.textContent="Spam-Schutz · Bitte kurz bestätigen";}let token=localStorage.getItem("tb-token"),user=null,registerMode=false,activeId=null,chats=[],busy=false,history=[],photoData=null,photoMime="image/jpeg",captchaToken="";
 const headers=()=>({"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{})});
-function authMode(reg){registerMode=reg;$("tabLogin").classList.toggle("selected",!reg);$("tabRegister").classList.toggle("selected",reg);$("authSubmit").textContent=reg?"Konto erstellen":"Anmelden";$("password").autocomplete=reg?"new-password":"current-password";$("authMsg").textContent=""}
+function authMode(reg){
+ registerMode=reg;
+ $("tabLogin").classList.toggle("selected",!reg);$("tabRegister").classList.toggle("selected",reg);
+ $("tabLogin").setAttribute("aria-selected",String(!reg));$("tabRegister").setAttribute("aria-selected",String(reg));
+ $("authTitle").textContent=reg?"Erstelle dein Konto.":"Dein Platz für neue Ideen.";
+ $("authDescription").textContent=reg?"Ein Benutzername, ein sicheres Passwort – und dein eigener KI-Bereich.":"Melde dich an und setze deine Chats genau dort fort, wo du aufgehört hast.";
+ $("authSubmitText").textContent=reg?"Konto erstellen":"Anmelden";
+ $("password").autocomplete=reg?"new-password":"current-password";
+ $("passwordHint").textContent=reg?"Mindestens 10 Zeichen":"Dein Kontopasswort";
+ $("confirmPasswordRow").classList.toggle("hidden",!reg);
+ $("confirmPassword").required=reg;
+ $("usernameHint").textContent=reg?"3–20 Zeichen: Kleinbuchstaben, Zahlen und Unterstrich.":"Gib deinen Benutzernamen ein.";
+ $("authMsg").textContent="";
+}
 $("tabLogin").onclick=()=>authMode(false);$("tabRegister").onclick=()=>authMode(true);
 async function authRequest(path,body){let last;for(let attempt=0;attempt<2;attempt++){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);try{const response=await fetch(API+path,{method:"POST",headers:headers(),body:JSON.stringify(body),signal:controller.signal});const raw=await response.text();let data={};try{data=raw?JSON.parse(raw):{}}catch{}if(response.ok)return data;const err=Error(data.error||data.answer||"HTTP "+response.status);err.status=response.status;if(attempt===0&&[502,503,504].includes(response.status)){last=err;await new Promise(r=>setTimeout(r,1800));continue}throw err}catch(e){last=e;if(attempt===0&&(!e.status||e.name==="AbortError")){await new Promise(r=>setTimeout(r,1800));continue}if(e.name==="AbortError")throw Error("Der Server braucht zu lange zum Aufwachen. Bitte 1 Minute warten und erneut anmelden.");throw e}finally{clearTimeout(timer)}}throw last||Error("Anmeldung fehlgeschlagen")}
-$("authSubmit").onclick=async()=>{let b=$("authSubmit");b.disabled=true;$("authMsg").textContent=registerMode?"Konto wird erstellt …":"Server wird verbunden …";try{if(captchaEnabled&&!(window.__tbCaptcha||captchaToken))throw Error("Bitte CAPTCHA bestätigen.");const path=registerMode?"/api/register":"/api/login",d=await authRequest(path,{username:$("username").value,password:$("password").value,captchaToken:window.__tbCaptcha||captchaToken});captchaToken="";window.__tbCaptcha="";if(window.turnstile)window.turnstile.reset();token=d.token;user=d.user;localStorage.setItem("tb-token",token);$("authMsg").textContent="Anmeldung erfolgreich – lade Konto …";await start()}catch(e){$("authMsg").textContent=e.message;if(/captcha/i.test(e.message)){window.__tbCaptcha="";captchaToken="";if(window.turnstile)window.turnstile.reset()}}finally{captchaToken="";window.__tbCaptcha="";if(window.turnstile){try{window.turnstile.reset()}catch{}}b.disabled=false}};
+$("authSubmit").onclick=async()=>{
+ const b=$("authSubmit"),username=$("username").value.trim().toLowerCase(),password=$("password").value;
+ if(!/^[a-z0-9_]{3,20}$/.test(username)){ $("authMsg").textContent="Benutzername: 3–20 Zeichen (a–z, 0–9, _).";$("username").focus();return; }
+ if(registerMode){
+  if(password.length<10||password.length>128){$("authMsg").textContent="Das Passwort muss 10–128 Zeichen haben.";$("password").focus();return;}
+  if(password!==$("confirmPassword").value){$("authMsg").textContent="Die Passwörter stimmen nicht überein.";$("confirmPassword").focus();return;}
+ }else if(!password){$("authMsg").textContent="Bitte gib dein Passwort ein.";$("password").focus();return;}
+ b.disabled=true;$("authMsg").textContent=registerMode?"Dein Konto wird sicher erstellt …":"Du wirst sicher angemeldet …";
+ try{
+  if(captchaEnabled&&!(window.__tbCaptcha||captchaToken))throw Error("Bitte bestätige zuerst die Sicherheitsprüfung.");
+  const path=registerMode?"/api/register":"/api/login";
+  const d=await authRequest(path,{username,password,captchaToken:window.__tbCaptcha||captchaToken});
+  captchaToken="";window.__tbCaptcha="";if(window.turnstile)window.turnstile.reset();
+  token=d.token;user=d.user;localStorage.setItem("tb-token",token);
+  $("authMsg").textContent="Erfolgreich! Dein Workspace wird geöffnet …";await start();
+ }catch(e){
+  $("authMsg").textContent=e.message||"Das hat nicht geklappt. Bitte versuche es erneut.";
+  if(/captcha/i.test(e.message)){window.__tbCaptcha="";captchaToken="";if(window.turnstile)window.turnstile.reset()}
+ }finally{captchaToken="";window.__tbCaptcha="";if(window.turnstile){try{window.turnstile.reset()}catch{}}b.disabled=false}
+};
 $("password").onkeydown=e=>{if(e.key==="Enter")$("authSubmit").click()};
-const passwordToggle=$("togglePassword");passwordToggle.onclick=()=>{const visible=$("password").type==="text";$("password").type=visible?"password":"text";passwordToggle.title=visible?"Passwort anzeigen":"Passwort verbergen";passwordToggle.setAttribute("aria-pressed",String(!visible));passwordToggle.setAttribute("aria-label",visible?"Passwort anzeigen":"Passwort verbergen")};
+$("confirmPassword").onkeydown=e=>{if(e.key==="Enter")$("authSubmit").click()};
+const passwordToggle=$("togglePassword");passwordToggle.onclick=()=>{const visible=$("password").type==="text";$("password").type=visible?"password":"text";passwordToggle.textContent=visible?"Anzeigen":"Verbergen";passwordToggle.setAttribute("aria-pressed",String(!visible));passwordToggle.setAttribute("aria-label",visible?"Passwort anzeigen":"Passwort verbergen")};
 async function loadSystemNotice(){try{const n=await fetch(API+"/api/notifications",{cache:"no-store"}).then(r=>r.json());const el=$("systemNotice"),txt=$("systemNoticeText");const text=[n.announcement,n.notice].filter(Boolean).join(" · ");if(text){txt.textContent=text;el.className="systemNotice "+(n.level==="critical"?"critical":"warning");el.dataset.notice=text;if(localStorage.getItem("tb-dismissed-notice")===text)el.classList.add("hidden")}else{txt.textContent="";el.className="systemNotice hidden";el.dataset.notice=""}}catch{}}$("dismissNotice").onclick=()=>{localStorage.setItem("tb-dismissed-notice",$("systemNotice").dataset.notice||"");$("systemNotice").classList.add("hidden")};
 async function checkMaintenance(){try{const m=await fetch(API+"/api/maintenance").then(r=>r.json());$("maintenanceText").textContent=m.message||"TILLBOT wird gerade gewartet.";const isAdmin=user&&user.role==="admin";$("maintenanceScreen").classList.toggle("hidden",!m.enabled||isAdmin);document.body.classList.toggle("maintenanceActive",m.enabled&&!isAdmin);return m}catch{return {enabled:false}}}
 async function start(){if(!token){user=null;$("auth").classList.remove("hidden");$("app").classList.add("hidden");await checkMaintenance();return}let d;try{d=await api("/api/me")}catch(e){if(e.status===401){token=null;localStorage.removeItem("tb-token");user=null}$("auth").classList.remove("hidden");$("app").classList.add("hidden");$("authMsg").textContent=e.status===401?"Session abgelaufen. Bitte erneut anmelden.":"Serververbindung fehlgeschlagen: "+e.message+" · Seite nach Wiederherstellung neu laden.";await checkMaintenance();return}user=d.user;$("auth").classList.add("hidden");$("app").classList.remove("hidden");$("who").textContent="@"+user.username;$("sideUser").textContent=user.username;$("admin").classList.toggle("hidden",user.role!=="admin");$("studioShortcut").classList.toggle("hidden",user.role!=="admin");await checkMaintenance();await loadSystemNotice();try{await loadChats()}catch(e){$("history").textContent="Chats konnten nicht geladen werden: "+e.message}await loadQuota()}
