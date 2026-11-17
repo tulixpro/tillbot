@@ -687,3 +687,70 @@ button:hover{filter:none;transform:translateY(-1px)}
 
 /* Wartungsankündigung: ruhige, professionelle Admin-Eingabe */
 .maintenancePresetRow{display:flex;gap:9px;align-items:center;margin:8px 0 12px}.maintenancePresetRow select{flex:1;min-width:0;background:#0b1220;color:inherit;border:1px solid #ffffff20;border-radius:10px;padding:11px}.maintenanceAdmin textarea{width:100%;resize:vertical;min-height:78px;margin:8px 0 5px;background:#0b1220;color:inherit;border:1px solid #ffffff20;border-radius:10px;padding:12px;font:inherit;line-height:1.5}.maintenanceAdmin textarea:focus,.maintenancePresetRow select:focus{outline:2px solid #7399ff55;border-color:#7399ff80}.maintenanceHint{display:block;color:#8fa2bc;line-height:1.5;margin:3px 0 14px}
+
+
+/* TILLBOT 3.0 — Light workspace redesign */
+:root{color-scheme:light;font-family:Inter,"Segoe UI",system-ui,sans-serif;color:#17233b;scrollbar-color:#c7d2e3 #f4f7fb}
+body{background:#f5f7fb;color:#17233b;background-image:radial-gradient(ellipse at 12% 0%,#e7f0ff 0%,transparent 38%),radial-gradient(ellipse at 95% 12%,#e8f8f5 0%,transparent 32%);background-attachment:fixed}
+body:before{opacity:.12;filter:none}
+.layout{background:transparent}
+aside{background:rgba(255,255,255,.88);border-right:1px solid #e5eaf2;backdrop-filter:blur(22px);box-shadow:8px 0 30px #25385808}
+.brandIcon{background:linear-gradient(135deg,#dceafe,#d9f7ef);box-shadow:0 6px 18px #5577aa18;color:#2855a5}
+.logo{color:#17233b}
+.brand small,.sideProfile small{color:#8996aa}
+.primary{background:linear-gradient(120deg,#3869d8,#4a8ce8);color:#fff;box-shadow:0 8px 20px #3869d826}
+button{color:#34425b;background:#fff;border-color:#e3e9f2}
+button:hover{filter:none;background:#f4f7fc;border-color:#cbd7e8}
+.label{color:#929db0}
+#history button{color:#586780}
+#history button:hover{background:#f1f5fb;color:#233b65}
+.sidebottom button{background:#fff;border-color:#e7ebf2;color:#4b5870}
+.sidebottom button:hover{background:#f3f6fb}
+.sideProfile{border-top-color:#e8edf4}
+.avatar{background:linear-gradient(135deg,#dceafe,#d9f7ef);color:#2855a5}
+.onlineDot{background:#24b47e;box-shadow:0 0 10px #24b47e55}
+main{background:transparent}
+header{background:rgba(255,255,255,.82);border-bottom:1px solid #e5eaf2;backdrop-filter:blur(18px)}
+header strong{color:#17233b}
+header strong span{color:#4779df}
+header small{color:#8b97aa}
+.tag{color:#687791}
+.chat{color:#263650}
+.welcome{color:#53627a}
+.eyebrow{color:#4a79d7}
+.welcome h1{color:#17233b}
+.welcome h1 span{background:linear-gradient(90deg,#3869d8,#20a982);background-clip:text;color:transparent}
+.muted{color:#78869d}
+.cloud{color:#4b83df;filter:drop-shadow(0 0 20px #6f9ce833)}
+.suggestions button{background:#fff;border-color:#e2e9f3;color:#53627a;box-shadow:0 3px 12px #26385808}
+.suggestions button:hover{background:#f3f7ff;border-color:#cbdaf3;color:#315cae}
+.bubble.user{background:linear-gradient(135deg,#3869d8,#4389df);color:#fff}
+.bubble.bot{background:#fff;border:1px solid #e5eaf2;color:#293750;box-shadow:0 8px 24px #2638580a}
+.composerArea{background:linear-gradient(0deg,#f5f7fb 70%,transparent)}
+.composer{background:#fff;border:1px solid #dfe6f0;box-shadow:0 12px 38px #24385812}
+.composer:focus-within{border-color:#83a6e8;box-shadow:0 0 0 3px #4779df16,0 12px 38px #24385812}
+.composer textarea{color:#25344d}
+.composer textarea::placeholder{color:#9aa6b8}
+.composer button{background:linear-gradient(135deg,#3869d8,#4389df);color:#fff}
+.composerArea small{color:#929db0}
+.auth{background:radial-gradient(ellipse at 50% 0%,#e5efff,transparent 55%)}
+.authbox{background:rgba(255,255,255,.94);border:1px solid #e3e9f2;box-shadow:0 28px 90px #26385812;color:#17233b}
+.authbox h1{color:#17233b}
+.authbox p{color:#77859b}
+.authbox input,dialog input{background:#f8fafd;border:1px solid #dfe6f0;color:#1d2b43}
+.authbox input::placeholder{color:#98a4b6}
+.authbox input:focus,dialog input:focus{border-color:#7d9fe2;box-shadow:0 0 0 3px #4779df18}
+.tabs{background:#f1f4f9;border:1px solid #e6ebf3}
+.tabs button{background:transparent;color:#687791}
+.tabs button.selected{background:#fff;color:#315fb9;box-shadow:0 2px 8px #26385812}
+.authFoot{color:#9aa5b5}
+.captchaBox{background:#f8fafd;border:1px solid #e7ecf3}
+.msg{color:#bd4a4a}
+.systemNotice{background:#fff;border-color:#dfe6f0;color:#34425b;box-shadow:0 8px 24px #26385812}
+.maintenanceScreen{background:#f5f7fb}
+.maintenanceCard{background:#fff;border:1px solid #e5eaf2;color:#263650;box-shadow:0 20px 70px #26385812}
+.maintenanceCard h1{color:#17233b}
+.maintenanceCard p,.maintenanceCard small{color:#77859b}
+dialog{background:#fff;color:#25344d;border:1px solid #e3e9f2;box-shadow:0 25px 80px #26385824}
+dialog button{background:#f6f8fc;color:#34425b;border-color:#e1e7f0}
+@media(max-width:760px){aside{background:#fff;box-shadow:16px 0 50px #26385820}header{background:rgba(255,255,255,.94)}.composerArea{padding-bottom:max(18px,env(safe-area-inset-bottom))}}
