@@ -799,3 +799,34 @@ body[data-theme="light"]{color-scheme:light}
 .authCopyright{position:absolute;bottom:22px;margin:0;color:#a0aabd;font-size:9px;font-weight:750;letter-spacing:1.7px}
 .authCopyright span{padding:0 5px;color:#c0c9d6}
 @media(max-width:520px){.authV3{padding:24px 14px 56px}.authCard{padding:25px 21px;border-radius:23px!important}.authBrand{margin-bottom:27px}.authIntro h1{font-size:29px}}
+
+/* Completely rebuilt authentication experience */
+.authV3{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:34px 16px 58px;background:linear-gradient(135deg,#f5f8ff 0%,#edf3ff 52%,#eefaf6 100%)}
+.authRebuilt{width:min(100%,490px);padding:clamp(25px,5vw,42px);border:1px solid #e3eaf5!important;border-radius:25px!important;background:rgba(255,255,255,.96)!important;box-shadow:0 24px 80px rgba(32,58,100,.13)!important;color:#182641}
+.authRebuilt .authBrand{margin-bottom:30px}.authRebuilt .authIntro{margin-bottom:24px}
+.authRebuilt .authIntro h1{font-size:clamp(27px,5vw,33px);letter-spacing:-1.1px;margin:17px 0 9px}
+.authRebuilt .authIntro p{font-size:14px;line-height:1.6;color:#77859b}
+.authRebuilt .authTabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;border:1px solid #e7edf5;border-radius:13px;background:#f3f6fb;margin-bottom:23px}
+.authRebuilt .authTabs button{min-height:43px;border:0;border-radius:9px;background:transparent;color:#75839a;font-size:13px;font-weight:700}
+.authRebuilt .authTabs button.selected{background:white;color:#315fb9;box-shadow:0 2px 9px #24385815}
+.authRebuilt .authFields{display:grid;gap:9px}
+.authRebuilt .authFields>label,.authRebuilt .authFieldHeading label,.authRebuilt .confirmPasswordRow>label{font-size:12px;font-weight:750;color:#3c4b63}
+.authRebuilt .authInputWrap{height:49px;display:flex;align-items:center;gap:10px;padding:0 12px;border:1px solid #dfe6f0;border-radius:11px;background:#fbfcfe;color:#91a0b5;transition:border-color .15s,box-shadow .15s}
+.authRebuilt .authInputWrap:focus-within{border-color:#86a6e5;box-shadow:0 0 0 4px #4779df16}
+.authRebuilt .authInputWrap>span{width:18px;text-align:center;font-size:17px}
+.authRebuilt .authInputWrap input{flex:1;min-width:0;width:100%;height:100%;padding:0;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;color:#1d2b43;font:inherit;font-size:14px}
+.authRebuilt .authInputWrap input::placeholder{color:#a0aabd}
+.authRebuilt .authFieldHeading{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.authRebuilt .authFieldHeading span,.authRebuilt .authFieldHint{font-size:10px;color:#98a4b6}
+.authRebuilt .authFieldHint{margin:1px 0 0}
+.authRebuilt .authPasswordWrap .passwordToggle{height:32px;padding:0 8px;border:0;border-radius:7px;background:#edf2fa;color:#55709d;font-size:11px;font-weight:700}
+.authRebuilt .confirmPasswordRow{display:grid;gap:9px;margin-top:6px}
+.authRebuilt .authCaptcha{display:flex;flex-direction:column;align-items:center;gap:7px;margin:19px 0 15px;padding:12px;border:1px solid #e7edf5;border-radius:12px;background:#f8fafd}
+.authRebuilt .authCaptcha small{font-size:10px;color:#98a4b6}
+.authRebuilt .authSubmit{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:12px;border:0;border-radius:12px;background:linear-gradient(110deg,#3869d8,#4389df)!important;color:white!important;font-size:14px;font-weight:750;box-shadow:0 8px 20px #3869d82b!important}
+.authRebuilt .authSubmit .authArrow{font-size:18px;transition:transform .15s}
+.authRebuilt .authSubmit:hover .authArrow{transform:translateX(3px)}
+.authRebuilt .authSubmit:disabled{opacity:.65;cursor:wait}
+.authRebuilt .authMessage{min-height:20px;margin:11px 0 0;text-align:center;font-size:12px;line-height:1.5}
+.authRebuilt .authTrust{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 16px;margin-top:19px;padding-top:16px;border-top:1px solid #edf0f5;color:#98a4b6;font-size:10px}
+@media(max-width:520px){.authV3{padding:20px 13px 50px}.authRebuilt{padding:24px 20px;border-radius:21px!important}.authRebuilt .authBrand{margin-bottom:25px}}
