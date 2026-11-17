@@ -49,6 +49,16 @@ async function verifyCaptcha(token, ip) {
   } catch { return false; }
 }
 
+app.get("/api/auth/status", async (_req,res) => {
+  let databaseReady=false;
+  try { await pool.query("SELECT 1"); databaseReady=true; } catch {}
+  res.set("Cache-Control","no-store").json({
+    captchaConfigured:!!process.env.TURNSTILE_SECRET_KEY,
+    databaseReady,
+    authReady:!!process.env.TURNSTILE_SECRET_KEY&&databaseReady
+  });
+});
+
 const normalizeUsername = (value) => String(value || "").trim().toLowerCase();
 const makeToken = (user) => jwt.sign({ sub: String(user.id) }, TOKEN_SECRET, { expiresIn: "7d" });
 

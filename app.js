@@ -19,6 +19,21 @@ function authMode(reg){
 }
 window.tillbotAuthMode=authMode;$("tabLogin").onclick=()=>authMode(false);$("tabRegister").onclick=()=>authMode(true);
 async function authRequest(path,body){let last;for(let attempt=0;attempt<2;attempt++){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);try{const response=await fetch(API+path,{method:"POST",headers:headers(),body:JSON.stringify(body),signal:controller.signal});const raw=await response.text();let data={};try{data=raw?JSON.parse(raw):{}}catch{}if(response.ok)return data;const err=Error(data.error||data.answer||"HTTP "+response.status);err.status=response.status;if(attempt===0&&[502,503,504].includes(response.status)){last=err;await new Promise(r=>setTimeout(r,1800));continue}throw err}catch(e){last=e;if(attempt===0&&(!e.status||e.name==="AbortError")){await new Promise(r=>setTimeout(r,1800));continue}if(e.name==="AbortError")throw Error("Der Server braucht zu lange zum Aufwachen. Bitte 1 Minute warten und erneut anmelden.");throw e}finally{clearTimeout(timer)}}throw last||Error("Anmeldung fehlgeschlagen")}
+
+async function checkAuthStatus(){
+ const msg=$("authMsg");
+ try{
+  const response=await fetch(API+"/api/auth/status",{cache:"no-store"});
+  if(!response.ok)throw Error("HTTP "+response.status);
+  const status=await response.json();
+  if(!status.captchaConfigured){msg.textContent="Anmeldung gerade nicht verfügbar: Der Betreiber muss die CAPTCHA-Serverkonfiguration ergänzen.";return}
+  if(!status.databaseReady){msg.textContent="Anmeldung gerade nicht verfügbar: Die Datenbank antwortet momentan nicht.";return}
+  msg.textContent="";
+ }catch{
+  msg.textContent="TILLBOT-Server nicht erreichbar. Bitte später erneut versuchen.";
+ }
+}
+checkAuthStatus();
 window.tillbotAuthSubmit=async()=>{
  const b=$("authSubmit"),username=$("username").value.trim().toLowerCase(),password=$("password").value;
  if(!/^[a-z0-9_]{3,20}$/.test(username)){ $("authMsg").textContent="Benutzername: 3–20 Zeichen (a–z, 0–9, _).";$("username").focus();return; }
