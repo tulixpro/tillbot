@@ -890,3 +890,28 @@ body[data-theme="light"]{color-scheme:light}
 .authRebuilt .authCaptcha{position:relative;z-index:0}
 .authRebuilt .authCaptcha iframe{max-width:100%}
 @media(prefers-reduced-motion:reduce){.authV3 .authRebuilt,.authRebuilt .authIcon{animation:none!important}.authRebuilt .authSubmit,.authRebuilt .authTabs button,.authRebuilt .authInputWrap{transition:none!important}}
+
+
+/* TILLBOT workspace motion polish: restrained, fast, and accessible */
+@keyframes tbAmbientDrift{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(0,-10px,0) scale(1.015)}}
+@keyframes tbSoftPulse{0%,100%{box-shadow:0 0 0 0 rgba(91,215,190,0)}50%{box-shadow:0 0 0 5px rgba(91,215,190,.07)}}
+@keyframes tbMessageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tbShimmer{0%{background-position:180% 0}100%{background-position:-180% 0}}
+.welcome .cloud{animation:tbAmbientDrift 7s ease-in-out infinite}
+.welcome .eyebrow{letter-spacing:2.3px}
+.suggestions button,.powerTools button{transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease}
+.suggestions button:hover,.powerTools button:hover{transform:translateY(-2px);border-color:rgba(100,220,200,.38);box-shadow:0 8px 22px rgba(0,0,0,.14)}
+.bubble{animation:tbMessageIn .24s ease both}
+.composer:focus-within{box-shadow:0 0 0 3px rgba(91,215,190,.12),0 15px 50px rgba(0,0,0,.2)}
+.composer #send{position:relative;overflow:hidden;transition:transform .18s ease,filter .18s ease,box-shadow .18s ease}
+.composer #send:hover{transform:translateY(-2px);filter:brightness(1.12);box-shadow:0 7px 20px rgba(45,190,160,.2)}
+.brandIcon,.avatar{transition:transform .22s ease,box-shadow .22s ease}
+.brand:hover .brandIcon{transform:rotate(-4deg) scale(1.04)}
+.sidebottom button:focus-visible,.suggestions button:focus-visible,.powerTools button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.authRebuilt .authIcon{transition:transform .25s ease}
+.authRebuilt .authIcon:hover{transform:rotate(-5deg) scale(1.04)}
+@media(prefers-reduced-motion:reduce){
+  .welcome .cloud{animation:none!important}
+  .suggestions button,.powerTools button,.bubble,.composer #send,.brandIcon,.avatar,.authRebuilt .authIcon{animation:none!important;transition:none!important}
+  .suggestions button:hover,.powerTools button:hover,.composer #send:hover,.brand:hover .brandIcon{transform:none!important}
+}
