@@ -971,3 +971,7 @@ body[data-theme="light"] .learnFlashcard{background:#eef2ff;color:#17243a}
 .aboutTillbot ul{padding-left:20px;color:var(--muted);font-size:12px;line-height:1.9}
 .aboutVersion{font-size:10px!important;letter-spacing:1px;text-transform:uppercase;opacity:.75}
 body[data-reduce-motion="true"] *,body[data-reduce-motion="true"] *::before,body[data-reduce-motion="true"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+
+
+/* Tailbot source links */
+.assistantSourceLink{display:inline-block;margin:.15rem 0;color:var(--accent,#60a5fa);text-decoration:none;overflow-wrap:anywhere}.assistantSourceLink:hover{text-decoration:underline}
