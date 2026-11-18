@@ -156,3 +156,61 @@ document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("clic
  };
  p.value=templates[tool]||text;p.focus();p.dispatchEvent(new Event("input"));
 }));
+
+
+/* TILLBOT Learn — personal flashcards and active recall */
+(()=>{
+ const lang=()=> $("language")?.value==="English"?"en":"de";
+ const copy=()=>lang()==="en"?{
+  button:"🧠 TILLBOT Learn",title:"Your learning space",intro:"Create flashcards from notes or a photo, then test yourself.",source:"Paste notes or describe what you want to learn",placeholder:"Paste your notes, vocabulary or topic here…",photo:"Add a photo",create:"Create flashcards",deck:"Your flashcards",empty:"No flashcards yet. Add notes above to create your first deck.",start:"Start quiz",front:"Question",reveal:"Show answer",known:"I knew it",again:"Practice again",next:"Next card",close:"Close",working:"Creating your flashcards…",fail:"Could not create flashcards. Please try again.",saved:"Flashcards saved on this device.",count:"cards",remove:"Clear deck",photoReady:"Photo added ✓",noContent:"Add notes or a photo first.",done:"Round complete!",score:"You knew",of:"of"
+ }:{
+  button:"🧠 TILLBOT Lernen",title:"Dein Lernbereich",intro:"Erstelle Karteikarten aus Lernzetteln oder Fotos und teste dein Wissen.",source:"Füge Lernstoff ein oder beschreibe dein Thema",placeholder:"Lernzettel, Vokabeln oder Thema hier einfügen …",photo:"Foto hinzufügen",create:"Karteikarten erstellen",deck:"Deine Karteikarten",empty:"Noch keine Karteikarten. Füge oben Lernstoff ein, um dein erstes Set zu erstellen.",start:"Abfrage starten",front:"Frage",reveal:"Antwort anzeigen",known:"Wusste ich",again:"Noch üben",next:"Nächste Karte",close:"Schließen",working:"Deine Karteikarten werden erstellt …",fail:"Karteikarten konnten nicht erstellt werden. Bitte erneut versuchen.",saved:"Karteikarten wurden auf diesem Gerät gespeichert.",count:"Karten",remove:"Set leeren",photoReady:"Foto hinzugefügt ✓",noContent:"Füge zuerst Text oder ein Foto hinzu.",done:"Runde geschafft!",score:"Du konntest",of:"von"
+ };
+ let sourceImage=null,deck=[],position=0,known=0,revealed=false,quiz=false;
+ try{deck=JSON.parse(localStorage.getItem("tb-learn-deck")||"[]");if(!Array.isArray(deck))deck=[]}catch{deck=[]}
+ const button=$("learnModeBtn")||document.createElement("button");button.id="learnModeBtn";button.className="learnModeBtn";button.type="button";button.textContent=copy().button;
+ if(!button.isConnected)$("newChat")?.after(button);
+ const dialog=document.createElement("dialog");dialog.id="learnDialog";dialog.className="learnDialog";
+ dialog.innerHTML='<div class="learnHead"><span class="learnKicker">TILLBOT · STUDY SPACE</span><h2 id="learnTitle"></h2><p id="learnIntro"></p></div><section id="learnCreator" class="learnCreator"><label id="learnSourceLabel" for="learnSource"></label><textarea id="learnSource" rows="5"></textarea><div class="learnControls"><input id="learnPhoto" type="file" accept="image/*" hidden><button id="learnPhotoBtn" type="button"></button><span id="learnPhotoStatus" aria-live="polite"></span><button id="learnCreateBtn" class="primary" type="button"></button></div><p id="learnMessage" class="learnMessage" aria-live="polite"></p></section><section class="learnDeck"><div class="learnDeckHead"><h3 id="learnDeckTitle"></h3><span id="learnCount"></span></div><div id="learnCards"></div><div id="learnQuiz" class="learnQuiz hidden"><span id="learnProgress"></span><article class="learnFlashcard"><small id="learnFaceLabel"></small><div id="learnFaceText"></div></article><div class="learnQuizActions"><button id="learnReveal" class="primary" type="button"></button><button id="learnKnown" type="button" class="hidden"></button><button id="learnAgain" type="button" class="hidden"></button></div></div><div class="learnFooter"><button id="learnStart" class="primary" type="button"></button><button id="learnClear" type="button"></button></div></section><button id="learnClose" class="secondaryButton learnClose" type="button"></button>';
+ document.body.append(dialog);
+ const $l=id=>document.getElementById(id);
+ function paint(){
+  const t=copy();$l("learnTitle").textContent=t.title;$l("learnIntro").textContent=t.intro;$l("learnSourceLabel").textContent=t.source;$l("learnSource").placeholder=t.placeholder;$l("learnPhotoBtn").textContent="＋ "+t.photo;$l("learnCreateBtn").textContent=t.create;$l("learnDeckTitle").textContent=t.deck;$l("learnStart").textContent=t.start;$l("learnClear").textContent=t.remove;$l("learnClose").textContent=t.close;$l("learnCount").textContent=deck.length+" "+t.count;
+  $l("learnCards").innerHTML="";
+  if(!deck.length){$l("learnCards").textContent=t.empty}
+  deck.forEach((c,i)=>{const row=document.createElement("article");row.className="learnCardRow";const q=document.createElement("strong"),a=document.createElement("p");q.textContent=(i+1)+". "+c.front;a.textContent=c.back;row.append(q,a);$l("learnCards").append(row)});
+  $l("learnStart").disabled=!deck.length;$l("learnClear").disabled=!deck.length;
+ }
+ function persist(){localStorage.setItem("tb-learn-deck",JSON.stringify(deck));paint()}
+ function show(){paint();$l("learnMessage").textContent="";dialog.showModal()}
+ button.addEventListener("click",show);
+ $l("learnClose").onclick=()=>dialog.close();
+ $l("learnPhotoBtn").onclick=()=>$l("learnPhoto").click();
+ $l("learnPhoto").onchange=async e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  if(!f.type.startsWith("image/")){ $l("learnMessage").textContent=copy().fail;return}
+  try{const img=new Image(),url=URL.createObjectURL(f);img.src=url;await img.decode();const scale=Math.min(1,1200/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);sourceImage={data:canvas.toDataURL("image/jpeg",.72).split(",")[1],mime:"image/jpeg"};$l("learnPhotoStatus").textContent=copy().photoReady;URL.revokeObjectURL(url)}catch{$l("learnMessage").textContent=copy().fail}e.target.value="";
+ };
+ async function createCards(){
+  const notes=$l("learnSource").value.trim();if(!notes&&!sourceImage){$l("learnMessage").textContent=copy().noContent;return}
+  const b=$l("learnCreateBtn");b.disabled=true;$l("learnMessage").textContent=copy().working;
+  try{
+   const instruction=lang()==="en"?"Create 8 to 12 useful study flashcards from the supplied notes/image. Return ONLY valid JSON, an array of objects with exactly the keys front and back. Questions should be clear, answers concise but explanatory. Do not invent details not present in the source.":"Erstelle 8 bis 12 hilfreiche Lern-Karteikarten aus den Notizen/dem Foto. Gib AUSSCHLIESSLICH gültiges JSON zurück: ein Array aus Objekten mit genau den Schlüsseln front und back. Fragen klar formulieren, Antworten kurz und verständlich erklären. Erfinde keine Informationen, die nicht in der Vorlage stehen.";
+   const response=await fetch(API+"/api/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:instruction+(notes?"\n\nLernstoff:\n"+notes:""),history:[],image:sourceImage,stream:true})});
+   if(!response.ok){const er=await response.json();throw Error(er.error||"HTTP "+response.status)}
+   const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",answer="";
+   while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const events=pending.split("\n\n");pending=events.pop()||"";for(const ev of events){const line=ev.split("\n").find(x=>x.startsWith("data:"));if(!line)continue;try{const d=JSON.parse(line.slice(5).trim());if(d.delta)answer+=d.delta}catch{}}}
+   const match=answer.match(/\[[\s\S]*\]/);if(!match)throw Error("JSON missing");const parsed=JSON.parse(match[0]).filter(c=>c&&typeof c.front==="string"&&typeof c.back==="string").slice(0,30);if(!parsed.length)throw Error("No cards");
+   deck=parsed.map(c=>({front:c.front.slice(0,700),back:c.back.slice(0,1200)}));persist();$l("learnMessage").textContent=copy().saved;sourceImage=null;$l("learnPhotoStatus").textContent="";
+  }catch(e){$l("learnMessage").textContent=copy().fail+" ("+e.message+")"}
+  finally{b.disabled=false}
+ }
+ $l("learnCreateBtn").onclick=createCards;
+ $l("learnClear").onclick=()=>{deck=[];persist();$l("learnQuiz").classList.add("hidden");$l("learnStart").classList.remove("hidden")};
+ function showCard(){const c=deck[position];revealed=false;$l("learnProgress").textContent=(position+1)+" / "+deck.length;$l("learnFaceLabel").textContent=copy().front;$l("learnFaceText").textContent=c.front;$l("learnReveal").classList.remove("hidden");$l("learnKnown").classList.add("hidden");$l("learnAgain").classList.add("hidden");$l("learnReveal").textContent=copy().reveal}
+ function reveal(){if(revealed)return;revealed=true;$l("learnFaceLabel").textContent=lang()==="en"?"Answer":"Antwort";$l("learnFaceText").textContent=deck[position].back;$l("learnReveal").classList.add("hidden");$l("learnKnown").classList.remove("hidden");$l("learnAgain").classList.remove("hidden");$l("learnKnown").textContent=copy().known;$l("learnAgain").textContent=copy().again}
+ function mark(knew){if(knew)known++;position++;if(position>=deck.length){$l("learnFaceLabel").textContent=copy().done;$l("learnFaceText").textContent=copy().score+" "+known+" "+copy().of+" "+deck.length+"."; $l("learnReveal").classList.add("hidden");$l("learnKnown").classList.add("hidden");$l("learnAgain").classList.add("hidden");$l("learnProgress").textContent="✓";return}showCard()}
+ $l("learnStart").onclick=()=>{position=0;known=0;quiz=true;$l("learnQuiz").classList.remove("hidden");$l("learnStart").classList.add("hidden");showCard()};
+ $l("learnReveal").onclick=reveal;$l("learnKnown").onclick=()=>mark(true);$l("learnAgain").onclick=()=>mark(false);
+ const langSelect=$("language");langSelect?.addEventListener("change",()=>{if(dialog.open)paint()});
+})();
