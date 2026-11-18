@@ -8,5 +8,5 @@ self.addEventListener("fetch",event=>{
  // Always fetch app code and documents from the network first to avoid stale login code.
  const isCritical=url.pathname.endsWith(".js")||url.pathname.endsWith(".css")||url.pathname.endsWith(".html")||req.mode==="navigate";
  if(isCritical){event.respondWith(fetch(req,{cache:"no-store"}).then(async r=>{if(r.ok){const c=await caches.open(CACHE);await c.put(req,r.clone())}return r}).catch(()=>caches.match(req).then(r=>r||caches.match("./index.html"))));return}
- event.respondWith(caches.match(req).then(cached=>cached||fetch(req).then(async r=>{if(r.ok){const c=await caches.open(CACHE);await c.put(req,r.clone())}return r}))
+ event.respondWith(caches.match(req).then(cached=>cached||fetch(req).then(async r=>{if(r.ok){const c=await caches.open(CACHE);await c.put(req,r.clone())}return r})))
 });
