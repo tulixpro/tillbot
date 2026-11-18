@@ -952,3 +952,12 @@ body[data-theme="light"] .learnCardRow{background:#f7f9fd;border-color:#e1e8f1}
 body[data-theme="light"] .learnCardRow p,body[data-theme="light"] .learnHead p{color:#64748b}
 body[data-theme="light"] .learnFlashcard{background:#eef2ff;color:#17243a}
 @media(max-width:520px){.learnControls>*{max-width:100%}.learnDialog{padding:17px}.learnFlashcard{min-height:140px}}
+
+
+/* Native anti-bot auth refresh */
+.authProtection{display:flex;align-items:center;gap:12px;margin:18px 0 15px;padding:13px 14px;border:1px solid #dce9e8;border-radius:14px;background:linear-gradient(120deg,#f4f9ff,#f1faf7);color:#34445e}
+.authProtectionIcon{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:11px;background:#e4f2ef;font-size:18px}
+.authProtection strong{display:block;font-size:12px;font-weight:800;color:#29445a}
+.authProtection small{display:block;margin-top:3px;font-size:11px;line-height:1.45;color:#718198}
+.authHoneypot{position:absolute!important;left:-10000px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+@media(prefers-color-scheme:dark){.authProtection{border-color:#ffffff18;background:linear-gradient(120deg,#17283d,#142e2b);color:#eaf0ff}.authProtection strong{color:#eaf0ff}.authProtection small{color:#a7b6ca}.authProtectionIcon{background:#203c3a}}
