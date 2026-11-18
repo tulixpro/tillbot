@@ -11,6 +11,9 @@ async function api(path, options={}) {
   if (!response.ok) { const error = new Error(data.error || data.message || "HTTP " + response.status); error.status = response.status; throw error; }
   return data;
 }
+// Expose compatibility globals for any inline/legacy workspace handlers.
+window.api = api;
+window.TILLBOT_API = API;
 
 function authMode(reg){
  registerMode=reg;
