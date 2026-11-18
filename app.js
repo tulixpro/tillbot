@@ -19,6 +19,9 @@ async function api(path, options={}) {
   }
   return data;
 }
+// Expose compatibility globals for any inline/legacy workspace handlers.
+window.api = api;
+window.TILLBOT_API = API;
 
 function authMode(reg){
  registerMode=reg;
