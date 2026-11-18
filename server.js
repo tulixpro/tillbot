@@ -310,7 +310,16 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
     });
     if(req.body.stream&&response.ok){res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});res.flushHeaders?.();const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",full="";while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const lines=pending.split("\n");pending=lines.pop()||"";for(const line of lines){const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta){full+=delta;res.write("data: "+JSON.stringify({delta})+"\n\n")}}catch{}}}if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);const sourceText=formatTailbotSources(sources);if(sourceText)res.write("data: "+JSON.stringify({delta:sourceText})+"\n\n");res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined,sources:sources.map(({title,url})=>({title,url}))})+"\n\n");return res.end()}
     const data = await response.json();
-    if (!response.ok) return res.status(502).json({ answer: "Groq Fehler: " + (data.error?.message || response.status) });
+    if (!response.ok) {
+      const upstreamMessage = data.error?.message || data.errors?.[0]?.message || response.status;
+      const status = response.status === 429 ? 429 : response.status === 403 ? 503 : 502;
+      const message = response.status === 429
+        ? "Tailbot ist gerade ausgelastet oder das kostenlose Tageskontingent von Cloudflare ist aufgebraucht. Bitte später erneut versuchen."
+        : response.status === 403
+          ? "Cloudflare hat den Zugriff abgelehnt. Bitte Workers-AI-Token und Modellfreigabe prüfen."
+          : "Tailbot konnte gerade keine Antwort erzeugen (" + upstreamMessage + ").";
+      return res.status(status).json({ answer: message });
+    }
     if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);
     res.json({ answer: (data.choices?.[0]?.message?.content || "Keine Antwort") + formatTailbotSources(sources), sources:sources.map(({title,url})=>({title,url})), quota:req.user.role==="admin"?{unlimited:true}:undefined });
   } catch (error) {
