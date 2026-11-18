@@ -1000,3 +1000,31 @@ body[data-reduce-motion="true"] *,body[data-reduce-motion="true"] *::before,body
 .composerArea>.powerTools button{min-height:28px!important;padding:4px 8px!important;font-size:10px!important;line-height:1.15!important;font-weight:600!important;border-radius:10px!important;letter-spacing:0!important}
 .composerArea>.powerTools button[data-tool="optimize"]{border-color:#39bfae!important;color:#baf8eb!important;background:#123c3c!important}
 @media(max-width:420px){.composerArea{gap:5px}.composerArea>.powerTools{max-height:76px;gap:4px}.composerArea>.powerTools button{min-height:26px!important;padding:4px 7px!important;font-size:10px!important}}
+
+
+/* Final compact, colorful mobile action chips — high-specificity override. */
+body .composerArea .powerTools{
+ display:flex!important;flex-wrap:wrap!important;align-items:center!important;
+ gap:5px!important;max-height:108px!important;overflow-y:auto!important;overflow-x:hidden!important;
+ padding:3px 2px 6px!important;align-content:flex-start!important;
+}
+body .composerArea .powerTools button{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ flex:0 1 auto!important;width:auto!important;min-width:0!important;max-width:100%!important;
+ min-height:30px!important;height:auto!important;padding:5px 9px!important;margin:0!important;
+ border-radius:999px!important;border:1px solid #b9e9e5!important;
+ background:linear-gradient(115deg,#e5fbf7,#eaf3ff)!important;
+ color:#16435a!important;font-size:11px!important;line-height:1.15!important;
+ font-weight:700!important;letter-spacing:0!important;white-space:normal!important;
+ box-shadow:0 1px 3px #173c5018!important;
+}
+body .composerArea .powerTools button[data-tool="optimize"]{
+ background:linear-gradient(110deg,#16bfa5,#269ce8)!important;
+ color:#fff!important;border-color:#16bfa5!important;
+}
+body .composerArea .powerTools button:active{transform:scale(.98)}
+body .composerArea>.composer{margin-top:2px!important}
+@media(max-width:420px){
+ body .composerArea .powerTools{gap:4px!important;max-height:96px!important;padding:2px 1px 5px!important}
+ body .composerArea .powerTools button{min-height:27px!important;padding:4px 7px!important;font-size:10px!important}
+}
