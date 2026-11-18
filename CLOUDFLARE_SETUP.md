@@ -1,6 +1,6 @@
-# Tailbot – Cloudflare Workers AI einrichten
+# TILLBOT – Cloudflare Workers AI einrichten
 
-Tailbot nutzt in diesem Projekt das offene Qwen-Modell `@cf/qwen/qwen3.8-27b` über Cloudflare Workers AI. Das Modell wird von Cloudflare gehostet; TILLBOT trainiert es nicht selbst.
+TILLBOT nutzt in diesem Projekt das offene Qwen-Modell `@cf/qwen/qwen3.8-27b` über Cloudflare Workers AI. Das Modell wird von Cloudflare gehostet; TILLBOT trainiert es nicht selbst.
 
 ## 1. Cloudflare vorbereiten
 
