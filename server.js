@@ -244,7 +244,7 @@ app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res
 async function fetchTailbotSources(query) {
   const q = String(query || "").trim().slice(0, 180);
   const factualQuery = /^(was|wer|wie|warum|wann|wo|wieso|welche|welcher|welches|erkläre|erklaere|definiere|bedeutung|geschichte|funktion|what|who|how|why|when|where|explain|define)\b/i.test(q);
-  if (q.length < 8 || !factualQuery || /(passwort|konto|adresse|telefon|e-mail|gesundheit|krankheit|symptom|diagnose|medikament|therapie|psychisch|schreib|verfass|übersetz|uebersetz|translate|rewrite|brainstorm|erfinde|gedicht)/i.test(q) || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(q)) return [];
+  if (q.length < 8 || !factualQuery || /(passwort|konto|adresse|telefon|e-mail|gesundheit|krankheit|symptom|diagnose|medikament|therapie|psychisch|schreib|verfass|übersetz|uebersetz|translate|rewrite|brainstorm|erfinde|gedicht|\\bich\\b|\\bmir\\b|\\bmich\\b|\\bmein(?:e|em|en|er)?\\b)/i.test(q) || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(q)) return [];
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4500);
   try {
@@ -307,7 +307,7 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
     const response = await fetch("https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID) + "/ai/v1/chat/completions", {
       method: "POST", signal: controller.signal,
       headers: { Authorization: "Bearer " + process.env.CLOUDFLARE_API_TOKEN, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: cloudflareModel, messages, max_tokens: 800, temperature: 0.7, stream:!!req.body.stream, options: { rejectIfBusy: true } })
+      body: JSON.stringify({ model: cloudflareModel, messages, max_completion_tokens: 800, temperature: 0.7, stream:!!req.body.stream, options: { rejectIfBusy: true } })
     });
     if(req.body.stream&&response.ok){res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});res.flushHeaders?.();const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",full="";while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const lines=pending.split("\n");pending=lines.pop()||"";for(const line of lines){const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta){full+=delta;res.write("data: "+JSON.stringify({delta})+"\n\n")}}catch{}}}if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);const sourceText=formatTailbotSources(sources);if(sourceText)res.write("data: "+JSON.stringify({delta:sourceText})+"\n\n");res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined,sources:sources.map(({title,url})=>({title,url}))})+"\n\n");return res.end()}
     const data = await response.json();
