@@ -27,7 +27,6 @@ Required environment variables (set in the hosting provider's secret/environment
 - `DATABASE_URL` – PostgreSQL connection URL.
 - `JWT_SECRET` – stable random secret, at least 32 characters. Changing it invalidates existing sessions.
 - `GROQ_API_KEY` – key for the AI API.
-- `TURNSTILE_SECRET_KEY` – Cloudflare Turnstile secret; registration/login require successful server-side verification.
 - `FRONTEND_ORIGIN` – allowed frontend origin, e.g. `https://tulixpro.github.io`.
 - `ADMIN_USERNAME` and `ADMIN_SETUP_SECRET` – one-time admin bootstrap configuration. Use a strong setup secret and remove/rotate it after setup where operationally possible.
 
@@ -40,7 +39,7 @@ Optional:
 
 ## Current features
 
-- Login and registration with CAPTCHA, account/session handling.
+- Login and registration with server-side rate limits and a honeypot anti-bot check; account/session handling.
 - Persistent chat history, rename/delete chats, streaming AI responses.
 - 14 prompt shortcuts (Lerncoach, Text verbessern, Zusammenfassen, Kreativmodus, Codehilfe, Quiz, Übersetzen, Planer, Einfach erklären, Brainstorm, Story, Prüfungstraining, E-Mail, Debugger). These are prompt templates, not separate AI models.
 - Image attachment for **image analysis** (not image generation).
@@ -54,7 +53,7 @@ Optional:
 - The small UI quick actions guide the same AI model through prompts; they do not create independent tools or guarantee specialized behavior.
 - Speech recognition and speech synthesis depend on browser/device support.
 - Uploaded images and chat content are sent to the backend/AI provider to answer the request. Chat histories and account data are stored in PostgreSQL. Do not submit passwords, private documents or sensitive personal data.
-- The admin security audit checks selected configuration/database conditions; it is **not** a penetration test or guarantee of security.
+- The admin security audit checks selected configuration/database conditions; it is **not** a penetration test or guarantee of security. GitHub Actions runs JavaScript syntax checks and an npm audit of production dependencies; Dependabot checks dependencies weekly.
 - Service-worker caching supports the app shell, not offline AI generation.
 
 ## Local development
