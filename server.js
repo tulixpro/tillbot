@@ -30,32 +30,25 @@ app.use((req, res, next) => {
 
 app.use("/api", (req, res, next) => { res.setHeader("Cache-Control", "no-store"); next(); });
 app.use("/api", rateLimit({ windowMs: 60_000, limit: 30, standardHeaders: true, legacyHeaders: false }));
-const authLimit = rateLimit({ windowMs: 15 * 60_000, limit: 8, message: { error: "Zu viele Versuche. Bitte 15 Minuten warten." } });
-app.use("/api/login", authLimit);
-app.use("/api/register", authLimit);
+const loginLimit = rateLimit({ windowMs: 15 * 60_000, limit: 10, standardHeaders: true, legacyHeaders: false, message: { error: "Zu viele Anmeldeversuche. Bitte 15 Minuten warten." } });
+const registerLimit = rateLimit({ windowMs: 60 * 60_000, limit: 5, standardHeaders: true, legacyHeaders: false, message: { error: "Zu viele Registrierungen von diesem Netzwerk. Bitte später erneut versuchen." } });
+app.use("/api/login", loginLimit);
+app.use("/api/register", registerLimit);
 
 
-async function verifyCaptcha(token, ip) {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  // Fail closed: never allow authentication when server-side CAPTCHA is unconfigured.
-  if (!secret) { console.error("TURNSTILE_SECRET_KEY fehlt; Login und Registrierung bleiben gesperrt."); return null; }
-  if (!token) return false;
-  try {
-    const form = new URLSearchParams({secret, response:token});
-    if (ip) form.set("remoteip", ip);
-    const result = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:form,signal:AbortSignal.timeout(8000)});
-    const data = await result.json();
-    return data.success === true;
-  } catch { return false; }
+// Native anti-bot protection: rate limits plus a honeypot field.
+// This is friction-based protection, not a claim that every automated client can be detected.
+function isBotTrapFilled(req) {
+  return typeof req.body?.website === "string" && req.body.website.trim().length > 0;
 }
 
 app.get("/api/auth/status", async (_req,res) => {
   let databaseReady=false;
   try { await pool.query("SELECT 1"); databaseReady=true; } catch {}
   res.set("Cache-Control","no-store").json({
-    captchaConfigured:!!process.env.TURNSTILE_SECRET_KEY,
+    antiBotEnabled:true,
     databaseReady,
-    authReady:!!process.env.TURNSTILE_SECRET_KEY&&databaseReady
+    authReady:databaseReady
   });
 });
 
@@ -99,9 +92,7 @@ app.get("/api/notifications", async (_req,res)=>{
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
 app.post("/api/register", async (req, res) => {
-  const captcha = await verifyCaptcha(req.body.captchaToken, req.ip);
-  if (captcha === null) return res.status(503).json({ error: "CAPTCHA serverseitig nicht konfiguriert. Bitte Betreiber kontaktieren." });
-  if (!captcha) return res.status(403).json({ error: "CAPTCHA ungültig oder abgelaufen. Bitte erneut bestätigen." });
+  if (isBotTrapFilled(req)) return res.status(400).json({ error: "Anfrage konnte nicht verarbeitet werden." });
   const username = normalizeUsername(req.body.username);
   const password = String(req.body.password || "");
   if (!/^[a-z0-9_]{3,20}$/.test(username)) return res.status(400).json({ error: "Username: 3–20 Zeichen (a-z, 0-9, _)" });
@@ -120,9 +111,7 @@ app.post("/api/register", async (req, res) => {
 });
 
 app.post("/api/login", async (req, res) => {
-  const captcha = await verifyCaptcha(req.body.captchaToken, req.ip);
-  if (captcha === null) return res.status(503).json({ error: "CAPTCHA serverseitig nicht konfiguriert. Bitte Betreiber kontaktieren." });
-  if (!captcha) return res.status(403).json({ error: "CAPTCHA ungültig oder abgelaufen. Bitte erneut bestätigen." });
+  if (isBotTrapFilled(req)) return res.status(400).json({ error: "Anfrage konnte nicht verarbeitet werden." });
   try {
     const { rows } = await pool.query("SELECT * FROM users WHERE username = $1", [normalizeUsername(req.body.username)]); const user = rows[0];
     if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
@@ -206,7 +195,7 @@ app.put("/api/admin/users/:id/role", auth, admin, async (req,res)=>{
 app.get("/api/admin/security-audit", auth, admin, async (_req,res)=>{
   const checks=[
     {name:"JWT-Schlüssel dauerhaft gesetzt",ok:!!(process.env.JWT_SECRET&&process.env.JWT_SECRET.length>=32),severity:"critical",detail:"JWT_SECRET muss in Render dauerhaft und mit mindestens 32 Zeichen gesetzt sein."},
-    {name:"CAPTCHA serverseitig aktiv",ok:!!process.env.TURNSTILE_SECRET_KEY,severity:"high",detail:"TURNSTILE_SECRET_KEY in Render setzen; ohne Secret ist die Prüfung deaktiviert."},
+    {name:"Eigener Bot-Schutz aktiv",ok:true,severity:"medium",detail:"Login- und Registrierungs-Ratenlimits sowie ein serverseitiges Honeypot-Feld sind aktiv."},
     {name:"KI-API-Schlüssel gesetzt",ok:!!process.env.GROQ_API_KEY,severity:"high",detail:"GROQ_API_KEY ist erforderlich, damit Chat-Anfragen funktionieren."},
     {name:"HTTPS-Frontend",ok:String(process.env.FRONTEND_ORIGIN||"https://tulixpro.github.io").startsWith("https://"),severity:"medium",detail:"Frontend-Origin sollte HTTPS verwenden."},
     {name:"Helmet-Sicherheitsheader",ok:true,severity:"medium",detail:"Helmet ist im Express-Server aktiviert; CSP wird separat über Hosting/Policy verwaltet."},

@@ -1,7 +1,7 @@
 const API="https://tillbot.onrender.com", $=id=>document.getElementById(id);
 // Keep the app shell inside iOS Safari's visible viewport when its keyboard opens.
 const syncVisualViewport=()=>{if(window.visualViewport&&matchMedia("(max-width: 820px)").matches){document.documentElement.style.setProperty("--tb-visual-height",Math.round(window.visualViewport.height)+"px")}else{document.documentElement.style.removeProperty("--tb-visual-height")}};
-syncVisualViewport();window.visualViewport?.addEventListener("resize",syncVisualViewport);window.addEventListener("orientationchange",()=>setTimeout(syncVisualViewport,180));const captchaNode=document.querySelector(".cf-turnstile");const captchaEnabled=!!(captchaNode&&captchaNode.dataset.sitekey&&captchaNode.dataset.sitekey.length>20&&!captchaNode.dataset.sitekey.includes("HIER_EINTRAGEN"));$("captchaBox").classList.remove("hidden");if(!captchaEnabled){$("captchaBox").innerHTML="<p class=\"captchaFallback\">CAPTCHA ist momentan nicht konfiguriert. Bitte Admin informieren.</p>";}else{const captchaNote=$("captchaBox").querySelector("small");if(captchaNote)captchaNote.textContent="Spam-Schutz · Bitte kurz bestätigen";}let token=localStorage.getItem("tb-token"),user=null,registerMode=false,activeId=null,chats=[],busy=false,history=[],photoData=null,photoMime="image/jpeg",captchaToken="";
+syncVisualViewport();window.visualViewport?.addEventListener("resize",syncVisualViewport);window.addEventListener("orientationchange",()=>setTimeout(syncVisualViewport,180));let token=localStorage.getItem("tb-token"),user=null,registerMode=false,activeId=null,chats=[],busy=false,history=[],photoData=null,photoMime="image/jpeg";
 const headers=()=>({"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{})});
 function authMode(reg){
  registerMode=reg;
@@ -26,7 +26,6 @@ async function checkAuthStatus(){
   const response=await fetch(API+"/api/auth/status",{cache:"no-store"});
   if(!response.ok)throw Error("HTTP "+response.status);
   const status=await response.json();
-  if(!status.captchaConfigured){msg.textContent="Anmeldung gerade nicht verfügbar: Der Betreiber muss die CAPTCHA-Serverkonfiguration ergänzen.";return}
   if(!status.databaseReady){msg.textContent="Anmeldung gerade nicht verfügbar: Die Datenbank antwortet momentan nicht.";return}
   msg.textContent="";
  }catch{
@@ -43,16 +42,14 @@ window.tillbotAuthSubmit=async()=>{
  }else if(!password){$("authMsg").textContent="Bitte gib dein Passwort ein.";$("password").focus();return;}
  b.disabled=true;$("authMsg").textContent=registerMode?"Dein Konto wird sicher erstellt …":"Du wirst sicher angemeldet …";
  try{
-  if(captchaEnabled&&!(window.__tbCaptcha||captchaToken))throw Error("Bitte bestätige zuerst die Sicherheitsprüfung.");
   const path=registerMode?"/api/register":"/api/login";
-  const d=await authRequest(path,{username,password,captchaToken:window.__tbCaptcha||captchaToken});
-  captchaToken="";window.__tbCaptcha="";if(window.turnstile)window.turnstile.reset();
+  const d=await authRequest(path,{username,password,website:$("website").value});
+  $("website").value="";
   token=d.token;user=d.user;localStorage.setItem("tb-token",token);
   $("authMsg").textContent="Erfolgreich! Dein Workspace wird geöffnet …";await start();
  }catch(e){
   $("authMsg").textContent=e.message||"Das hat nicht geklappt. Bitte versuche es erneut.";
-  if(/captcha/i.test(e.message)){window.__tbCaptcha="";captchaToken="";if(window.turnstile)window.turnstile.reset()}
- }finally{captchaToken="";window.__tbCaptcha="";if(window.turnstile){try{window.turnstile.reset()}catch{}}b.disabled=false}
+ }finally{$("website").value="";b.disabled=false}
 };
 $("authSubmit").onclick=window.tillbotAuthSubmit;
 $("password").onkeydown=e=>{if(e.key==="Enter")$("authSubmit").click()};
@@ -130,7 +127,7 @@ $("photoInput").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(!
 let activeRecognition=null;
 $("voiceBtn").onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceMsg").textContent="Diktieren wird hier nicht unterstützt. Bitte Chrome/Edge verwenden oder Text eingeben.";return}if(activeRecognition){activeRecognition.stop();return}try{const rec=new SR();activeRecognition=rec;rec.lang="de-DE";rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;let base=$("prompt").value.trim(),finalText="";$("voiceBtn").textContent="■ Stop";$("voiceMsg").textContent="🎙️ Höre zu …";rec.onresult=e=>{let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=t+" ";else interim+=t}$("prompt").value=(base+" "+finalText+" "+interim).trim();$("prompt").dispatchEvent(new Event("input"))};rec.onerror=e=>{$("voiceMsg").textContent=e.error==="not-allowed"?"Mikrofon verweigert – Browserberechtigung prüfen.":"Spracherkennung: "+e.error};rec.onend=()=>{activeRecognition=null;$("voiceBtn").textContent="Sprache";if(finalText)$("voiceMsg").textContent="Diktat eingefügt ✓"};rec.start()}catch(e){activeRecognition=null;$("voiceMsg").textContent="Mikrofonstart fehlgeschlagen: "+e.message}};
 
-window.tillbotCaptchaOk=t=>{captchaToken=t;window.__tbCaptcha=t};window.tillbotCaptchaExpired=()=>{captchaToken="";window.__tbCaptcha=""};window.tillbotCaptchaError=code=>{captchaToken="";window.__tbCaptcha="";const m=$("authMsg");if(m)m.textContent="CAPTCHA konnte nicht laden ("+String(code||"Netzwerkfehler") +"). Safari: Inhaltsblocker/Privat-Relay prüfen und Seite neu laden.";};
+
 
 // Keyboard helpers: quick new conversation and close mobile drawer.
 document.addEventListener("keydown",e=>{if(e.key==="Escape")$("sidebar").classList.remove("open");if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("newChat").click()}});
