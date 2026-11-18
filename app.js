@@ -3,6 +3,15 @@ const API="https://tillbot.onrender.com", $=id=>document.getElementById(id);
 const syncVisualViewport=()=>{if(window.visualViewport&&matchMedia("(max-width: 820px)").matches){document.documentElement.style.setProperty("--tb-visual-height",Math.round(window.visualViewport.height)+"px")}else{document.documentElement.style.removeProperty("--tb-visual-height")}};
 syncVisualViewport();window.visualViewport?.addEventListener("resize",syncVisualViewport);window.addEventListener("orientationchange",()=>setTimeout(syncVisualViewport,180));let token=localStorage.getItem("tb-token"),user=null,registerMode=false,activeId=null,chats=[],busy=false,history=[],photoData=null,photoMime="image/jpeg";
 const headers=()=>({"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{})});
+// Shared JSON API client used by authenticated workspace requests.
+async function api(path, options={}) {
+  const response = await fetch(API + path, { ...options, headers: { ...headers(), ...(options.headers || {}) } });
+  const raw = await response.text(); let data = {};
+  try { data = raw ? JSON.parse(raw) : {}; } catch {}
+  if (!response.ok) { const error = new Error(data.error || data.message || "HTTP " + response.status); error.status = response.status; throw error; }
+  return data;
+}
+
 function authMode(reg){
  registerMode=reg;
  $("tabLogin").classList.toggle("selected",!reg);$("tabRegister").classList.toggle("selected",reg);
