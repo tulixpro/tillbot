@@ -74,7 +74,7 @@ function admin(req, res, next) {
 }
 
 app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
-app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
+app.get("/api/status", (_req, res) => res.set("Cache-Control","no-store").json({ online:true, name:"TILLBOT", project:"TILLBOT", provider:"Cloudflare Workers AI", model:process.env.CLOUDFLARE_MODEL||"@cf/qwen/qwen3.8-27b", aiConfigured:!!(process.env.CLOUDFLARE_ACCOUNT_ID&&process.env.CLOUDFLARE_API_TOKEN) }));
 
 app.put("/api/admin/announcement", auth, admin, async (req,res)=>{
  const message=String(req.body.message||"").trim().slice(0,500);
@@ -197,7 +197,7 @@ app.get("/api/admin/security-audit", auth, admin, async (_req,res)=>{
   const checks=[
     {name:"JWT-Schlüssel dauerhaft gesetzt",ok:!!(process.env.JWT_SECRET&&process.env.JWT_SECRET.length>=32),severity:"critical",detail:"JWT_SECRET muss in Render dauerhaft und mit mindestens 32 Zeichen gesetzt sein."},
     {name:"Eigener Bot-Schutz aktiv",ok:true,severity:"medium",detail:"IP-basierte API- und Auth-Limits sowie ein serverseitiges Honeypot-Feld sind aktiv. Limits liegen aktuell im Prozessspeicher."},
-    {name:"KI-API-Schlüssel gesetzt",ok:!!process.env.GROQ_API_KEY,severity:"high",detail:"GROQ_API_KEY ist erforderlich, damit Chat-Anfragen funktionieren."},
+    {name:"TILLBOT-KI-Verbindung gesetzt",ok:!!(process.env.CLOUDFLARE_ACCOUNT_ID&&process.env.CLOUDFLARE_API_TOKEN),severity:"high",detail:"TILLBOT verwendet Cloudflare Workers AI mit einem offenen Qwen-Modell. Account-ID und API-Token müssen in Render gesetzt sein."},
     {name:"HTTPS-Frontend",ok:String(process.env.FRONTEND_ORIGIN||"https://tulixpro.github.io").startsWith("https://"),severity:"medium",detail:"Frontend-Origin sollte HTTPS verwenden."},
     {name:"Helmet-Sicherheitsheader",ok:true,severity:"medium",detail:"Helmet ist im Express-Server aktiviert; CSP wird separat über Hosting/Policy verwaltet."},
     {name:"API-Rate-Limit",ok:true,severity:"medium",detail:"Globales API-Limit sowie zusätzliche Limits für Login/Registrierung sind aktiv."},
@@ -241,14 +241,53 @@ async function incrementDailyQuota(userId){await pool.query("UPDATE user_message
 app.get("/api/admin/quota",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT value FROM app_settings WHERE key=$1",["daily_message_limit"]);res.json({limit:Number(q.rows[0]?.value)||30})});
 app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Math.max(1,Math.min(500,Math.floor(Number(req.body.limit)||30)));await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["daily_message_limit",String(limit)]);res.json({ok:true,limit})});
 app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.json({unlimited:true});const q=await checkDailyQuota(req.user.id);res.json({unlimited:false,count:q.count||0,remaining:q.remaining||0,limit:q.limit||30,blocked:q.blocked||false,until:q.until||null})});
-app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
+async function fetchTILLBOTSources(query) {
+  const q = String(query || "").trim().slice(0, 180);
+  const factualQuery = /^(was|wer|wie|warum|wann|wo|wieso|welche|welcher|welches|erkläre|erklaere|definiere|bedeutung|geschichte|funktion|what|who|how|why|when|where|explain|define)\b/i.test(q);
+  if (q.length < 8 || !factualQuery || /(passwort|konto|adresse|telefon|e-mail|gesundheit|krankheit|symptom|diagnose|medikament|therapie|psychisch|schreib|verfass|übersetz|uebersetz|translate|rewrite|brainstorm|erfinde|gedicht|\bich\b|\bmich\b|\bmein(?:e|em|en|er)?\b)/i.test(q) || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(q)) return [];
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 4500);
+  try {
+    const url = new URL("https://de.wikipedia.org/w/api.php");
+    url.search = new URLSearchParams({ action:"query", list:"search", srsearch:q, format:"json", utf8:"1", srlimit:"3" }).toString();
+    const response = await fetch(url, { signal:controller.signal, headers:{"User-Agent":"TILLBOT/1.0 (TILLBOT project assistant; source lookup)"} });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return (data.query?.search || []).slice(0,3).map(item => {
+      const title = String(item.title || "").slice(0,160);
+      const excerpt = String(item.snippet || "").replace(/<[^>]*>/g," ").replace(/&quot;/g,'"').replace(/&#039;/g,"'").replace(/&amp;/g,"&").replace(/\s+/g," ").trim().slice(0,360);
+      return { title, excerpt, url:"https://de.wikipedia.org/wiki/" + encodeURIComponent(title.replace(/ /g,"_")) };
+    }).filter(item => item.title && item.excerpt);
+  } catch { return []; } finally { clearTimeout(timer); }
+}
+function formatTILLBOTSources(sources) {
+  if (!Array.isArray(sources) || !sources.length) return "";
+  return "\n\n### Weiterführende Quellen (Wikipedia)\n\n" + sources.map(item => "[" + item.title.replace(/[\[\]]/g,"") + "](" + item.url + ")").join("\n\n");
+}
+
+const activeChatRequests = { count: 0 };
+function limitConcurrentChats(req, res, next) {
+  const maxActive = Math.max(1, Math.min(2, Number(process.env.MAX_CONCURRENT_CHATS) || 2));
+  if (activeChatRequests.count >= maxActive) return res.status(503).json({ answer: "TILLBOT ist gerade stark ausgelastet. Bitte in wenigen Sekunden erneut versuchen." });
+  activeChatRequests.count++;
+  let released = false;
+  const release = () => { if (!released) { released = true; activeChatRequests.count = Math.max(0, activeChatRequests.count - 1); } };
+  res.once("finish", release);
+  res.once("close", release);
+  next();
+}
+
+app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, limitConcurrentChats, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
   if(req.user.role!=="admin"){const q=await checkDailyQuota(req.user.id);if(q.blocked)return res.status(429).json({error:"Dein Tagesbudget ist aufgebraucht. Du kannst ab "+new Date(q.until).toLocaleString("de-DE")+" Uhr wieder schreiben.",quota:{blocked:true,until:q.until,remaining:0}});req.dailyQuota=q}
-  if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "GROQ_API_KEY fehlt in Render" });
+  if (!process.env.CLOUDFLARE_ACCOUNT_ID || !process.env.CLOUDFLARE_API_TOKEN) return res.status(503).json({ answer: "TILLBOT ist noch nicht mit Cloudflare Workers AI verbunden. Bitte CLOUDFLARE_ACCOUNT_ID und CLOUDFLARE_API_TOKEN in Render hinterlegen." });
   const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
-  const messages = [{ role: "system", content: "Du bist TILLBOT, ein freundlicher, kompetenter KI-Assistent. Antworte verständlich und standardmäßig auf Deutsch. Bei Programmierfragen: liefere korrekten, möglichst vollständigen Code in Markdown-Codeblöcken mit passendem Sprachlabel (z. B. ```js), erkläre kurz Verwendung und wichtige Schritte, nenne nötige Dateien/Abhängigkeiten und weise auf Annahmen hin. Bei Debugging: analysiere erst den Fehler, nenne Ursache und zeige eine konkrete Lösung. Erfinde keine Testergebnisse und behaupte nicht, Code ausgeführt zu haben. Schreibe Code sicher und warne vor riskanten Aktionen; führe niemals automatisch vom Nutzer gelieferten oder generierten Code aus. Bei großen Projekten strukturiere die Antwort in Dateien und frage nur bei wirklich fehlenden Anforderungen nach." },
+  const userText = String(req.body.message || "").slice(0, 8000);
+  const sources = await fetchTILLBOTSources(userText);
+  const sourceContext = sources.length ? "\n\nMögliche Quellen zum Prüfen (nur verwenden, wenn sie die konkrete Aussage wirklich stützen):\n" + sources.map((item, i) => "[" + (i + 1) + "] " + item.title + ": " + item.excerpt + " (" + item.url + ")").join("\n") : "";
+  const systemPrompt = "Du bist TILLBOT, die eigenständige KI-Anwendung des TILLBOT-Projekts. Du bist freundlich, kompetent, transparent und antwortest standardmäßig auf Deutsch. Erkläre auf Nachfrage: TILLBOT ist die KI-Anwendung des TILLBOT-Projekts und wird vom TILLBOT-Team gepflegt. Erfinde keine Teammitglieder, Rollen, Firmensitze oder Geschichte. Behaupte niemals, ein selbst trainiertes Sprachmodell zu sein: TILLBOT nutzt ein offenes Qwen-Modell über Cloudflare Workers AI. Bei Quellenkontext darfst du nur Informationen daraus verwenden, wenn sie die Aussage tatsächlich stützen; erfinde niemals Quellen, Links, Zitate oder Testergebnisse. Wenn Quellen nicht passen oder unsicher sind, sage das offen. Bei Programmierfragen gib möglichst vollständigen, sicheren Code in Markdown-Codeblöcken aus und erkläre Verwendung, Abhängigkeiten und Annahmen. Bei Debugging analysiere Ursache und Lösung. Führe niemals automatisch Nutzer-Code aus. Bei großen Projekten strukturiere Antworten nach Dateien." + sourceContext;
+  const messages = [{ role: "system", content: systemPrompt },
     ...history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
       .map(m => ({ role: m.role, content: m.content.slice(0, 8000) }))];
-  const userText = String(req.body.message || "").slice(0, 8000);
   const image = req.body.image;
   if (image && typeof image.data === "string") {
     if (!["image/jpeg", "image/png", "image/webp"].includes(image.mime) || image.data.length > 2_500_000) {
@@ -264,16 +303,26 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30_000);
   try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const cloudflareModel = process.env.CLOUDFLARE_MODEL || "@cf/qwen/qwen3.8-27b";
+    const response = await fetch("https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID) + "/ai/v1/chat/completions", {
       method: "POST", signal: controller.signal,
-      headers: { Authorization: "Bearer " + process.env.GROQ_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: (image ? (process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b") : (process.env.GROQ_MODEL || "openai/gpt-oss-120b")), messages, max_completion_tokens: 800, temperature: 0.7, stream:!!req.body.stream })
+      headers: { Authorization: "Bearer " + process.env.CLOUDFLARE_API_TOKEN, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: cloudflareModel, messages, max_completion_tokens: 800, temperature: 0.7, stream:!!req.body.stream, options: { rejectIfBusy: true } })
     });
-    if(req.body.stream&&response.ok){res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});res.flushHeaders?.();const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",full="";while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const lines=pending.split("\n");pending=lines.pop()||"";for(const line of lines){const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta){full+=delta;res.write("data: "+JSON.stringify({delta})+"\n\n")}}catch{}}}if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined})+"\n\n");return res.end()}
+    if(req.body.stream&&response.ok){res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});res.flushHeaders?.();const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",full="";while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const lines=pending.split("\n");pending=lines.pop()||"";for(const line of lines){const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta){full+=delta;res.write("data: "+JSON.stringify({delta})+"\n\n")}}catch{}}}if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);const sourceText=formatTILLBOTSources(sources);if(sourceText)res.write("data: "+JSON.stringify({delta:sourceText})+"\n\n");res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined,sources:sources.map(({title,url})=>({title,url}))})+"\n\n");return res.end()}
     const data = await response.json();
-    if (!response.ok) return res.status(502).json({ answer: "Groq Fehler: " + (data.error?.message || response.status) });
+    if (!response.ok) {
+      const upstreamMessage = data.error?.message || data.errors?.[0]?.message || response.status;
+      const status = response.status === 429 ? 429 : response.status === 403 ? 503 : 502;
+      const message = response.status === 429
+        ? "TILLBOT ist gerade ausgelastet oder das kostenlose Tageskontingent von Cloudflare ist aufgebraucht. Bitte später erneut versuchen."
+        : response.status === 403
+          ? "Cloudflare hat den Zugriff abgelehnt. Bitte Workers-AI-Token und Modellfreigabe prüfen."
+          : "TILLBOT konnte gerade keine Antwort erzeugen (" + upstreamMessage + ").";
+      return res.status(status).json({ answer: message });
+    }
     if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);
-    res.json({ answer: data.choices?.[0]?.message?.content || "Keine Antwort",quota:req.user.role==="admin"?{unlimited:true}:undefined });
+    res.json({ answer: (data.choices?.[0]?.message?.content || "Keine Antwort") + formatTILLBOTSources(sources), sources:sources.map(({title,url})=>({title,url})), quota:req.user.role==="admin"?{unlimited:true}:undefined });
   } catch (error) {
     console.error("Chat API error:", error);
     res.status(500).json({ answer: error.name === "AbortError" ? "KI-Anfrage dauerte zu lange" : "KI-Serverfehler" });

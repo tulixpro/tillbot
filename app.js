@@ -66,6 +66,8 @@ function renderPlainAssistant(root,text){
  lines.forEach(line=>{
   const s=line.trim();if(!s){flush();closeList();return}
   const h=s.match(/^(#{1,3})\s+(.+)$/);if(h){flush();closeList();const el=document.createElement("h"+Math.min(4,h[1].length+1));el.className="assistantHeading";el.textContent=h[2];root.append(el);return}
+  const source=s.match(/^\[([^\]]+)\]\((https:\/\/[^)]+)\)$/);
+  if(source){flush();closeList();const link=document.createElement("a");link.href=source[2];link.textContent=source[1];link.target="_blank";link.rel="noopener noreferrer";link.className="assistantSourceLink";root.append(link);return}
   const bullet=s.match(/^[-*•]\s+(.+)$/),number=s.match(/^\d+[.)]\s+(.+)$/);
   if(bullet||number){flush();const ordered=!!number;if(list&&list.tagName!==(ordered?"OL":"UL"))closeList();if(!list)list=document.createElement(ordered?"ol":"ul");const li=document.createElement("li");li.textContent=(bullet||number)[1];list.append(li);return}
   closeList();paragraph.push(s)
