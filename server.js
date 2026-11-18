@@ -244,7 +244,7 @@ app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res
 async function fetchTailbotSources(query) {
   const q = String(query || "").trim().slice(0, 180);
   const factualQuery = /^(was|wer|wie|warum|wann|wo|wieso|welche|welcher|welches|erkläre|erklaere|definiere|bedeutung|geschichte|funktion|what|who|how|why|when|where|explain|define)\b/i.test(q);
-  if (q.length < 8 || !factualQuery || /(passwort|konto|adresse|telefon|e-mail|gesundheit|krankheit|symptom|diagnose|medikament|therapie|psychisch|schreib|verfass|übersetz|uebersetz|translate|rewrite|brainstorm|erfinde|gedicht|\\bich\\b|\\bmir\\b|\\bmich\\b|\\bmein(?:e|em|en|er)?\\b)/i.test(q) || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(q)) return [];
+  if (q.length < 8 || !factualQuery || /(passwort|konto|adresse|telefon|e-mail|gesundheit|krankheit|symptom|diagnose|medikament|therapie|psychisch|schreib|verfass|übersetz|uebersetz|translate|rewrite|brainstorm|erfinde|gedicht|\bich\b|\bmich\b|\bmein(?:e|em|en|er)?\b)/i.test(q) || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(q)) return [];
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4500);
   try {
