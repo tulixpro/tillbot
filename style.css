@@ -961,3 +961,13 @@ body[data-theme="light"] .learnFlashcard{background:#eef2ff;color:#17243a}
 .authProtection small{display:block;margin-top:3px;font-size:11px;line-height:1.45;color:#718198}
 .authHoneypot{position:absolute!important;left:-10000px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
 @media(prefers-color-scheme:dark){.authProtection{border-color:#ffffff18;background:linear-gradient(120deg,#17283d,#142e2b);color:#eaf0ff}.authProtection strong{color:#eaf0ff}.authProtection small{color:#a7b6ca}.authProtectionIcon{background:#203c3a}}
+
+
+/* Expanded settings and project information */
+.settingToggle{display:flex!important;align-items:center;gap:10px;margin:13px 0!important;color:var(--text)!important}
+.settingToggle input{width:18px!important;height:18px;accent-color:var(--accent);flex:0 0 auto}
+.aboutTillbot{padding:20px!important;margin:10px 0;border:1px solid var(--line)!important;border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--card) 88%,var(--accent) 12%),var(--panel))}
+.aboutTillbot h3{font-size:19px!important;margin:8px 0 12px!important}
+.aboutTillbot ul{padding-left:20px;color:var(--muted);font-size:12px;line-height:1.9}
+.aboutVersion{font-size:10px!important;letter-spacing:1px;text-transform:uppercase;opacity:.75}
+body[data-reduce-motion="true"] *,body[data-reduce-motion="true"] *::before,body[data-reduce-motion="true"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
