@@ -24,13 +24,14 @@ app.use((req, res, next) => {
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
 
 app.use("/api", (req, res, next) => { res.setHeader("Cache-Control", "no-store"); next(); });
 app.use("/api", rateLimit({ windowMs: 60_000, limit: 30, standardHeaders: true, legacyHeaders: false }));
-const loginLimit = rateLimit({ windowMs: 15 * 60_000, limit: 10, standardHeaders: true, legacyHeaders: false, message: { error: "Zu viele Anmeldeversuche. Bitte 15 Minuten warten." } });
+const loginLimit = rateLimit({ windowMs: 15 * 60_000, limit: 10, skipSuccessfulRequests: true, standardHeaders: true, legacyHeaders: false, message: { error: "Zu viele fehlgeschlagene Anmeldeversuche. Bitte 15 Minuten warten." } });
 const registerLimit = rateLimit({ windowMs: 60 * 60_000, limit: 5, standardHeaders: true, legacyHeaders: false, message: { error: "Zu viele Registrierungen von diesem Netzwerk. Bitte später erneut versuchen." } });
 app.use("/api/login", loginLimit);
 app.use("/api/register", registerLimit);
@@ -195,7 +196,7 @@ app.put("/api/admin/users/:id/role", auth, admin, async (req,res)=>{
 app.get("/api/admin/security-audit", auth, admin, async (_req,res)=>{
   const checks=[
     {name:"JWT-Schlüssel dauerhaft gesetzt",ok:!!(process.env.JWT_SECRET&&process.env.JWT_SECRET.length>=32),severity:"critical",detail:"JWT_SECRET muss in Render dauerhaft und mit mindestens 32 Zeichen gesetzt sein."},
-    {name:"Eigener Bot-Schutz aktiv",ok:true,severity:"medium",detail:"Login- und Registrierungs-Ratenlimits sowie ein serverseitiges Honeypot-Feld sind aktiv."},
+    {name:"Eigener Bot-Schutz aktiv",ok:true,severity:"medium",detail:"IP-basierte API- und Auth-Limits sowie ein serverseitiges Honeypot-Feld sind aktiv. Limits liegen aktuell im Prozessspeicher."},
     {name:"KI-API-Schlüssel gesetzt",ok:!!process.env.GROQ_API_KEY,severity:"high",detail:"GROQ_API_KEY ist erforderlich, damit Chat-Anfragen funktionieren."},
     {name:"HTTPS-Frontend",ok:String(process.env.FRONTEND_ORIGIN||"https://tulixpro.github.io").startsWith("https://"),severity:"medium",detail:"Frontend-Origin sollte HTTPS verwenden."},
     {name:"Helmet-Sicherheitsheader",ok:true,severity:"medium",detail:"Helmet ist im Express-Server aktiviert; CSP wird separat über Hosting/Policy verwaltet."},
