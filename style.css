@@ -993,3 +993,10 @@ body[data-reduce-motion="true"] *,body[data-reduce-motion="true"] *::before,body
  .composerArea>.composer #send{flex-basis:42px;width:42px;min-width:42px;height:42px}
  .composerArea>.composer #photoBtn,.composerArea>.composer #voiceBtn{padding:0 7px;font-size:11px}
 }
+
+
+/* Compact quick actions for small screens. */
+.composerArea>.powerTools{gap:5px;max-height:88px;overflow-y:auto;overflow-x:hidden;padding:1px 1px 5px;align-content:flex-start}
+.composerArea>.powerTools button{min-height:28px!important;padding:4px 8px!important;font-size:10px!important;line-height:1.15!important;font-weight:600!important;border-radius:10px!important;letter-spacing:0!important}
+.composerArea>.powerTools button[data-tool="optimize"]{border-color:#39bfae!important;color:#baf8eb!important;background:#123c3c!important}
+@media(max-width:420px){.composerArea{gap:5px}.composerArea>.powerTools{max-height:76px;gap:4px}.composerArea>.powerTools button{min-height:26px!important;padding:4px 7px!important;font-size:10px!important}}
