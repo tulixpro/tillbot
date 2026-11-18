@@ -180,7 +180,8 @@ document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("clic
  story:"Schreibe eine spannende, originelle Geschichte mit Figuren, Atmosphäre und überraschendem Ende. Vorgaben: "+(text||"[Genre oder Idee]"),
  exam:"Bereite mich auf eine Prüfung vor: Lernziele, kompakte Wiederholung, typische Fragen und danach aktives Abfragen. Fach/Thema: "+(text||"[Thema]"),
  email:"Hilf mir, eine klare und höfliche E-Mail zu schreiben. Erstelle Betreff und Nachricht, passend zum Kontext. Inhalt: "+(text||"[Was soll drinstehen?]"),
- debug:"Analysiere den Code/Fehler systematisch. Erkläre Ursache, Lösung und verbesserten Code. Bitte nichts erfinden, fehlende Infos nachfragen. Code/Fehler: "+(text||"[Code oder Fehlermeldung]")
+ debug:"Analysiere den Code/Fehler systematisch. Erkläre Ursache, Lösung und verbesserten Code. Bitte nichts erfinden, fehlende Infos nachfragen. Code/Fehler: "+(text||"[Code oder Fehlermeldung]"),
+ optimize:"Du bist Produkt- und UX-Optimierer für die Anwendung TILLBOT. Hilf mir, TILLBOT sinnvoll zu verbessern. Nenne konkrete Verbesserungen für Nutzen, Bedienung, Zuverlässigkeit, Datenschutz und Sicherheit. Priorisiere nach Wirkung und Aufwand und bevorzuge kostenlose, realistisch umsetzbare Änderungen. Behaupte nicht, Zugriff auf den Quellcode oder die Einstellungen zu haben. Wenn wichtige Informationen fehlen, stelle gezielte Rückfragen. Mein Vorschlag oder Problem: "+(text||"[Beschreibe, was an TILLBOT besser werden soll]")
  };
  p.value=templates[tool]||text;p.focus();p.dispatchEvent(new Event("input"));
 }));
