@@ -243,7 +243,8 @@ app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Math.max(1,Ma
 app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.json({unlimited:true});const q=await checkDailyQuota(req.user.id);res.json({unlimited:false,count:q.count||0,remaining:q.remaining||0,limit:q.limit||30,blocked:q.blocked||false,until:q.until||null})});
 async function fetchTailbotSources(query) {
   const q = String(query || "").trim().slice(0, 180);
-  if (q.length < 8 || /(schreib|verfass|übersetz|uebersetz|translate|rewrite|brainstorm|erfinde|gedicht|geschichte.*erfind|passwort|konto|adresse|telefon|e-mail)/i.test(q) || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(q)) return [];
+  const factualQuery = /^(was|wer|wie|warum|wann|wo|wieso|welche|welcher|welches|erkläre|erklaere|definiere|bedeutung|geschichte|funktion|what|who|how|why|when|where|explain|define)\b/i.test(q);
+  if (q.length < 8 || !factualQuery || /(passwort|konto|adresse|telefon|e-mail|gesundheit|krankheit|symptom|diagnose|medikament|therapie|psychisch|schreib|verfass|übersetz|uebersetz|translate|rewrite|brainstorm|erfinde|gedicht)/i.test(q) || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(q)) return [];
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4500);
   try {
