@@ -74,7 +74,7 @@ function admin(req, res, next) {
 }
 
 app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
-app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
+app.get("/api/status", (_req, res) => res.set("Cache-Control","no-store").json({ online:true, name:"Tailbot", project:"TILLBOT", provider:"Cloudflare Workers AI", model:process.env.CLOUDFLARE_MODEL||"@cf/qwen/qwen3.8-27b", aiConfigured:!!(process.env.CLOUDFLARE_ACCOUNT_ID&&process.env.CLOUDFLARE_API_TOKEN) }));
 
 app.put("/api/admin/announcement", auth, admin, async (req,res)=>{
  const message=String(req.body.message||"").trim().slice(0,500);
