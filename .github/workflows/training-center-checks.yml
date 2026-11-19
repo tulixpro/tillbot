@@ -8,6 +8,7 @@ on:
       - "app.js"
       - "index.html"
       - "training.html"
+      - "admin.html"
       - "training-import.js"
       - "training-import.test.js"
       - "sw.js"
@@ -32,15 +33,18 @@ jobs:
         run: node --check training-import.js
       - name: Test training import validation
         run: node --test training-import.test.js
-      - name: Check embedded training page JavaScript
+      - name: Check embedded page JavaScript
         run: |
           python3 - <<'PY'
           import re
           from pathlib import Path
-          html = Path("training.html").read_text(encoding="utf-8")
-          scripts = re.findall(r"<script>(.*?)</script>", html, flags=re.S)
-          if len(scripts) != 1:
-              raise SystemExit(f"Expected one inline script, found {len(scripts)}")
-          Path("/tmp/training-inline.js").write_text(scripts[0], encoding="utf-8")
+          for page in ("training.html", "admin.html"):
+              html = Path(page).read_text(encoding="utf-8")
+              scripts = re.findall(r"<script>(.*?)</script>", html, flags=re.S)
+              if len(scripts) != 1:
+                  raise SystemExit(f"{page}: expected one inline script, found {len(scripts)}")
+              target = Path("/tmp") / (page + ".js")
+              target.write_text(scripts[0], encoding="utf-8")
           PY
-          node --check /tmp/training-inline.js
+          node --check /tmp/training.html.js
+          node --check /tmp/admin.html.js
