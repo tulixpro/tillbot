@@ -1,106 +1,88 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101827">
-  <title>TILLBOT CORE – Browser-Demo</title>
-  <style>
-    :root{color-scheme:dark;--bg:#0b1220;--panel:#111c2e;--panel2:#17243a;--line:#263750;--text:#edf3fc;--muted:#9aabc2;--accent:#70a7ff;--user:#203b60}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#203b60 0,transparent 55%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;justify-content:center;padding:24px}
-    .app{width:min(820px,100%);display:flex;flex-direction:column;min-height:calc(100vh - 48px);background:rgba(17,28,46,.94);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 24px 80px #0006}
-    header{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px}
-    .brand{display:flex;align-items:center;gap:13px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#3979d7,#77b7ff);display:grid;place-items:center;font-weight:900;color:#071326;letter-spacing:-1px}
-    h1{font-size:19px;margin:0}.sub{font-size:13px;color:var(--muted)}.status{font-size:12px;color:#a9d8bb;border:1px solid #315e4b;background:#163426;padding:6px 10px;border-radius:99px;white-space:nowrap}
-    .notice{margin:18px 22px 0;padding:12px 14px;border:1px solid #66532e;background:#332a19;color:#f1d9a5;border-radius:12px;font-size:13px}
-    #messages{flex:1;padding:22px;display:flex;flex-direction:column;gap:14px;overflow:auto}
-    .msg{max-width:86%;padding:13px 15px;border:1px solid var(--line);border-radius:16px;background:var(--panel2);white-space:pre-wrap;overflow-wrap:anywhere}
-    .msg.user{align-self:flex-end;background:var(--user);border-color:#315783}.msg.bot{align-self:flex-start}.who{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px}
-    .suggestions{display:flex;gap:8px;flex-wrap:wrap;padding:0 22px 16px}.suggestions button{border:1px solid var(--line);background:#142239;color:#cfe0f8;border-radius:99px;padding:8px 12px;cursor:pointer}
-    form{display:flex;gap:10px;padding:16px 18px;border-top:1px solid var(--line);background:#0e1929}input{min-width:0;flex:1;border:1px solid #344963;background:#101e31;color:var(--text);padding:13px 15px;border-radius:12px;font:inherit;outline:none}input:focus{border-color:var(--accent)}button.send{border:0;background:var(--accent);color:#071326;font-weight:750;padding:0 20px;border-radius:12px;cursor:pointer}button:focus-visible{outline:2px solid white;outline-offset:3px}
-    footer{display:flex;justify-content:space-between;gap:12px;padding:0 22px 16px;color:var(--muted);font-size:12px}
-    .current-ai{margin:0 22px 18px;padding:16px;border:1px solid var(--line);border-radius:16px;background:#0d1828}
-    .current-ai h2{font-size:17px;margin:0 0 5px}.current-ai p{margin:0 0 12px;color:var(--muted);font-size:13px}
-    .current-ai iframe{display:block;width:100%;height:760px;border:1px solid var(--line);border-radius:12px;background:#fff}
-    @media(max-width:540px){.current-ai{margin:0 14px 14px;padding:12px}.current-ai iframe{height:680px}}
-    @media(max-width:540px){body{padding:0}.app{min-height:100vh;border-radius:0;border:0}.status{display:none}header{padding:18px}.notice{margin:14px 14px 0}#messages{padding:16px}.msg{max-width:94%}.suggestions{padding:0 14px 14px}form{padding:12px}footer{padding:0 14px 14px}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#081321">
+<meta name="description" content="TILLBOT CORE – transparente deutsche Browser-Demo.">
+<title>TILLBOT CORE – Deutsche KI-Forschungsdemo</title>
+<style>
+:root{color-scheme:dark;--bg:#081321;--panel:#101f31;--panel2:#14263a;--line:#263b52;--text:#edf4fc;--muted:#9aadc2;--blue:#72b5ff;--mint:#54dfbd;--user:#1b3b5d}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#1b4160 0,transparent 48%),var(--bg);color:var(--text);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.shell{width:min(1040px,calc(100% - 32px));margin:28px auto 42px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;border:1px solid var(--line);border-radius:20px;background:#0e1c2deF;box-shadow:0 18px 55px #0003}
+.brand{display:flex;align-items:center;gap:13px}.mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(140deg,#53dfbd,#68aaff);color:#071625;font-weight:900;letter-spacing:-1px;font-size:17px}.brand h1{font-size:18px;letter-spacing:-.4px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.status{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid #315d52;border-radius:99px;background:#102b2a;color:#b9f2df;font-size:11px;white-space:nowrap}.status i{width:7px;height:7px;border-radius:50%;background:var(--mint)}
+.hero{text-align:center;padding:30px 18px 22px}.eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#88b9e8;font-weight:750}.hero h2{font-size:clamp(27px,4vw,38px);letter-spacing:-1.2px;line-height:1.12;margin:10px 0}.hero p{max-width:650px;margin:0 auto;color:var(--muted);font-size:14px}
+.notice{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;margin:0 auto 16px;border:1px solid #705a31;background:#292518;border-radius:14px;color:#f0dfb8;font-size:13px}.notice strong{color:#fff0c9}.noticeIcon{font-size:18px;line-height:1}
+.chatCard{border:1px solid var(--line);border-radius:20px;background:rgba(15,29,46,.96);overflow:hidden;box-shadow:0 22px 65px #0004}.chatHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)}.chatHead strong{font-size:13px}.chatHead span{font-size:11px;color:var(--muted)}
+#messages{height:min(48vh,470px);min-height:300px;overflow:auto;display:flex;flex-direction:column;gap:13px;padding:20px}.msg{max-width:min(82%,720px);padding:13px 15px;border:1px solid var(--line);border-radius:15px;background:var(--panel2);overflow-wrap:anywhere;white-space:pre-wrap}.msg.user{align-self:flex-end;background:var(--user);border-color:#31577a;border-bottom-right-radius:5px}.msg.bot{align-self:flex-start;border-bottom-left-radius:5px}.who{margin-bottom:5px;color:#9db2c9;font-size:10px;font-weight:750;letter-spacing:1px;text-transform:uppercase}.msg.user .who{color:#b9d7f6}
+.quickbar{display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 15px}.quickbar button,.toolbar button{border:1px solid #314963;background:#14283e;color:#d9e8f8;border-radius:10px;padding:8px 11px;font-size:12px;font-weight:600;transition:.15s}.quickbar button:hover,.toolbar button:hover{border-color:#5a9bd0;background:#1b3853}
+.composer{display:flex;align-items:flex-end;gap:10px;padding:15px 18px;border-top:1px solid var(--line);background:#0b1929}.composer textarea{flex:1;min-width:0;min-height:48px;max-height:130px;resize:vertical;border:1px solid #344b65;border-radius:13px;padding:12px 14px;background:#101f31;color:var(--text);outline:none}.composer textarea:focus{border-color:#69aef0}.send{min-height:46px;padding:0 19px;border:0;border-radius:12px;background:linear-gradient(135deg,#5bdfbf,#75b7ff);color:#071726;font-weight:800}.send:disabled{opacity:.45;cursor:not-allowed}.chatFoot{display:flex;justify-content:space-between;gap:12px;padding:0 18px 14px;color:#8198b0;font-size:11px}
+details.tutorial{margin:16px 0;border:1px solid var(--line);border-radius:15px;background:#0e1c2d;padding:14px 16px}details summary{cursor:pointer;font-weight:700;font-size:13px} .tutorialGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.tutorialGrid article{padding:13px;border:1px solid #263a50;border-radius:12px;background:#14263a}.tutorialGrid article p,.tutorial>p{margin:6px 0 0;color:var(--muted);font-size:12px}
+.currentAi{margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:18px;background:#0e1c2d}.currentAi h2{margin:0 0 5px;font-size:17px}.currentAi p{margin:0 0 14px;color:var(--muted);font-size:12px}.currentAi iframe{display:block;width:100%;height:720px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.footer{display:flex;justify-content:space-between;gap:12px;margin-top:15px;color:#8195aa;font-size:11px}
+@media(max-width:620px){.shell{width:100%;margin:0 auto 24px}.topbar{border-radius:0;padding:15px 16px}.hero{padding:25px 16px 18px}.notice{margin:0 12px 12px}.chatCard{border-left:0;border-right:0;border-radius:0}#messages{height:48vh;min-height:260px;padding:14px}.msg{max-width:94%}.composer{padding:12px;gap:7px}.send{padding:0 13px}.tutorialGrid{grid-template-columns:1fr}details.tutorial{margin:12px}.currentAi{margin:16px 12px;padding:13px}.currentAi iframe{height:680px}.footer{padding:0 12px;flex-direction:column}}
+</style>
 </head>
 <body>
-  <main class="app">
-    <header>
-      <div class="brand"><div class="logo" aria-hidden="true">TB</div><div><h1>TILLBOT CORE</h1><div class="sub">Interaktive Browser-Demo · Deutsch</div></div></div>
-      <div class="status">● Demo bereit</div>
-    </header>
-    <div class="notice"><strong>Transparenter Prototyp:</strong> Diese erste Demo nutzt feste Regeln und vorbereitete Antworten. Sie ist kein trainiertes Sprachmodell und lernt nicht aus deinen Nachrichten. Alles läuft lokal in dieser Browserseite.</div>
-    <section id="messages" aria-live="polite" aria-label="Chatverlauf">
-      <div class="msg bot"><div class="who">TILLBOT CORE</div>Hallo! Ich bin die TILLBOT-CORE-Browserdemo. Ich kann dir zeigen, welche Funktionen bereits als Prototyp vorhanden sind. Frag mich zum Beispiel, wer ich bin oder was als Nächstes geplant ist.</div>
-    </section>
-    <div class="suggestions" aria-label="Beispielfragen">
-      <button type="button" data-prompt="Was kannst du?">Was kannst du?</button>
-      <button type="button" data-prompt="Was ist TILLBOT CORE?">Was ist TILLBOT CORE?</button>
-      <button type="button" data-prompt="Wie geht es weiter?">Wie geht es weiter?</button>
-    </div>
-    <form id="chat-form">
-      <input id="message-input" autocomplete="off" maxlength="500" placeholder="Schreib eine Nachricht …" aria-label="Deine Nachricht">
-      <button class="send" type="submit">Senden</button>
-    </form>
-    <section class="current-ai" aria-labelledby="current-ai-title">
-      <h2 id="current-ai-title">Aktuelle TILLBOT-KI</h2>
-      <p>Hier kannst du zusätzlich den bestehenden TILLBOT-Assistenten verwenden. Melde dich im eingebetteten Bereich mit deinem TILLBOT-Konto an. Dieser Chat nutzt den bestehenden TILLBOT-Dienst – nicht das experimentelle CORE-Modell.</p>
-      <iframe src="./" title="Aktueller TILLBOT-KI-Chat" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="microphone"></iframe>
-    </section>
-    <footer><span>CORE-Prototyp · Aktuelle KI separat · Keine Übertragung im CORE-Chat</span><span id="count">0 Nachrichten</span></footer>
-  </main>
-  <script>
-    (() => {
-      const form = document.getElementById('chat-form');
-      const input = document.getElementById('message-input');
-      const messages = document.getElementById('messages');
-      const count = document.getElementById('count');
-      let sent = 0;
-      function answer(text) {
-        const q = text.toLocaleLowerCase('de').replace(/[?!.,]/g, ' ').replace(/\s+/g, ' ').trim();
-        if (/^(hi|hallo|hey|guten morgen|guten tag|moin)\b/.test(q)) return 'Hallo! Schön, dass du die TILLBOT-Demo ausprobierst. Was möchtest du wissen?';
-        if (q.includes('was kannst') || q.includes('funktionen') || q.includes('hilfe')) return 'In dieser Demo kann ich einige Fragen zu TILLBOT CORE beantworten und den Chatablauf zeigen. Freie Wissensfragen, Websuche, langfristiges Gedächtnis und echtes Lernen sind noch nicht eingebaut.';
-        if (q.includes('wer bist') || q.includes('was ist tillbot') || q.includes('tillbot core')) return 'TILLBOT CORE ist das Projekt für ein eigenständiges Sprachmodell mit eigener Tokenisierung, Modellarchitektur, Trainingspipeline und Laufzeit. Der aktuelle Stand ist ein experimenteller Prototyp – noch kein leistungsfähiger Assistent.';
-        if (q.includes('wie geht') || q.includes('nächste') || q.includes('weiter')) return 'Die nächsten Schritte sind: Modell- und Datenpipeline stabilisieren, rechtlich geprüfte deutsche Trainingsdaten vorbereiten, reproduzierbare Tests bestehen lassen und erst danach kontrolliert trainieren und evaluieren.';
-        if (q.includes('lernst') || q.includes('lernen') || q.includes('merkst')) return 'Nein. Diese Browserdemo speichert und trainiert nichts aus dem Chat. Nachrichten bleiben nur während dieser geöffneten Seite im sichtbaren Verlauf.';
-        if (q.includes('internet') || q.includes('online') || q.includes('daten')) return 'Diese Demo benötigt keine API und sendet deine Nachrichten nicht an einen Server. Die Antworten kommen aus eingebauten Regeln und Textbausteinen.';
-        if (q.includes('deutsch') || q.includes('sprache')) return 'Deutsch ist die erste Zielsprache für TILLBOT CORE. Diese Demo und ihre vorbereiteten Antworten sind auf Deutsch.';
-        if (q.includes('danke')) return 'Gern! Wenn du möchtest, probiere noch eine der Beispielfragen aus.';
-        return 'Das kann ich in dieser frühen Demo noch nicht zuverlässig beantworten. Im Moment kenne ich nur einige vorbereitete Themen rund um TILLBOT CORE. Das eigentliche Sprachmodell muss noch entwickelt und trainiert werden.';
-      }
-      function addMessage(text, role) {
-        const item = document.createElement('div');
-        item.className = 'msg ' + role;
-        const who = document.createElement('div');
-        who.className = 'who';
-        who.textContent = role === 'user' ? 'Du' : 'TILLBOT CORE';
-        const body = document.createElement('div');
-        body.textContent = text;
-        item.append(who, body);
-        messages.appendChild(item);
-        messages.scrollTop = messages.scrollHeight;
-      }
-      function send(text) {
-        const value = text.trim();
-        if (!value) return;
-        addMessage(value, 'user');
-        addMessage(answer(value), 'bot');
-        sent++;
-        count.textContent = sent + (sent === 1 ? ' Nachricht' : ' Nachrichten');
-      }
-      form.addEventListener('submit', event => {
-        event.preventDefault();
-        send(input.value);
-        input.value = '';
-        input.focus();
-      });
-      document.querySelectorAll('[data-prompt]').forEach(button => {
-        button.addEventListener('click', () => send(button.dataset.prompt));
-      });
-    })();
-  </script>
+<main class="shell">
+<header class="topbar"><div class="brand"><div class="mark" aria-hidden="true">TC</div><div><h1>TILLBOT CORE</h1><p>Eigenständiges Sprachmodell · Deutsch zuerst</p></div></div><div class="status"><i></i> Forschungsdemo</div></header>
+<section class="hero"><span class="eyebrow">CORE · BROWSER-PROTOTYP</span><h2>Ein eigener KI-Kern. Schritt für Schritt.</h2><p>Hier kannst du die Oberfläche und die vorbereiteten CORE-Antworten testen. Der eigentliche Modellkern wird separat entwickelt und trainiert.</p></section>
+<div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Browserdemo verwendet feste Regeln und vorbereitete Antworten. Sie ist noch kein trainiertes Sprachmodell, kann keine freien Wissensfragen zuverlässig beantworten und lernt nicht aus deinen Nachrichten. Der Demo-Chat überträgt keine Nachrichten an einen Server.</div></div>
+<section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
+<div class="chatHead"><strong>CORE-Testchat</strong><span>Lokale Demo · keine Anmeldung</span></div>
+<div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Ich kann dir den aktuellen Projektstand und meine Demo-Funktionen erklären. Wähle eine Frage oder schreibe direkt los.</div></div>
+<div class="quickbar" aria-label="Beispielfragen">
+<button type="button" data-prompt="Was kannst du?">Was kannst du?</button>
+<button type="button" data-prompt="Was ist TILLBOT CORE?">Was ist CORE?</button>
+<button type="button" data-prompt="Wie geht es weiter?">Nächste Schritte</button>
+<button type="button" data-prompt="Lernst du aus meinen Nachrichten?">Lernst du mit?</button>
+</div>
+<form class="composer" id="chat-form"><textarea id="message-input" rows="1" maxlength="500" placeholder="Nachricht an TILLBOT CORE …" aria-label="Nachricht an TILLBOT CORE"></textarea><button class="send" id="send" type="submit" disabled>Senden ↑</button></form>
+<div class="chatFoot"><span>Enter senden · Shift + Enter für Zeilenumbruch</span><span id="count">0 Nachrichten</span></div>
+</section>
+<details class="tutorial">
+<summary>📘 Tutorial: Was kann CORE schon – und was noch nicht?</summary>
+<div class="tutorialGrid">
+<article><strong>✓ Bereits testbar</strong><p>Chat-Oberfläche, Beispiel-Fragen und vorbereitete Antworten über CORE, den Entwicklungsstand, Deutsch als Zielsprache und die nächsten Schritte.</p></article>
+<article><strong>⌛ Noch in Entwicklung</strong><p>Freie Wissensfragen, echte Recherche, Bildverständnis, dauerhaftes Gedächtnis und selbstständiges Lernen. Dafür braucht CORE ein trainiertes Modell und weitere geprüfte Funktionen.</p></article>
+</div>
+<p><strong>Hinweis:</strong> Bitte keine vertraulichen Informationen eingeben. Die Demo speichert den Chat nicht dauerhaft.</p>
+</details>
+<section class="currentAi" aria-labelledby="current-ai-title"><h2 id="current-ai-title">Bestehender TILLBOT-Assistent</h2><p>Dieser Bereich öffnet die aktuelle TILLBOT-Anwendung. Sie ist vom experimentellen CORE-Prototyp getrennt und benötigt dein normales TILLBOT-Konto.</p><iframe src="./" title="Bestehender TILLBOT-Assistent" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="microphone"></iframe></section>
+<footer class="footer"><span>TILLBOT CORE · Forschungsprototyp</span><span id="demo-status">Keine Verbindung zu einem Modellserver</span></footer>
+</main>
+<script>
+(()=>{
+ if(new URLSearchParams(window.location.search).has('embed'))document.querySelector('.currentAi')?.remove();
+ const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count');
+ let sent=0;
+ const answer=text=>{
+  const q=text.toLocaleLowerCase('de').replace(/[?!.,]/g,' ').replace(/\s+/g,' ').trim();
+  if(/^(hi|hallo|hey|guten morgen|guten tag|moin)\b/.test(q))return'Hallo! Schön, dass du TILLBOT CORE testest. Was möchtest du über den Prototyp wissen?';
+  if(q.includes('was kannst')||q.includes('funktionen')||q.includes('hilfe'))return'In dieser Demo kann ich einige vorbereitete Fragen zu TILLBOT CORE beantworten und den Chatablauf zeigen. Freie Wissensfragen, Websuche, langfristiges Gedächtnis und echtes Lernen sind noch nicht eingebaut.';
+  if(q.includes('wer bist')||q.includes('was ist tillbot')||q.includes('tillbot core')||q==='was ist core')return'TILLBOT CORE ist das Projekt für ein eigenständiges Sprachmodell mit eigener Tokenisierung, Modellarchitektur, Trainingspipeline und Laufzeit. Der aktuelle Stand ist ein experimenteller Prototyp – noch kein leistungsfähiger Assistent.';
+  if(q.includes('wie geht')||q.includes('nächste')||q.includes('weiter'))return'Die nächsten Schritte sind: Trainingspipeline messbar und reproduzierbar machen, rechtlich geprüfte deutsche Trainingsdaten vorbereiten, Tests bestehen lassen und erst danach kontrolliert trainieren und evaluieren.';
+  if(q.includes('lernst')||q.includes('lernen')||q.includes('merkst'))return'Nein. Diese Browserdemo trainiert nicht aus dem Chat und speichert nichts dauerhaft. Die Nachrichten sind nur während dieser geöffneten Seite im sichtbaren Verlauf.';
+  if(q.includes('internet')||q.includes('online')||q.includes('daten'))return'Diese Demo benötigt keine API und sendet deine Nachrichten nicht an einen Server. Die Antworten kommen aus eingebauten Regeln und Textbausteinen.';
+  if(q.includes('deutsch')||q.includes('sprache'))return'Deutsch ist die erste Zielsprache für TILLBOT CORE. Die Oberfläche und die vorbereiteten Antworten dieser Demo sind auf Deutsch.';
+  if(q.includes('danke'))return'Gern! Du kannst weitere Beispielfragen anklicken oder direkt eine Frage zum Projekt stellen.';
+  return'Das kann ich in dieser frühen Demo noch nicht zuverlässig beantworten. Im Moment kenne ich nur einige vorbereitete Themen rund um TILLBOT CORE. Das eigentliche Sprachmodell muss noch entwickelt und trainiert werden.';
+ };
+ function add(text,role){
+  const item=document.createElement('div');item.className='msg '+role;
+  const who=document.createElement('div');who.className='who';who.textContent=role==='user'?'Du':'TILLBOT CORE';
+  const body=document.createElement('div');body.textContent=text;item.append(who,body);messages.append(item);messages.scrollTop=messages.scrollHeight;
+ }
+ function submit(text){
+  const value=text.trim();if(!value)return;
+  add(value,'user');add(answer(value),'bot');sent++;count.textContent=sent+(sent===1?' Nachricht':' Nachrichten');
+ }
+ form.addEventListener('submit',e=>{e.preventDefault();submit(input.value);input.value='';send.disabled=true;input.focus()});
+ input.addEventListener('input',()=>{send.disabled=!input.value.trim()});
+ input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!send.disabled)form.requestSubmit()}});
+ document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{submit(button.dataset.prompt);input.focus()}));
+})();
+</script>
 </body>
 </html>

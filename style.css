@@ -1251,3 +1251,56 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* 2026 workspace polish: compact tools, predictable composer, responsive spacing */
+#app main{min-width:0;min-height:0}
+#app .chat{min-height:0;overscroll-behavior:contain}
+#app .composerArea{flex:0 0 auto;width:100%;min-width:0;position:relative!important;bottom:auto!important;padding:10px clamp(14px,3vw,30px) max(14px,env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,transparent,rgba(7,17,30,.94) 28%,#07111e 100%)!important;backdrop-filter:blur(14px)}
+#app .toolsToggle{display:inline-flex!important;align-items:center;gap:8px;min-height:36px!important;margin:0 auto 8px!important;padding:8px 13px!important;border:1px solid rgba(120,175,210,.25)!important;border-radius:11px!important;background:rgba(17,35,53,.92)!important;color:#c8d9e8!important;font-size:12px!important;font-weight:650!important;box-shadow:none!important;cursor:pointer}
+#app .toolsToggle:hover{border-color:rgba(88,184,255,.65)!important;background:#142b40!important}
+#app .composerArea>.powerTools{display:none!important;max-width:900px;max-height:min(34vh,230px);overflow:auto;overscroll-behavior:contain;margin:0 auto 10px!important;padding:10px!important;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px!important;border:1px solid rgba(130,170,205,.15);border-radius:16px;background:rgba(9,23,37,.96);box-shadow:0 14px 35px rgba(0,0,0,.18)}
+#app .composerArea>.powerTools.toolsExpanded{display:grid!important}
+#app .composerArea>.powerTools button{min-width:0;min-height:38px;padding:8px 10px!important;border:1px solid rgba(135,175,210,.18)!important;border-radius:10px!important;background:rgba(25,45,65,.9)!important;color:#d9e9f7!important;font-size:12px!important;font-weight:600;white-space:normal;line-height:1.25;text-align:left;box-shadow:none!important}
+#app .composerArea>.powerTools button:hover{background:#1b3c55!important;border-color:rgba(88,184,255,.55)!important;transform:translateY(-1px)}
+#app .composer{width:min(900px,100%);min-width:0;margin:0 auto!important;align-items:flex-end}
+#app .composerTools{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+#app .composerTools button{flex:0 0 auto}
+#app #prompt{min-width:0}
+#app .composerArea>small{max-width:900px;margin:7px auto 0;text-align:right}
+@media(max-width:760px){
+ #app .composerArea{padding:7px 10px max(10px,env(safe-area-inset-bottom))!important}
+ #app .composerArea>.powerTools{grid-template-columns:repeat(2,minmax(0,1fr));max-height:28vh;padding:8px!important}
+ #app .composerArea>.powerTools button{min-height:36px!important;font-size:11px!important}
+ #app .toolsToggle{min-height:34px!important;margin-bottom:6px!important}
+ #app .composer{border-radius:18px!important}
+ #app .composerArea>small{text-align:center}
+}
+@media(min-width:761px){#app .welcome{max-width:760px}}
+
+
+/* Refined workspace navigation and selectable CORE demo */
+#sidebar{width:276px;min-width:276px;padding:22px 16px 16px;border-right:1px solid rgba(150,210,235,.13);background:linear-gradient(180deg,rgba(7,27,46,.98),rgba(5,20,36,.98));box-shadow:12px 0 38px rgba(0,0,0,.12)}
+#sidebar .brand{padding:4px 8px 18px}
+#sidebar .label{margin:24px 8px 10px;font-weight:800;letter-spacing:1.7px}
+#sidebar .newChat{width:100%;border-radius:14px;font-weight:750;min-height:46px}
+#sidebar .learnModeBtn{width:100%;margin-top:9px;border-radius:12px;text-align:left;padding:12px 13px;background:rgba(80,150,190,.12);border:1px solid rgba(120,190,225,.2);color:#d8f1ff}
+#history{gap:5px;max-height:calc(100dvh - 330px);padding:2px 0 12px}
+#history button{border-radius:10px;padding:10px 12px;line-height:1.35}
+#sidebar .sidebottom{padding-top:12px;border-top:1px solid rgba(150,210,235,.13)}
+#sidebar .sidebottom button{border-radius:10px;padding:10px 12px;color:#c8ddec;transition:background .15s,border-color .15s}
+#sidebar .sidebottom button:hover{background:rgba(110,180,220,.13);border-color:rgba(130,205,240,.25)}
+#sidebar .sideProfile{padding:14px 6px 4px}
+#sidebar .sideProfile small{display:block;color:#8caabe;font-size:11px;margin-top:2px}
+.demoPicker{flex:0 0 auto;padding:16px 24px 22px;border-top:1px solid rgba(140,220,240,.13);background:rgba(5,22,38,.88)}
+.demoPickerCopy{max-width:900px;margin:0 auto 10px}
+.demoPickerCopy .eyebrow{font-size:9px}
+.demoPickerCopy h2{margin:3px 0;font-size:16px;color:#effaff}
+.demoPickerCopy p{margin:0;color:#91b6ce;font-size:12px}
+.demoPicker>label{display:block;max-width:900px;margin:0 auto 5px;color:#b7d2e4;font-size:11px;font-weight:700}
+.demoPicker>select{display:block;width:min(900px,100%);margin:0 auto;padding:11px 13px;border:1px solid rgba(130,205,240,.25);border-radius:12px;background:#0c2b43;color:#eaf6ff}
+.demoFrameWrap{max-width:1100px;margin:14px auto 0;border:1px solid rgba(130,205,240,.22);border-radius:16px;overflow:hidden;background:#081827}
+.demoFrameHead{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;color:#d9f1ff;font-size:12px}
+.demoFrameHead button{border:1px solid rgba(130,205,240,.25);border-radius:9px;padding:7px 10px;background:#102d44;color:#d9f1ff}
+#demoFrame{display:block;width:100%;height:min(78vh,760px);border:0;background:#081321}
+@media(max-width:760px){#sidebar{width:min(86vw,320px);min-width:0;padding:16px}.demoPicker{padding:12px 12px max(16px,env(safe-area-inset-bottom))}.demoPickerCopy p{font-size:11px}#demoFrame{height:72vh}}
