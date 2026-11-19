@@ -1067,3 +1067,16 @@ body::before,body::after{content:none!important;display:none!important;backgroun
  .welcome h1{font-size:clamp(26px,7vw,32px)!important;letter-spacing:-1.2px!important}
  .welcome .muted{font-size:14px!important;line-height:1.5}
 }
+
+
+/* Keep the anti-bot honeypot completely outside the visible signup layout. */
+.authRebuilt .authHoneypot,
+.authRebuilt .authHoneypot label,
+.authRebuilt .authHoneypot input{
+ position:fixed!important;left:-10000px!important;top:0!important;
+ width:1px!important;height:1px!important;max-width:1px!important;
+ max-height:1px!important;overflow:hidden!important;opacity:0!important;
+ pointer-events:none!important;clip-path:inset(50%)!important;
+ white-space:nowrap!important;margin:0!important;padding:0!important;
+ border:0!important;display:block!important;
+}
