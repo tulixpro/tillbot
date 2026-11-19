@@ -11,6 +11,7 @@ import time
 import torch
 
 from model import TillbotCore
+from tokenizer_runtime import tokenizer_from_checkpoint, encode_text
 
 
 def timed_generate(model, prompt, tokens, use_cache, device):
@@ -39,10 +40,11 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     state = torch.load(args.checkpoint, map_location=device, weights_only=True)
+    tokenizer = tokenizer_from_checkpoint(state)
     model = TillbotCore(**state["config"]).to(device)
     model.load_state_dict(state["model_state"])
     model.eval()
-    prompt_ids = list(args.prompt.encode("utf-8"))[-model.context:]
+    prompt_ids = encode_text(args.prompt, tokenizer)[-model.context:]
     prompt = torch.tensor(prompt_ids, dtype=torch.long, device=device)[None, :]
 
     # Warm up both paths so first-call setup does not dominate the comparison.
@@ -67,7 +69,7 @@ def main():
         raise SystemExit("Greedy outputs differ: investigate cache correctness before comparing speed.")
     print({
         "device": str(device),
-        "prompt_bytes": len(prompt_ids),
+        "prompt_tokens": len(prompt_ids),
         "generated_bytes": args.tokens,
         "repeats": args.repeats,
         "results": results,
