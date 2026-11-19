@@ -1368,3 +1368,30 @@ header{background:rgba(25,21,40,.88)!important;border-color:rgba(190,170,255,.13
 @media(max-width:700px){
   #chat::before{width:min(76%,390px);opacity:.065}
 }
+
+
+/* FINAL FIX: compact, consistent buttons on desktop and mobile */
+#app .suggestions{gap:6px!important}
+#app .suggestions button{
+  min-height:29px!important;height:auto!important;padding:5px 8px!important;
+  border-radius:8px!important;font-size:10px!important;line-height:1.1!important;
+}
+#app .composerArea #togglePowerTools{
+  min-height:29px!important;height:29px!important;padding:5px 9px!important;
+  font-size:10px!important;border-radius:8px!important;
+}
+#app .composerArea>.powerTools{gap:5px!important;padding:7px!important}
+#app .composerArea>.powerTools button{
+  min-height:29px!important;padding:5px 7px!important;
+  font-size:10px!important;line-height:1.1!important;border-radius:8px!important;
+}
+#app .composerTools button{
+  min-width:30px!important;min-height:30px!important;height:30px!important;
+  padding:4px 6px!important;font-size:10px!important;border-radius:8px!important;
+}
+#app #send{min-width:32px!important;min-height:32px!important;height:32px!important}
+@media(max-width:760px){
+  #app .suggestions button{min-height:27px!important;padding:4px 7px!important;font-size:9px!important}
+  #app .composerArea>.powerTools button{min-height:25px!important;padding:4px 6px!important;font-size:9px!important}
+  #app .composerTools button{min-width:28px!important;min-height:29px!important;height:29px!important}
+}
