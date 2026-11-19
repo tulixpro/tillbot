@@ -64,7 +64,7 @@ class Block(nn.Module):
 
 
 class TillbotCore(nn.Module):
-    """Small GPT-style language model with 256 possible byte tokens."""
+    """Small GPT-style language model with a configurable token vocabulary."""
 
     def __init__(self, width: int = 128, heads: int = 4, layers: int = 4,
                  context: int = 256, dropout: float = 0.1, vocab_size: int = 256):
@@ -101,7 +101,7 @@ class TillbotCore(nn.Module):
         if tokens.ndim != 2 or tokens.size(1) == 0:
             raise ValueError("tokens must be a non-empty [batch, sequence] tensor")
         if tokens.dtype != torch.long:
-            raise ValueError("tokens must use torch.long byte IDs")
+            raise ValueError("tokens must use torch.long vocabulary IDs")
         _, length = tokens.shape
         if torch.any((tokens < 0) | (tokens >= self.vocab_size)):
             raise ValueError(f"token IDs must be in the vocabulary range 0..{self.vocab_size - 1}")
@@ -143,7 +143,7 @@ class TillbotCore(nn.Module):
                  temperature: float = 0.8, top_k: int = 40,
                  repetition_penalty: float = 1.0, do_sample: bool = True,
                  use_cache: bool = True) -> torch.Tensor:
-        """Generate bytes, using a KV cache for faster token-by-token decoding."""
+        """Generate token IDs, using a KV cache for faster token-by-token decoding."""
         if tokens.ndim != 2 or tokens.size(0) < 1 or tokens.size(1) < 1:
             raise ValueError("tokens must be a non-empty [batch, sequence] tensor")
         if tokens.dtype != torch.long or torch.any((tokens < 0) | (tokens >= self.vocab_size)):
