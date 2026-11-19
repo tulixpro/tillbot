@@ -199,6 +199,16 @@ class TrainingSmokeTests(unittest.TestCase):
             self.assertTrue(checkpoint.is_file())
             self.assertTrue(checkpoint.with_suffix(".metrics.jsonl").is_file())
             self.assertTrue(checkpoint.with_suffix(".last.pt").is_file())
+            report = root / "probe.md"
+            probe = subprocess.run(
+                [sys.executable, str(ROOT / "probe.py"), "--checkpoint", str(checkpoint),
+                 "--out", str(report), "--tokens", "2"],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(probe.returncode, 0, probe.stderr)
+            self.assertTrue(report.is_file())
+            self.assertIn("prompt injection", report.read_text(encoding="utf-8"))
+
 
 
 if __name__ == "__main__":
