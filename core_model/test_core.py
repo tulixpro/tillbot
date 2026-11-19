@@ -92,9 +92,6 @@ class DatasetPreparationTests(unittest.TestCase):
 
 
 class DatasetAuditTests(unittest.TestCase):
-
-
-class DatasetAuditTests(unittest.TestCase):
     def test_detects_duplicates_and_private_data_patterns_without_printing_values(self):
         with tempfile.TemporaryDirectory() as temp:
             source = Path(temp) / "source"
@@ -129,6 +126,79 @@ class DatasetAuditTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             report = json.loads(report_path.read_text(encoding="utf-8"))
             self.assertEqual(report["documents"][0]["status"], "invalid_utf8")
+
+class JsonlImportTests(unittest.TestCase):
+    def test_imports_tillbot_jsonl_and_deduplicates(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "examples.jsonl"
+            row = {"messages":[{"role":"user","content":"Was ist KI?"},{"role":"assistant","content":"KI ist ein Forschungsfeld."}]}
+            source.write_text(json.dumps(row, ensure_ascii=False)+"\\n"+json.dumps(row, ensure_ascii=False)+"\\n", encoding="utf-8")
+            output = root / "documents"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "import_jsonl.py"), "--input", str(source),
+                 "--out-dir", str(output), "--confirm-licensed-data"],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((output / "example-000001.txt").is_file())
+            self.assertFalse((output / "example-000002.txt").exists())
+            manifest = json.loads((output / "import-manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["unique_examples"], 1)
+
+    def test_import_requires_rights_confirmation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "examples.jsonl"
+            source.write_text(json.dumps({"prompt":"Was ist KI?","completion":"KI ist ein Forschungsfeld."}), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "import_jsonl.py"), "--input", str(source),
+                 "--out-dir", str(root / "out")], capture_output=True, text=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("--confirm-licensed-data", result.stderr)
+
+    def test_rejects_nonempty_output_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "examples.jsonl"
+            source.write_text(json.dumps({"prompt":"Was ist KI?","completion":"KI ist ein Forschungsfeld."}), encoding="utf-8")
+            output = root / "out"
+            output.mkdir()
+            (output / "keep.txt").write_text("keep", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "import_jsonl.py"), "--input", str(source),
+                 "--out-dir", str(output), "--confirm-licensed-data"],
+                capture_output=True, text=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("must be empty", result.stderr)
+
+
+class TrainingSmokeTests(unittest.TestCase):
+    def test_tiny_cpu_training_writes_checkpoint_and_metrics(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            corpus = root / "corpus.txt"
+            corpus.write_text(
+                "Erster Beispieldialog mit genügend Text für das Training.\\n\\n"
+                "Zweiter Beispieldialog mit genügend Text für die Validierung.\\n\\n"
+                "Dritter Beispieldialog für einen kleinen Testlauf.\\n\\n"
+                "Vierter Beispieldialog zum Prüfen des Trainingsablaufs.",
+                encoding="utf-8",
+            )
+            checkpoint = root / "model.pt"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "train.py"), "--data", str(corpus),
+                 "--out", str(checkpoint), "--steps", "2", "--batch-size", "2",
+                 "--context", "8", "--width", "8", "--heads", "2", "--layers", "1",
+                 "--eval-interval", "1", "--eval-batches", "1", "--patience", "2"],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(checkpoint.is_file())
+            self.assertTrue(checkpoint.with_suffix(".metrics.jsonl").is_file())
+            self.assertTrue(checkpoint.with_suffix(".last.pt").is_file())
 
 
 if __name__ == "__main__":
