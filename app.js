@@ -204,24 +204,24 @@ document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("clic
 (()=>{
  const lang=()=> $("language")?.value==="English"?"en":"de";
  const copy=()=>lang()==="en"?{
-  button:"🧠 TILLBOT Learn",title:"Your learning space",intro:"Create flashcards from notes or a photo, then test yourself.",source:"Paste notes or describe what you want to learn",placeholder:"Paste your notes, vocabulary or topic here…",photo:"Add a photo",create:"Create flashcards",deck:"Your flashcards",empty:"No flashcards yet. Add notes above to create your first deck.",start:"Start quiz",front:"Question",reveal:"Show answer",known:"I knew it",again:"Practice again",next:"Next card",close:"Close",working:"Creating your flashcards…",fail:"Could not create flashcards. Please try again.",saved:"Flashcards saved on this device.",count:"cards",remove:"Clear deck",photoReady:"Photo added ✓",noContent:"Add notes or a photo first.",done:"Round complete!",score:"You knew",of:"of"
+  button:"🧠 TILLBOT Learn",title:"Your learning space",intro:"Create flashcards from notes or a photo, then test yourself.",source:"Paste notes or describe what you want to learn",placeholder:"Paste your notes, vocabulary or topic here…",photo:"Add a photo",create:"Create flashcards",deck:"Your flashcards",empty:"No flashcards yet. Add notes above to create your first deck.",start:"Start quiz",shuffle:"Shuffle cards",retry:"Review missed cards",front:"Question",reveal:"Show answer",known:"I knew it",again:"Practice again",next:"Next card",close:"Close",working:"Creating your flashcards…",fail:"Could not create flashcards. Please try again.",saved:"Flashcards saved on this device.",count:"cards",remove:"Clear deck",photoReady:"Photo added ✓",noContent:"Add notes or a photo first.",done:"Round complete!",score:"You knew",of:"of"
  }:{
-  button:"🧠 TILLBOT Lernen",title:"Dein Lernbereich",intro:"Erstelle Karteikarten aus Lernzetteln oder Fotos und teste dein Wissen.",source:"Füge Lernstoff ein oder beschreibe dein Thema",placeholder:"Lernzettel, Vokabeln oder Thema hier einfügen …",photo:"Foto hinzufügen",create:"Karteikarten erstellen",deck:"Deine Karteikarten",empty:"Noch keine Karteikarten. Füge oben Lernstoff ein, um dein erstes Set zu erstellen.",start:"Abfrage starten",front:"Frage",reveal:"Antwort anzeigen",known:"Wusste ich",again:"Noch üben",next:"Nächste Karte",close:"Schließen",working:"Deine Karteikarten werden erstellt …",fail:"Karteikarten konnten nicht erstellt werden. Bitte erneut versuchen.",saved:"Karteikarten wurden auf diesem Gerät gespeichert.",count:"Karten",remove:"Set leeren",photoReady:"Foto hinzugefügt ✓",noContent:"Füge zuerst Text oder ein Foto hinzu.",done:"Runde geschafft!",score:"Du konntest",of:"von"
+  button:"🧠 TILLBOT Lernen",title:"Dein Lernbereich",intro:"Erstelle Karteikarten aus Lernzetteln oder Fotos und teste dein Wissen.",source:"Füge Lernstoff ein oder beschreibe dein Thema",placeholder:"Lernzettel, Vokabeln oder Thema hier einfügen …",photo:"Foto hinzufügen",create:"Karteikarten erstellen",deck:"Deine Karteikarten",empty:"Noch keine Karteikarten. Füge oben Lernstoff ein, um dein erstes Set zu erstellen.",start:"Abfrage starten",shuffle:"Karten mischen",retry:"Schwierige Karten wiederholen",front:"Frage",reveal:"Antwort anzeigen",known:"Wusste ich",again:"Noch üben",next:"Nächste Karte",close:"Schließen",working:"Deine Karteikarten werden erstellt …",fail:"Karteikarten konnten nicht erstellt werden. Bitte erneut versuchen.",saved:"Karteikarten wurden auf diesem Gerät gespeichert.",count:"Karten",remove:"Set leeren",photoReady:"Foto hinzugefügt ✓",noContent:"Füge zuerst Text oder ein Foto hinzu.",done:"Runde geschafft!",score:"Du konntest",of:"von"
  };
- let sourceImage=null,deck=[],position=0,known=0,revealed=false,quiz=false;
+ let sourceImage=null,deck=[],sessionDeck=[],missedCards=[],position=0,known=0,revealed=false,quiz=false;
  try{deck=JSON.parse(localStorage.getItem("tb-learn-deck")||"[]");if(!Array.isArray(deck))deck=[]}catch{deck=[]}
  const button=$("learnModeBtn")||document.createElement("button");button.id="learnModeBtn";button.className="learnModeBtn";button.type="button";button.textContent=copy().button;
  if(!button.isConnected)$("newChat")?.after(button);
  const dialog=document.createElement("dialog");dialog.id="learnDialog";dialog.className="learnDialog";
- dialog.innerHTML='<div class="learnHead"><span class="learnKicker">TILLBOT · STUDY SPACE</span><h2 id="learnTitle"></h2><p id="learnIntro"></p></div><section id="learnCreator" class="learnCreator"><label id="learnSourceLabel" for="learnSource"></label><textarea id="learnSource" rows="5"></textarea><div class="learnControls"><input id="learnPhoto" type="file" accept="image/*" hidden><button id="learnPhotoBtn" type="button"></button><span id="learnPhotoStatus" aria-live="polite"></span><button id="learnCreateBtn" class="primary" type="button"></button></div><p id="learnMessage" class="learnMessage" aria-live="polite"></p></section><section class="learnDeck"><div class="learnDeckHead"><h3 id="learnDeckTitle"></h3><span id="learnCount"></span></div><div id="learnCards"></div><div id="learnQuiz" class="learnQuiz hidden"><span id="learnProgress"></span><article class="learnFlashcard"><small id="learnFaceLabel"></small><div id="learnFaceText"></div></article><div class="learnQuizActions"><button id="learnReveal" class="primary" type="button"></button><button id="learnKnown" type="button" class="hidden"></button><button id="learnAgain" type="button" class="hidden"></button></div></div><div class="learnFooter"><button id="learnStart" class="primary" type="button"></button><button id="learnClear" type="button"></button></div></section><button id="learnClose" class="secondaryButton learnClose" type="button"></button>';
+ dialog.innerHTML='<div class="learnHead"><span class="learnKicker">TILLBOT · STUDY SPACE</span><h2 id="learnTitle"></h2><p id="learnIntro"></p></div><section id="learnCreator" class="learnCreator"><label id="learnSourceLabel" for="learnSource"></label><textarea id="learnSource" rows="5"></textarea><div class="learnControls"><input id="learnPhoto" type="file" accept="image/*" hidden><button id="learnPhotoBtn" type="button"></button><span id="learnPhotoStatus" aria-live="polite"></span><button id="learnCreateBtn" class="primary" type="button"></button></div><p id="learnMessage" class="learnMessage" aria-live="polite"></p></section><section class="learnDeck"><div class="learnDeckHead"><h3 id="learnDeckTitle"></h3><span id="learnCount"></span></div><div id="learnCards"></div><div id="learnQuiz" class="learnQuiz hidden"><span id="learnProgress"></span><article class="learnFlashcard"><small id="learnFaceLabel"></small><div id="learnFaceText"></div></article><div class="learnQuizActions"><button id="learnReveal" class="primary" type="button"></button><button id="learnKnown" type="button" class="hidden"></button><button id="learnAgain" type="button" class="hidden"></button></div></div><div class="learnFooter"><button id="learnStart" class="primary" type="button"></button><button id="learnShuffle" type="button"></button><button id="learnClear" type="button"></button></div></section><button id="learnClose" class="secondaryButton learnClose" type="button"></button>';
  document.body.append(dialog);
  const $l=id=>document.getElementById(id);
  function paint(){
-  const t=copy();$l("learnTitle").textContent=t.title;$l("learnIntro").textContent=t.intro;$l("learnSourceLabel").textContent=t.source;$l("learnSource").placeholder=t.placeholder;$l("learnPhotoBtn").textContent="＋ "+t.photo;$l("learnCreateBtn").textContent=t.create;$l("learnDeckTitle").textContent=t.deck;$l("learnStart").textContent=t.start;$l("learnClear").textContent=t.remove;$l("learnClose").textContent=t.close;$l("learnCount").textContent=deck.length+" "+t.count;
+  const t=copy();$l("learnTitle").textContent=t.title;$l("learnIntro").textContent=t.intro;$l("learnSourceLabel").textContent=t.source;$l("learnSource").placeholder=t.placeholder;$l("learnPhotoBtn").textContent="＋ "+t.photo;$l("learnCreateBtn").textContent=t.create;$l("learnDeckTitle").textContent=t.deck;$l("learnStart").textContent=t.start;$l("learnShuffle").textContent=t.shuffle;$l("learnClear").textContent=t.remove;$l("learnClose").textContent=t.close;$l("learnCount").textContent=deck.length+" "+t.count;
   $l("learnCards").innerHTML="";
   if(!deck.length){$l("learnCards").textContent=t.empty}
   deck.forEach((c,i)=>{const row=document.createElement("article");row.className="learnCardRow";const q=document.createElement("strong"),a=document.createElement("p");q.textContent=(i+1)+". "+c.front;a.textContent=c.back;row.append(q,a);$l("learnCards").append(row)});
-  $l("learnStart").disabled=!deck.length;$l("learnClear").disabled=!deck.length;
+  $l("learnStart").disabled=!deck.length;$l("learnShuffle").disabled=deck.length<2;$l("learnClear").disabled=!deck.length;
  }
  function persist(){localStorage.setItem("tb-learn-deck",JSON.stringify(deck));paint()}
  function show(){paint();$l("learnMessage").textContent="";dialog.showModal()}
@@ -248,11 +248,36 @@ document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("clic
   finally{b.disabled=false}
  }
  $l("learnCreateBtn").onclick=createCards;
- $l("learnClear").onclick=()=>{deck=[];persist();$l("learnQuiz").classList.add("hidden");$l("learnStart").classList.remove("hidden")};
- function showCard(){const c=deck[position];revealed=false;$l("learnProgress").textContent=(position+1)+" / "+deck.length;$l("learnFaceLabel").textContent=copy().front;$l("learnFaceText").textContent=c.front;$l("learnReveal").classList.remove("hidden");$l("learnKnown").classList.add("hidden");$l("learnAgain").classList.add("hidden");$l("learnReveal").textContent=copy().reveal}
- function reveal(){if(revealed)return;revealed=true;$l("learnFaceLabel").textContent=lang()==="en"?"Answer":"Antwort";$l("learnFaceText").textContent=deck[position].back;$l("learnReveal").classList.add("hidden");$l("learnKnown").classList.remove("hidden");$l("learnAgain").classList.remove("hidden");$l("learnKnown").textContent=copy().known;$l("learnAgain").textContent=copy().again}
- function mark(knew){if(knew)known++;position++;if(position>=deck.length){$l("learnFaceLabel").textContent=copy().done;$l("learnFaceText").textContent=copy().score+" "+known+" "+copy().of+" "+deck.length+"."; $l("learnReveal").classList.add("hidden");$l("learnKnown").classList.add("hidden");$l("learnAgain").classList.add("hidden");$l("learnProgress").textContent="✓";return}showCard()}
- $l("learnStart").onclick=()=>{position=0;known=0;quiz=true;$l("learnQuiz").classList.remove("hidden");$l("learnStart").classList.add("hidden");showCard()};
+ $l("learnClear").onclick=()=>{deck=[];sessionDeck=[];missedCards=[];persist();$l("learnQuiz").classList.add("hidden");$l("learnStart").classList.remove("hidden")};
+ function showCard(){const c=sessionDeck[position];revealed=false;$l("learnProgress").textContent=(position+1)+" / "+deck.length;$l("learnFaceLabel").textContent=copy().front;$l("learnFaceText").textContent=c.front;$l("learnReveal").classList.remove("hidden");$l("learnKnown").classList.add("hidden");$l("learnAgain").classList.add("hidden");$l("learnReveal").textContent=copy().reveal}
+ function reveal(){if(revealed)return;revealed=true;$l("learnFaceLabel").textContent=lang()==="en"?"Answer":"Antwort";$l("learnFaceText").textContent=sessionDeck[position].back;$l("learnReveal").classList.add("hidden");$l("learnKnown").classList.remove("hidden");$l("learnAgain").classList.remove("hidden");$l("learnKnown").textContent=copy().known;$l("learnAgain").textContent=copy().again}
+ function finishRound(){
+  $l("learnFaceLabel").textContent=copy().done;
+  $l("learnFaceText").textContent=copy().score+" "+known+" "+copy().of+" "+sessionDeck.length+".";
+  $l("learnReveal").classList.add("hidden");$l("learnKnown").classList.add("hidden");$l("learnAgain").classList.add("hidden");
+  $l("learnProgress").textContent="✓";
+  const start=$l("learnStart");
+  if(missedCards.length){start.textContent=copy().retry+" ("+missedCards.length+")";start.disabled=false;start.classList.remove("hidden")}
+  else start.classList.add("hidden");
+ }
+ function mark(knew){
+  if(knew)known++;else missedCards.push(sessionDeck[position]);
+  position++;
+  if(position>=sessionDeck.length){finishRound();return}
+  showCard();
+ }
+ function beginRound(cards){
+  sessionDeck=cards.slice();position=0;known=0;missedCards=[];quiz=true;
+  $l("learnQuiz").classList.remove("hidden");$l("learnStart").classList.add("hidden");showCard();
+ }
+ $l("learnStart").onclick=()=>{
+  if(missedCards.length){const retry=missedCards.slice();beginRound(retry)}
+  else beginRound(deck);
+ };
+ $l("learnShuffle").onclick=()=>{
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
+  persist();$l("learnMessage").textContent=lang()==="en"?"Cards shuffled.":"Karten wurden gemischt.";
+ };
  $l("learnReveal").onclick=reveal;$l("learnKnown").onclick=()=>mark(true);$l("learnAgain").onclick=()=>mark(false);
  const langSelect=$("language");langSelect?.addEventListener("change",()=>{if(dialog.open)paint()});
 })();
