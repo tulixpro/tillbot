@@ -47,9 +47,18 @@ async function initDatabase() {
       updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS training_examples_approved_id ON training_examples(approved,id);
+    CREATE TABLE IF NOT EXISTS premium_entitlements (
+      user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      expires_at TIMESTAMPTZ NOT NULL,
+      note TEXT NOT NULL DEFAULT '',
+      granted_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS premium_entitlements_expiry ON premium_entitlements(expires_at);
     CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     INSERT INTO app_settings(key,value) VALUES ('maintenance_enabled','false') ON CONFLICT(key) DO NOTHING;
     INSERT INTO app_settings(key,value) VALUES ('daily_message_limit','30') ON CONFLICT(key) DO NOTHING;
+    INSERT INTO app_settings(key,value) VALUES ('premium_message_limit','150') ON CONFLICT(key) DO NOTHING;
     INSERT INTO app_settings(key,value) VALUES ('maintenance_message','TILLBOT wird gerade gewartet. Bitte später erneut versuchen.') ON CONFLICT(key) DO NOTHING;
   `);
 }
