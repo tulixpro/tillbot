@@ -16,6 +16,25 @@ A random small model does not know German, facts, or instruction following. Mean
 training requires a large, varied, legally usable corpus, compute, repeated training,
 held-out evaluation, and safety testing. This prototype is not comparable to ChatGPT.
 
+## Experimental BPE tokenizer (not yet wired into the model)
+
+A deterministic byte-level BPE tokenizer prototype is available in `tokenizer.py`.
+It starts with all 256 byte values, learns merge rules only from the supplied text,
+and can save/load a versioned JSON vocabulary. It preserves UTF-8 byte coverage and
+supports round-trip decoding. This is a separate experiment: the current Transformer
+still has a fixed 256-token embedding/output layer and **continues to use byte IDs**.
+Do not pass BPE token IDs into the current model yet.
+
+Fit the tokenizer only on the approved training split (never validation/test text):
+
+```bash
+python core_model/tokenizer.py --input ./prepared_data/train.txt --vocab-size 2048 --output ./artifacts/tillbot-tokenizer.json
+```
+
+The tokenizer's own tests run with the Core test suite. Before integrating it into
+the model, the embedding/output vocabulary, loss validation, generation decoding,
+checkpoint metadata, and migration/version checks must all be updated together.
+
 ## Free local development
 
 Python 3.10+ is recommended. For older laptops, use the explicit CPU-friendly
