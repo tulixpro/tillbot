@@ -53,9 +53,14 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     (out / "train.txt").write_text("\n\n".join(text for _, text in train_docs), encoding="utf-8")
     (out / "val.txt").write_text("\n\n".join(text for _, text in val_docs), encoding="utf-8")
+    train_bytes = (out / "train.txt").read_bytes()
+    val_bytes = (out / "val.txt").read_bytes()
     report = {"seed": args.seed, "validation_fraction": args.validation_fraction,
               "train_files": [name for name, _ in train_docs],
-              "validation_files": [name for name, _ in val_docs], "sources": manifest,
+              "validation_files": [name for name, _ in val_docs],
+              "train_sha256": hashlib.sha256(train_bytes).hexdigest(),
+              "validation_sha256": hashlib.sha256(val_bytes).hexdigest(),
+              "sources": manifest,
               "warning": "Rights were not independently verified by this script."}
     (out / "manifest.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Prepared {len(train_docs)} train and {len(val_docs)} validation documents in {out}")

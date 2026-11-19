@@ -41,9 +41,27 @@ def validate(train_path: Path, val_path: Path, manifest_path: Path,
         raise ValueError(f"Train/validation leakage: {len(overlap)} normalized duplicate document(s)")
 
     try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        manifest_bytes = manifest_path.read_bytes()
+        manifest = json.loads(manifest_bytes.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ValueError(f"Cannot read dataset manifest: {exc}") from exc
+    if not isinstance(manifest, dict):
+        raise ValueError("Dataset manifest must be a JSON object")
+
+    # Bind the prepared split files to the manifest itself. Source hashes alone
+    # are insufficient because a split file could be edited after preparation.
+    expected_train_hash = manifest.get("train_sha256")
+    expected_val_hash = manifest.get("validation_sha256")
+    if not isinstance(expected_train_hash, str) or len(expected_train_hash) != 64:
+        raise ValueError("Manifest is missing a valid train_sha256")
+    if not isinstance(expected_val_hash, str) or len(expected_val_hash) != 64:
+        raise ValueError("Manifest is missing a valid validation_sha256")
+    actual_train_hash = hashlib.sha256(train_path.read_bytes()).hexdigest()
+    actual_val_hash = hashlib.sha256(val_path.read_bytes()).hexdigest()
+    if actual_train_hash != expected_train_hash:
+        raise ValueError("Prepared training split SHA-256 does not match manifest")
+    if actual_val_hash != expected_val_hash:
+        raise ValueError("Prepared validation split SHA-256 does not match manifest")
 
     train_files = manifest.get("train_files")
     val_files = manifest.get("validation_files")
