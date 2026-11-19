@@ -55,6 +55,17 @@ async function initDatabase() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS premium_entitlements_expiry ON premium_entitlements(expires_at);
+    CREATE TABLE IF NOT EXISTS premium_codes (
+      code_hash CHAR(64) PRIMARY KEY,
+      duration_days INTEGER NOT NULL CHECK (duration_days BETWEEN 1 AND 365),
+      created_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      expires_at TIMESTAMPTZ NOT NULL,
+      redeemed_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+      redeemed_at TIMESTAMPTZ
+    );
+    CREATE INDEX IF NOT EXISTS premium_codes_expiry ON premium_codes(expires_at);
+    CREATE INDEX IF NOT EXISTS premium_codes_redeemed ON premium_codes(redeemed_at);
     CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     INSERT INTO app_settings(key,value) VALUES ('maintenance_enabled','false') ON CONFLICT(key) DO NOTHING;
     INSERT INTO app_settings(key,value) VALUES ('daily_message_limit','30') ON CONFLICT(key) DO NOTHING;
