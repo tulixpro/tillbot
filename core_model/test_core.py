@@ -247,6 +247,42 @@ class JsonlImportTests(unittest.TestCase):
 
 
 class TrainingSmokeTests(unittest.TestCase):
+    def test_bpe_training_checkpoint_and_probe_use_same_tokenizer(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            train_text = root / "train.txt"
+            val_text = root / "val.txt"
+            train_text.write_text(("TILLBOT lernt Deutsch und verarbeitet Text. " * 40), encoding="utf-8")
+            val_text.write_text(("Validierung prüft unbekannte Beispielsätze. " * 20), encoding="utf-8")
+            tokenizer_path = root / "tokenizer.json"
+            built = subprocess.run(
+                [sys.executable, str(ROOT / "tokenizer.py"), "--input", str(train_text),
+                 "--vocab-size", "280", "--output", str(tokenizer_path)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(built.returncode, 0, built.stderr)
+            checkpoint = root / "bpe.pt"
+            trained = subprocess.run(
+                [sys.executable, str(ROOT / "train.py"), "--train-data", str(train_text),
+                 "--val-data", str(val_text), "--tokenizer", str(tokenizer_path),
+                 "--out", str(checkpoint), "--steps", "1", "--batch-size", "2",
+                 "--context", "8", "--width", "8", "--heads", "2", "--layers", "1",
+                 "--eval-interval", "1", "--eval-batches", "1"],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(trained.returncode, 0, trained.stderr)
+            state = torch.load(checkpoint, map_location="cpu", weights_only=True)
+            self.assertGreater(state["config"]["vocab_size"], 256)
+            self.assertEqual(state["tokenizer"], "byte-bpe-v1")
+            report = root / "bpe-probe.md"
+            probed = subprocess.run(
+                [sys.executable, str(ROOT / "probe.py"), "--checkpoint", str(checkpoint),
+                 "--out", str(report), "--tokens", "1"],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(probed.returncode, 0, probed.stderr)
+            self.assertTrue(report.is_file())
+
     def test_tiny_cpu_training_writes_checkpoint_and_metrics(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
