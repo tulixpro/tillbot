@@ -33,6 +33,18 @@ class ModelTests(unittest.TestCase):
         self.assertIsNotNone(loss)
         self.assertTrue(torch.isfinite(loss).item())
 
+    def test_configurable_vocabulary_forward_and_generation(self):
+        model = TillbotCore(width=16, heads=4, layers=1, context=8,
+                            dropout=0.0, vocab_size=300)
+        tokens = torch.tensor([[256, 257, 299]], dtype=torch.long)
+        logits, loss = model(tokens, tokens)
+        self.assertEqual(tuple(logits.shape), (1, 3, 300))
+        self.assertTrue(torch.isfinite(loss).item())
+        generated = model.generate(tokens, max_new_tokens=2, top_k=300, do_sample=False)
+        self.assertTrue(torch.all(generated < 300).item())
+        with self.assertRaisesRegex(ValueError, "vocabulary range"):
+            model(torch.tensor([[300]], dtype=torch.long))
+
     def test_causal_attention_does_not_read_future_tokens(self):
         left = torch.tensor([[1, 2, 3, 4, 5]], dtype=torch.long)
         right = torch.tensor([[1, 2, 3, 90, 91]], dtype=torch.long)
