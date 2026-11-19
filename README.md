@@ -18,6 +18,10 @@ TILLBOT is a browser-based AI workspace with a static GitHub Pages frontend and 
 3. The site is served at `https://tulixpro.github.io/tillbot/`.
 4. After a frontend commit, allow Pages to publish and refresh the site. If an old UI remains, close/reopen the PWA or clear its site cache; the service worker cache version is in `sw.js`.
 
+## Public CORE demo
+
+The standalone TILLBOT CORE browser prototype is available at `https://tulixpro.github.io/tillbot/core-demo.html`. It is public and can be tested without an account. It runs locally in the browser with prepared rule-based responses; it is not a trained language model, does not call an AI API, and does not send or persist chat messages. The regular TILLBOT assistant remains behind account login.
+
 ## Backend deployment
 
 Deploy `server.js` with Node.js and install dependencies using `npm install`. The service listens on `process.env.PORT` (fallback 3000).
