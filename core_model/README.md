@@ -61,6 +61,16 @@ python core_model/chat.py --checkpoint artifacts/tillbot-core.pt
 
 The terminal client is a developer tool, not a safety layer.
 
+## Corpus audit before training
+
+Before preparing a reviewed corpus, run this local screening report:
+
+```bash
+python core_model/audit_dataset.py --source-dir ./reviewed_text --report ./prepared_data/audit-report.json
+```
+
+It flags exact/whitespace-normalized duplicates, invalid UTF-8, short documents, and possible email addresses, phone numbers, or credentials. It prints only file names and flags, not matched values. A non-zero exit means review the report before continuing. This is only a screening aid: it cannot establish data rights or guarantee that personal data is absent.
+
 ## Automated tests
 
 Run the CPU regression suite from the repository root:
