@@ -45,6 +45,8 @@ def validate(train_path: Path, val_path: Path, manifest_path: Path,
         manifest = json.loads(manifest_bytes.decode("utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ValueError(f"Cannot read dataset manifest: {exc}") from exc
+    if not isinstance(manifest, dict):
+        raise ValueError("Dataset manifest must be a JSON object")
 
     # Bind the prepared split files to the manifest itself. Source hashes alone
     # are insufficient because a split file could be edited after preparation.
