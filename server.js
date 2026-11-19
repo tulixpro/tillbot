@@ -292,7 +292,7 @@ app.post("/api/chat", auth, async (req,res,next)=>{
 
   const primary=String(process.env.AI_PROVIDER||"groq").trim().toLowerCase();
   const fallback=String(process.env.AI_FALLBACK_PROVIDER||(primary==="cloudflare"?"groq":"cloudflare")).trim().toLowerCase();
-  const requestedOrder=String(process.env.AI_PROVIDER_ORDER||[primary,fallback,"gemini"].join(","))
+  const requestedOrder=String(process.env.AI_PROVIDER_ORDER||[primary,fallback,"groq","cloudflare","gemini"].join(","))
     .split(",").map(name=>name.trim().toLowerCase()).filter(Boolean);
   const providerOrder=[...new Set(requestedOrder)].filter(name=>["groq","cloudflare","gemini"].includes(name));
   const getConfig=(name)=>{
