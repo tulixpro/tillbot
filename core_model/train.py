@@ -16,6 +16,7 @@ import torch
 
 from model import TillbotCore
 from tokenizer import ByteBPETokenizer
+from validate_dataset import validate as validate_dataset
 
 
 def read_bytes(path: str) -> tuple[torch.Tensor, str]:
@@ -76,6 +77,14 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--tokenizer", help="Optional trained byte-BPE JSON; fit it on training data only")
+    parser.add_argument("--strict-data-validation", action="store_true",
+                        help="Require a provenance manifest and validate split integrity before training")
+    parser.add_argument("--dataset-manifest",
+                        help="Manifest created by prepare_dataset.py (required with --strict-data-validation)")
+    parser.add_argument("--source-dir",
+                        help="Optional original source directory for source SHA-256 verification")
+    parser.add_argument("--min-document-chars", type=int, default=1,
+                        help="Minimum characters per prepared document during strict validation")
     args = parser.parse_args()
 
     if args.profile == "laptop":
@@ -85,6 +94,13 @@ def main():
 
     if bool(args.train_data) != bool(args.val_data):
         parser.error("--train-data and --val-data must be supplied together")
+    if args.strict_data_validation:
+        if not args.train_data or not args.dataset_manifest:
+            parser.error("--strict-data-validation requires --train-data, --val-data and --dataset-manifest")
+        if args.min_document_chars < 1:
+            parser.error("--min-document-chars must be positive")
+    elif args.dataset_manifest or args.source_dir:
+        parser.error("--dataset-manifest and --source-dir require --strict-data-validation")
     if args.steps < 1 or args.batch_size < 1 or args.context < 8:
         parser.error("--steps/--batch-size must be positive and --context at least 8")
     if args.width < 8 or args.heads < 1 or args.width % args.heads:
@@ -95,6 +111,18 @@ def main():
         parser.error("--eval-batches and --patience must be positive")
     if not 0.05 <= args.validation_fraction <= 0.4:
         parser.error("--validation-fraction must be between 0.05 and 0.4")
+
+    if args.strict_data_validation:
+        try:
+            report = validate_dataset(
+                Path(args.train_data), Path(args.val_data), Path(args.dataset_manifest),
+                Path(args.source_dir) if args.source_dir else None,
+                args.min_document_chars,
+            )
+        except ValueError as exc:
+            raise SystemExit(f"Strict dataset validation failed; training was not started: {exc}") from exc
+        print("Strict dataset validation passed:")
+        print(json.dumps(report, ensure_ascii=False))
 
     random.seed(args.seed)
     torch.manual_seed(args.seed)
