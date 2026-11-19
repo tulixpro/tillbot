@@ -18,14 +18,28 @@ held-out evaluation, and safety testing. This prototype is not comparable to Cha
 
 ## Free local development
 
-Python 3.10+ is recommended. Install a PyTorch build suitable for your machine from
+Python 3.10+ is recommended. For older laptops, use the explicit CPU-friendly
+profile. It selects a 32-wide, 2-layer model with a 64-byte context and batch size 2;
+this keeps memory use lower but also limits what the model can learn. It does not
+make training fast, and the resulting model remains experimental. Install a PyTorch build suitable for your machine from
 the official PyTorch installation selector, then from the repository root:
 
 ```bash
 python -m pip install -r core_model/requirements.txt
 ```
 
-Smoke test only (the tiny starter set is not useful assistant training):
+Laptop smoke test (the tiny starter set is not useful assistant training):
+
+```bash
+python core_model/train.py --profile laptop --device cpu --data core_model/data/seed_dialogues.txt --steps 20 --eval-interval 10 --eval-batches 2
+```
+
+The `--profile laptop` settings are a starting point, not a performance guarantee.
+For a real experiment, keep the CPU profile initially and increase training time
+only after checking temperature, memory use and validation metrics. `--device cpu`
+avoids trying to use legacy NVIDIA GPUs that current PyTorch builds may not support.
+
+Standard smoke test only (the tiny starter set is not useful assistant training):
 
 ```bash
 python core_model/train.py --data core_model/data/seed_dialogues.txt --steps 20 --context 32 --batch-size 2 --eval-interval 10 --eval-batches 2
@@ -38,7 +52,7 @@ and license evidence. Prepare a source-level split:
 
 ```bash
 python core_model/prepare_dataset.py --source-dir ./reviewed_text --out-dir ./prepared_data --confirm-licensed-data
-python core_model/train.py --train-data ./prepared_data/train.txt --val-data ./prepared_data/val.txt --steps 2000 --context 128 --batch-size 8
+python core_model/train.py --profile laptop --device cpu --train-data ./prepared_data/train.txt --val-data ./prepared_data/val.txt --steps 2000
 ```
 
 The dataset tool records filenames and hashes in `manifest.json`; it cannot verify
