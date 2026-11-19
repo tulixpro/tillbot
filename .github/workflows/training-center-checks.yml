@@ -26,6 +26,8 @@ jobs:
         run: |
           node --check server.js
           node --check app.js
+      - name: Check training import helper syntax
+        run: node --check training-import.js
       - name: Test training import validation\n        run: node --test training-import.test.js\n      - name: Check embedded training page JavaScript
         run: |
           python3 - <<'PY'
