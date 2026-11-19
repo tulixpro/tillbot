@@ -1251,3 +1251,25 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Compact suggestion chips: keep the welcome actions visually secondary. */
+.welcome .suggestions{gap:7px;margin-top:20px}
+.welcome .suggestions button{
+  min-height:30px;
+  padding:6px 11px;
+  font-size:11px;
+  line-height:1.2;
+  font-weight:500;
+  border-radius:999px;
+  box-shadow:none;
+}
+.welcome .suggestions button:hover{transform:translateY(-1px)}
+@media(max-width:520px){
+  .welcome .suggestions{gap:6px;margin-top:16px}
+  .welcome .suggestions button{
+    min-height:28px;
+    padding:5px 9px;
+    font-size:10.5px;
+  }
+}
