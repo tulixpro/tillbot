@@ -280,6 +280,7 @@ app.put("/api/admin/users/:id/premium", auth, admin, async (req,res)=>{
    const note=typeof req.body.note==="string"?req.body.note.trim().slice(0,120):"Manuell durch Admin vergeben";
    const {rows}=await pool.query("INSERT INTO premium_entitlements(user_id,expires_at,note,granted_by) SELECT id,CURRENT_TIMESTAMP+($2::text||' days')::interval,$3,$4 FROM users WHERE id=$1 ON CONFLICT(user_id) DO UPDATE SET expires_at=EXCLUDED.expires_at,note=EXCLUDED.note,granted_by=EXCLUDED.granted_by,updated_at=CURRENT_TIMESTAMP RETURNING user_id,expires_at,note",[id,days,note,req.user.id]);
    if(!rows[0]) return res.status(404).json({error:"Benutzer nicht gefunden."});
+   await pool.query("UPDATE user_message_usage SET blocked_until=NULL WHERE user_id=$1",[id]);
    return res.json({ok:true,active:true,expiresAt:rows[0].expires_at});
  }
  const result=await pool.query("DELETE FROM premium_entitlements WHERE user_id=$1",[id]);
