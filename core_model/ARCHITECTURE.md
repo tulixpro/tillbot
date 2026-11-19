@@ -33,7 +33,7 @@ serialization format. Its base vocabulary is the 256 possible bytes; learned mer
 extend the vocabulary. The CLI accepts reviewed training text only:
 
 ```bash
-python core_model/train_tokenizer.py --input ./prepared_data/train.txt --vocab-size 2048 --output ./artifacts/tillbot-tokenizer.json
+python core_model/tokenizer.py --input ./prepared_data/train.txt --vocab-size 2048 --output ./artifacts/tillbot-tokenizer.json
 ```
 
 This tokenizer is currently **not connected** to `TillbotCore`. The model still has
