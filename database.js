@@ -37,6 +37,7 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS user_message_usage (user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, usage_date DATE NOT NULL DEFAULT CURRENT_DATE, message_count INTEGER NOT NULL DEFAULT 0, blocked_until TIMESTAMPTZ);\n    CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     INSERT INTO app_settings(key,value) VALUES ('maintenance_enabled','false') ON CONFLICT(key) DO NOTHING;
     INSERT INTO app_settings(key,value) VALUES ('daily_message_limit','20') ON CONFLICT(key) DO NOTHING;
+    UPDATE app_settings SET value='20' WHERE key='daily_message_limit' AND value='30';
     INSERT INTO app_settings(key,value) VALUES ('maintenance_message','TILLBOT wird gerade gewartet. Bitte später erneut versuchen.') ON CONFLICT(key) DO NOTHING;
   `);
 }
