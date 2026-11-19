@@ -61,6 +61,18 @@ python core_model/chat.py --checkpoint artifacts/tillbot-core.pt
 
 The terminal client is a developer tool, not a safety layer.
 
+## Automated tests
+
+Run the CPU regression suite from the repository root:
+
+```bash
+python -m unittest discover -s core_model -p 'test_*.py' -v
+```
+
+The suite checks tensor shapes and loss, causal attention, generation bounds, context limits,
+and reproducible source-level dataset splits with explicit license confirmation. GitHub Actions
+runs the same suite for changes to `core_model/`.
+
 ## Evaluation and integration
 
 See `EVALUATION.md` for release gates. Validation loss alone does not measure answer
