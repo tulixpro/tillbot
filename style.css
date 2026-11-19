@@ -1726,3 +1726,55 @@ body[data-theme="light"] .bubble.user{background:#f2f2f2!important;color:#242424
  #app .suggestions{grid-template-columns:repeat(2,minmax(0,1fr))}
  #app .powerTools{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+
+/* Mobile layout hotfix: keep the tools panel inside the composer and use equal-width controls. */
+#app .composerArea { box-sizing:border-box; width:100%; min-width:0; }
+#app .composerArea #togglePowerTools {
+  display:flex!important; align-items:center; justify-content:flex-start;
+  width:min(850px,100%)!important; min-width:0; min-height:38px;
+  margin:0 auto 8px!important; padding:8px 12px!important;
+  box-sizing:border-box; border-radius:10px!important; font-size:12px!important;
+}
+#app .composerArea #powerTools:not(.toolsExpanded) { display:none!important; }
+#app .composerArea #powerTools.toolsExpanded {
+  display:grid!important; grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  width:min(850px,100%)!important; max-width:100%!important; min-width:0;
+  box-sizing:border-box; margin:0 auto 10px!important; gap:8px!important;
+  align-items:stretch; overflow-x:hidden;
+}
+#app .composerArea #powerTools.toolsExpanded > button {
+  display:flex!important; align-items:center; justify-content:flex-start;
+  width:100%!important; min-width:0!important; max-width:100%!important;
+  min-height:42px!important; height:auto!important; box-sizing:border-box;
+  padding:8px 10px!important; margin:0!important;
+  white-space:normal!important; overflow-wrap:anywhere; word-break:normal;
+  font-size:12px!important; line-height:1.25!important;
+}
+#app .composer { width:min(850px,100%); min-width:0; box-sizing:border-box; }
+#app .composerTools { display:flex!important; flex-wrap:nowrap!important; align-items:center; min-width:0; }
+#app .composerTools #send { margin-left:auto; flex:0 0 auto; }
+@media(max-width:760px) {
+  #app .composerArea { padding:8px 12px max(12px,env(safe-area-inset-bottom))!important; }
+  #app .composerArea #powerTools.toolsExpanded {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important; padding:8px!important; max-height:32vh;
+    overflow-y:auto; overscroll-behavior:contain;
+  }
+  #app .composerArea #powerTools.toolsExpanded > button {
+    min-height:40px!important; padding:8px!important; font-size:11px!important;
+  }
+  #app .composerArea #togglePowerTools { min-height:36px!important; }
+  #app .composer { padding:9px!important; border-radius:18px!important; }
+  #app .composer textarea { min-width:0; width:100%; box-sizing:border-box; }
+  #app .composerTools { gap:5px!important; }
+  #app .composerTools button { min-height:34px!important; }
+  #app .composerTools #photoBtn,#app .composerTools #voiceBtn {
+    min-width:0!important; padding:6px 9px!important; white-space:nowrap;
+  }
+  #app .composerTools #send { width:42px!important; height:42px!important; }
+}
+@media(max-width:380px) {
+  #app .composerArea #powerTools.toolsExpanded { grid-template-columns:minmax(0,1fr)!important; }
+  #app .composerTools #voiceBtn { font-size:10px!important; }
+}
