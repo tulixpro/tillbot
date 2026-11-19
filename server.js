@@ -236,20 +236,36 @@ app.get("/api/admin/metrics", auth, admin, async (_req, res) => {
   });
 });
 
-async function checkDailyQuota(userId){const {rows}=await pool.query("INSERT INTO user_message_usage(user_id) VALUES($1) ON CONFLICT(user_id) DO UPDATE SET user_id=EXCLUDED.user_id RETURNING usage_date,message_count,blocked_until",[userId]);let u=rows[0];const now=new Date();if(String(u.usage_date).slice(0,10)!==now.toISOString().slice(0,10)){const reset=await pool.query("UPDATE user_message_usage SET usage_date=CURRENT_DATE,message_count=0,blocked_until=NULL WHERE user_id=$1 RETURNING usage_date,message_count,blocked_until",[userId]);u=reset.rows[0]}if(u.blocked_until&&new Date(u.blocked_until)>now)return {blocked:true,until:u.blocked_until,count:u.message_count};if(u.blocked_until&&new Date(u.blocked_until)<=now){const resetAfterPause=await pool.query("UPDATE user_message_usage SET message_count=0,blocked_until=NULL WHERE user_id=$1 RETURNING usage_date,message_count,blocked_until",[userId]);u=resetAfterPause.rows[0]}const limitResult=await pool.query("SELECT value FROM app_settings WHERE key='daily_message_limit'");const dailyLimit=Math.max(1,Math.min(500,Number(limitResult.rows[0]?.value)||30));if(u.message_count>=dailyLimit){const until=new Date(now.getTime()+12*60*60*1000);await pool.query("UPDATE user_message_usage SET blocked_until=$1 WHERE user_id=$2",[until,userId]);return {blocked:true,until,count:u.message_count}}return {blocked:false,count:u.message_count,remaining:dailyLimit-u.message_count,limit:dailyLimit}}
-async function incrementDailyQuota(userId){await pool.query("UPDATE user_message_usage SET message_count=message_count+1,blocked_until=CASE WHEN message_count+1>=(SELECT CAST(value AS INTEGER) FROM app_settings WHERE key='daily_message_limit') THEN CURRENT_TIMESTAMP+INTERVAL '12 hours' ELSE blocked_until END WHERE user_id=$1",[userId])}
-app.get("/api/admin/quota",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT value FROM app_settings WHERE key=$1",["daily_message_limit"]);res.json({limit:Number(q.rows[0]?.value)||30})});
-app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Math.max(1,Math.min(500,Math.floor(Number(req.body.limit)||30)));await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["daily_message_limit",String(limit)]);res.json({ok:true,limit})});
-app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.json({unlimited:true});const q=await checkDailyQuota(req.user.id);res.json({unlimited:false,count:q.count||0,remaining:q.remaining||0,limit:q.limit||30,blocked:q.blocked||false,until:q.until||null})});
+async function getDailyQuota(userId){
+  const [usage,setting,reset]=await Promise.all([
+    pool.query("SELECT CASE WHEN usage_date=CURRENT_DATE THEN message_count ELSE 0 END AS count FROM user_message_usage WHERE user_id=$1",[userId]),
+    pool.query("SELECT value FROM app_settings WHERE key='daily_message_limit'"),
+    pool.query("SELECT date_trunc('day',CURRENT_TIMESTAMP)+INTERVAL '1 day' AS reset_at")
+  ]);
+  const limit=Math.max(1,Math.min(500,Number(setting.rows[0]?.value)||20));
+  const count=Number(usage.rows[0]?.count||0);
+  return {count,limit,remaining:Math.max(0,limit-count),blocked:count>=limit,resetAt:reset.rows[0].reset_at};
+}
+async function reserveDailyQuota(userId){
+  const sql="WITH cfg AS (SELECT GREATEST(1,LEAST(500,COALESCE(NULLIF(value,'')::INTEGER,20))) AS daily_limit FROM app_settings WHERE key='daily_message_limit'), reserved AS (INSERT INTO user_message_usage(user_id,usage_date,message_count) VALUES($1,CURRENT_DATE,1) ON CONFLICT(user_id) DO UPDATE SET usage_date=CURRENT_DATE,message_count=CASE WHEN user_message_usage.usage_date<>CURRENT_DATE THEN 1 ELSE user_message_usage.message_count+1 END,blocked_until=NULL WHERE user_message_usage.usage_date<>CURRENT_DATE OR user_message_usage.message_count < (SELECT daily_limit FROM cfg) RETURNING message_count) SELECT reserved.message_count,cfg.daily_limit FROM cfg LEFT JOIN reserved ON TRUE";
+  const result=await pool.query(sql,[userId]);
+  const row=result.rows[0];
+  if(row?.message_count!==null&&row?.message_count!==undefined)return {blocked:false,count:Number(row.message_count),limit:Number(row.daily_limit),remaining:Math.max(0,Number(row.daily_limit)-Number(row.message_count))};
+  return {...await getDailyQuota(userId),blocked:true};
+}
+async function releaseDailyQuota(userId){await pool.query("UPDATE user_message_usage SET message_count=GREATEST(0,message_count-1) WHERE user_id=$1 AND usage_date=CURRENT_DATE",[userId]);}
+app.get("/api/admin/quota",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT value FROM app_settings WHERE key=$1",["daily_message_limit"]);res.json({limit:Number(q.rows[0]?.value)||20})});
+app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Number(req.body.limit);if(!Number.isInteger(limit)||limit<1||limit>500)return res.status(400).json({error:"Das Tagesbudget muss eine ganze Zahl zwischen 1 und 500 sein."});await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["daily_message_limit",String(limit)]);res.json({ok:true,limit})});
+app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.set("Cache-Control","no-store").json({unlimited:true});const q=await getDailyQuota(req.user.id);res.set("Cache-Control","no-store").json({unlimited:false,...q})});
 app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
-  if(req.user.role!=="admin"){const q=await checkDailyQuota(req.user.id);if(q.blocked)return res.status(429).json({error:"Dein Tagesbudget ist aufgebraucht. Du kannst ab "+new Date(q.until).toLocaleString("de-DE")+" Uhr wieder schreiben.",quota:{blocked:true,until:q.until,remaining:0}});req.dailyQuota=q}
-  if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "GROQ_API_KEY fehlt in Render" });
+  if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "Der KI-Anbieter ist derzeit nicht konfiguriert." });
   const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
   const messages = [{ role: "system", content: "Du bist TILLBOT, der KI-Assistent des TILLBOT-Projekts. TILLBOT wird vom TILLBOT-Team entwickelt und gepflegt. Wenn du gefragt wirst, wer dich entwickelt hat, antworte: „Ich bin TILLBOT, der KI-Assistent des TILLBOT-Teams.“ Behaupte nicht, dass das Team ein eigenes Grundmodell von Grund auf trainiert hat: Das zugrunde liegende Sprachmodell wird als externer KI-Dienst bereitgestellt. Antworte standardmäßig auf Deutsch in einem klaren, professionellen, erwachsenen und respektvollen Ton. Verwende keine kindliche Ansprache, keine unnötigen Emojis, keine übertriebenen Begeisterungsfloskeln und keine Kosenamen. Verwende keine kindliche Ansprache, keine unnötigen Emojis, keine übertriebenen Begeisterungsfloskeln und keine Kosenamen. Passe die Detailtiefe an die Aufgabe an, bleibe ruhig und präzise und erkläre Fachbegriffe bei Bedarf verständlich. Bei Programmierfragen: liefere korrekten, möglichst vollständigen Code in Markdown-Codeblöcken mit passendem Sprachlabel (z. B. ```js), erkläre kurz Verwendung und wichtige Schritte, nenne nötige Dateien/Abhängigkeiten und weise auf Annahmen hin. Bei Debugging: analysiere erst den Fehler, nenne Ursache und zeige eine konkrete Lösung. Erfinde keine Testergebnisse und behaupte nicht, Code ausgeführt zu haben. Schreibe Code sicher und warne vor riskanten Aktionen; führe niemals automatisch vom Nutzer gelieferten oder generierten Code aus. Bei großen Projekten strukturiere die Antwort in Dateien und frage nur bei wirklich fehlenden Anforderungen nach." },
     ...history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
       .map(m => ({ role: m.role, content: m.content.slice(0, 8000) }))];
   const userText = String(req.body.message || "").slice(0, 8000);
   const image = req.body.image;
+  if (!userText && !(image && typeof image.data === "string")) return res.status(400).json({answer:"Bitte gib eine Nachricht ein oder hänge ein Bild an."});
   if (image && typeof image.data === "string") {
     if (!["image/jpeg", "image/png", "image/webp"].includes(image.mime) || image.data.length > 2_500_000) {
       return res.status(400).json({ answer: "Fotoformat nicht erlaubt oder Bild zu groß (bitte kleineres Foto verwenden)." });
@@ -261,6 +277,15 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
   } else if (userText) {
     messages.push({ role: "user", content: userText });
   }
+  let quotaReserved=false;
+  if(req.user.role!=="admin"){
+    const quota=await reserveDailyQuota(req.user.id);
+    if(quota.blocked){
+      const reset=await pool.query("SELECT date_trunc('day',CURRENT_TIMESTAMP)+INTERVAL '1 day' AS reset_at");
+      return res.status(429).json({error:"Dein Tagesbudget ist aufgebraucht. Es wird um Mitternacht zurückgesetzt.",quota:{blocked:true,resetAt:reset.rows[0].reset_at,remaining:0,limit:quota.limit}});
+    }
+    quotaReserved=true;
+  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30_000);
   try {
@@ -269,12 +294,12 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
       headers: { Authorization: "Bearer " + process.env.GROQ_API_KEY, "Content-Type": "application/json" },
       body: JSON.stringify({ model: (image ? (process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b") : (process.env.GROQ_MODEL || "openai/gpt-oss-120b")), messages, max_completion_tokens: 800, temperature: 0.7, stream:!!req.body.stream })
     });
-    if(req.body.stream&&response.ok){res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});res.flushHeaders?.();const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",full="";while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const lines=pending.split("\n");pending=lines.pop()||"";for(const line of lines){const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta){full+=delta;res.write("data: "+JSON.stringify({delta})+"\n\n")}}catch{}}}if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined})+"\n\n");return res.end()}
+    if(req.body.stream&&response.ok){res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});res.flushHeaders?.();const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",full="";while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const lines=pending.split("\n");pending=lines.pop()||"";for(const line of lines){const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta){full+=delta;res.write("data: "+JSON.stringify({delta})+"\n\n")}}catch{}}}res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined})+"\n\n");return res.end()}
     const data = await response.json();
-    if (!response.ok) return res.status(502).json({ answer: "Groq Fehler: " + (data.error?.message || response.status) });
-    if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);
+    if (!response.ok) { if(quotaReserved)await releaseDailyQuota(req.user.id); quotaReserved=false; return res.status(502).json({ answer: "KI-Anbieter-Fehler: " + (data.error?.message || response.status) }); }
     res.json({ answer: data.choices?.[0]?.message?.content || "Keine Antwort",quota:req.user.role==="admin"?{unlimited:true}:undefined });
   } catch (error) {
+    if(quotaReserved){try{await releaseDailyQuota(req.user.id)}catch(quotaError){console.error("Quota release error:",quotaError)}}
     console.error("Chat API error:", error);
     res.status(500).json({ answer: error.name === "AbortError" ? "KI-Anfrage dauerte zu lange" : "KI-Serverfehler" });
   } finally {
