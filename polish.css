@@ -1,0 +1,83 @@
+/* TILLBOT 3.1 visual polish — progressive, non-destructive overrides */
+:root {
+  color-scheme: dark;
+  --tb-glass: rgba(8, 31, 51, .72);
+  --tb-line: rgba(174, 230, 255, .16);
+  --tb-muted: #a8c8dc;
+  --tb-glow: 0 18px 55px rgba(0, 12, 28, .28);
+  --tb-focus: #83e7ff;
+}
+html { scroll-behavior: smooth; }
+body { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+button, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+button { min-height: 42px; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 3px solid var(--tb-focus);
+  outline-offset: 3px;
+}
+button:active { transform: translateY(0) scale(.985); }
+button:disabled { cursor: not-allowed; filter: saturate(.55); transform: none; }
+::selection { color: #041a2a; background: #8cebdc; }
+.authCard, .settingsGroup, .adminActions, .maintenanceCard {
+  box-shadow: var(--tb-glow);
+}
+.authCard {
+  border: 1px solid var(--tb-line);
+  backdrop-filter: blur(24px) saturate(1.2);
+}
+.authPill, .tag, .versionBadge { backdrop-filter: blur(14px); }
+.authInputWrap:focus-within, .composer:focus-within {
+  border-color: rgba(109, 226, 218, .72);
+  box-shadow: 0 0 0 4px rgba(63, 205, 184, .11);
+}
+#prompt { line-height: 1.55; }
+#chat { scroll-behavior: smooth; overscroll-behavior: contain; }
+.suggestions button, .powerTools button, .learnModeBtn {
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.suggestions button:hover, .powerTools button:hover, .learnModeBtn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(112, 229, 215, .45);
+  box-shadow: 0 8px 24px rgba(0, 10, 25, .18);
+}
+#send { min-width: 44px; min-height: 44px; }
+.systemNotice { border: 1px solid var(--tb-line); box-shadow: var(--tb-glow); }
+.settingsGroup, .adminActions {
+  border: 1px solid var(--tb-line);
+  border-radius: 18px;
+}
+input, textarea, select { accent-color: #39d7b1; }
+dialog {
+  max-width: min(760px, calc(100vw - 24px));
+  max-height: min(88dvh, 900px);
+  overscroll-behavior: contain;
+}
+dialog::backdrop { background: rgba(1, 10, 22, .72); backdrop-filter: blur(7px); }
+@media (max-width: 820px) {
+  body { background-attachment: scroll; }
+  .layout { min-height: var(--tb-visual-height, 100dvh); height: var(--tb-visual-height, 100dvh); }
+  main { min-height: 0; }
+  header { padding-left: max(14px, env(safe-area-inset-left)); padding-right: max(14px, env(safe-area-inset-right)); }
+  .composerArea { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  #prompt { max-height: 32dvh; }
+  .auth { min-height: 100dvh; padding: max(20px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom)); }
+  .authCard { width: min(100%, 480px); }
+  dialog { width: calc(100vw - 16px); max-width: none; max-height: 90dvh; padding: 18px; }
+}
+@media (max-width: 420px) {
+  :root { font-size: 16px; }
+  .authIntro h1 { font-size: clamp(1.8rem, 9vw, 2.5rem); }
+  .suggestions { gap: 8px; }
+  .composerTools { gap: 6px; }
+  .composerTools button { min-width: 40px; padding: 9px; }
+  .tag { max-width: 38vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
