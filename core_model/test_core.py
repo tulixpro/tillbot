@@ -68,6 +68,21 @@ class ModelTests(unittest.TestCase):
         second = self.model.generate(prompt, max_new_tokens=5, do_sample=False)
         self.assertTrue(torch.equal(first, second))
 
+    def test_cached_and_uncached_greedy_generation_match(self):
+        prompt = torch.tensor([[65, 66, 67, 68]], dtype=torch.long)
+        cached = self.model.generate(prompt, max_new_tokens=6, do_sample=False, use_cache=True)
+        plain = self.model.generate(prompt, max_new_tokens=6, do_sample=False, use_cache=False)
+        self.assertTrue(torch.equal(cached, plain))
+
+    def test_incremental_cache_matches_full_forward_logits(self):
+        prompt = torch.tensor([[10, 20, 30, 40]], dtype=torch.long)
+        next_byte = torch.tensor([[50]], dtype=torch.long)
+        with torch.no_grad():
+            _, _, cache = self.model(prompt, use_cache=True)
+            cached_logits, _, _ = self.model(next_byte, past_key_values=cache, use_cache=True)
+            full_logits, _, _ = self.model(torch.cat((prompt, next_byte), dim=1))
+        self.assertTrue(torch.allclose(cached_logits[:, -1], full_logits[:, -1], atol=1e-5))
+
     def test_generation_rejects_invalid_sampling_parameters(self):
         prompt = torch.tensor([[65]], dtype=torch.long)
         with self.assertRaisesRegex(ValueError, "temperature"):
