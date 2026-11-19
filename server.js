@@ -73,6 +73,57 @@ function admin(req, res, next) {
   next();
 }
 
+const trainingLimit = rateLimit({ windowMs: 60_000, limit: 20, standardHeaders: true, legacyHeaders: false });
+app.get("/api/admin/training/examples", auth, admin, trainingLimit, async (_req,res) => {
+  try {
+    const { rows } = await pool.query("SELECT id,prompt,completion,category,source_note,license_confirmed,approved,created_at,updated_at FROM training_examples ORDER BY created_at DESC LIMIT 250");
+    res.json({ examples: rows });
+  } catch (error) { console.error("Training examples read error:", error); res.status(500).json({error:"Trainingsdaten konnten nicht geladen werden."}); }
+});
+app.post("/api/admin/training/examples", auth, admin, trainingLimit, async (req,res) => {
+  const prompt=typeof req.body.prompt==="string"?req.body.prompt.trim():"";
+  const completion=typeof req.body.completion==="string"?req.body.completion.trim():"";
+  const category=typeof req.body.category==="string"?req.body.category.trim().slice(0,60):"Allgemein";
+  const sourceNote=typeof req.body.sourceNote==="string"?req.body.sourceNote.trim().slice(0,300):"";
+  if(prompt.length<3||prompt.length>6000||completion.length<2||completion.length>8000) return res.status(400).json({error:"Eingabe muss 3–6.000 und Antwort 2–8.000 Zeichen lang sein."});
+  if(req.body.licenseConfirmed!==true) return res.status(400).json({error:"Bitte bestätige, dass du die Rechte zur Nutzung des Textes hast."});
+  try {
+    const {rows}=await pool.query("INSERT INTO training_examples(prompt,completion,category,source_note,license_confirmed,created_by) VALUES($1,$2,$3,$4,true,$5) RETURNING id,prompt,completion,category,source_note,license_confirmed,approved,created_at,updated_at",[prompt,completion,category||"Allgemein",sourceNote,req.user.id]);
+    res.status(201).json({example:rows[0]});
+  } catch(error) { console.error("Training example create error:",error); res.status(500).json({error:"Beispiel konnte nicht gespeichert werden."}); }
+});
+app.patch("/api/admin/training/examples/:id", auth, admin, trainingLimit, async (req,res) => {
+  const id=Number(req.params.id);
+  if(!Number.isSafeInteger(id)||id<1) return res.status(400).json({error:"Ungültige ID."});
+  const approved=typeof req.body.approved==="boolean"?req.body.approved:null;
+  const prompt=typeof req.body.prompt==="string"?req.body.prompt.trim():null;
+  const completion=typeof req.body.completion==="string"?req.body.completion.trim():null;
+  if(approved===null&&prompt===null&&completion===null) return res.status(400).json({error:"Keine Änderung angegeben."});
+  if(prompt!==null&&(prompt.length<3||prompt.length>6000)) return res.status(400).json({error:"Prompt muss 3–6.000 Zeichen lang sein."});
+  if(completion!==null&&(completion.length<2||completion.length>8000)) return res.status(400).json({error:"Antwort muss 2–8.000 Zeichen lang sein."});
+  try {
+    const {rows}=await pool.query("UPDATE training_examples SET approved=COALESCE($1,approved),prompt=COALESCE($2,prompt),completion=COALESCE($3,completion),updated_at=CURRENT_TIMESTAMP WHERE id=$4 RETURNING id,prompt,completion,category,source_note,license_confirmed,approved,created_at,updated_at",[approved,prompt,completion,id]);
+    if(!rows[0]) return res.status(404).json({error:"Beispiel nicht gefunden."});
+    res.json({example:rows[0]});
+  } catch(error) { console.error("Training example update error:",error); res.status(500).json({error:"Beispiel konnte nicht aktualisiert werden."}); }
+});
+app.delete("/api/admin/training/examples/:id", auth, admin, trainingLimit, async (req,res) => {
+  const id=Number(req.params.id);
+  if(!Number.isSafeInteger(id)||id<1) return res.status(400).json({error:"Ungültige ID."});
+  try { const result=await pool.query("DELETE FROM training_examples WHERE id=$1",[id]); if(!result.rowCount)return res.status(404).json({error:"Beispiel nicht gefunden."}); res.json({ok:true}); }
+  catch(error) { console.error("Training example delete error:",error); res.status(500).json({error:"Beispiel konnte nicht gelöscht werden."}); }
+});
+app.get("/api/admin/training/export", auth, admin, trainingLimit, async (_req,res) => {
+  try {
+    const {rows}=await pool.query("SELECT prompt,completion FROM training_examples WHERE approved=true AND license_confirmed=true ORDER BY id ASC");
+    const jsonl=rows.map(row=>JSON.stringify({messages:[{role:"user",content:row.prompt},{role:"assistant",content:row.completion}]})).join("\n");
+    res.setHeader("Content-Type","application/x-ndjson; charset=utf-8");
+    res.setHeader("Content-Disposition",'attachment; filename="tillbot-training-approved.jsonl"');
+    res.setHeader("X-Training-Examples",String(rows.length));
+    res.send(jsonl+(jsonl?"\n":""));
+  } catch(error) { console.error("Training export error:",error); res.status(500).json({error:"Export fehlgeschlagen."}); }
+});
+
 app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
 app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
 
