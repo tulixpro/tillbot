@@ -1,12 +1,32 @@
 # TILLBOT Core training data
 
-Place a UTF-8 plain-text corpus at `data/train.txt` (or pass `--data PATH`).
+## What may be included
 
-Important:
-- Use only text you wrote, public-domain material, or material whose license explicitly permits machine-learning training.
-- Do not collect private chats, personal data, passwords, or scraped copyrighted books.
-- Keep a record of each source and its license before adding it.
-- A few paragraphs are only enough to test that the training loop runs. Useful language ability needs a large, varied, high-quality corpus and substantial compute.
-- Split evaluation data by document/source, not by randomly mixing fragments from the same private conversation.
+Use only text you wrote yourself, public-domain material, or material whose specific
+license/terms explicitly permit machine-learning training. Keep the original source,
+license, attribution requirements, retrieval date, and a record of your review.
 
-The initial model uses UTF-8 bytes (256 tokens), a small decoder-only Transformer, random initialization, and no downloaded pretrained weights. It will initially produce poor text. This is expected and is not a ChatGPT-level model.
+Do not include private chats, messages from friends, personal data, passwords, school
+records, account details, scraped copyrighted books, or content with unclear rights.
+Do not assume that content being visible online means it is permitted for model training.
+
+## Preparing a corpus
+
+Put reviewed UTF-8 plain-text documents in a separate folder, one source document per
+file. Aim for varied, high-quality examples rather than repeating templates. The
+preparation script creates a reproducible split by whole source files:
+
+```bash
+python core_model/prepare_dataset.py --source-dir ./reviewed_text --out-dir ./prepared_data --confirm-licensed-data
+```
+
+Review `manifest.json` and retain the actual license evidence. The script records file
+hashes and names but **cannot verify legal permission**. The validation documents must
+not be included in training.
+
+## Current starter set
+
+`seed_dialogues.txt` is a small collection of original project-authored examples. It is
+only for checking that the code runs; it is far too small to teach useful conversation.
+The initial model is randomly initialized, byte-level, and expected to produce poor
+text. It is not a ChatGPT-level model.
