@@ -1,6 +1,7 @@
 const express = require("express");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const crypto = require("node:crypto");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool, initDatabase } = require("./database");
@@ -196,7 +197,7 @@ app.put("/api/admin/users/:id/role", auth, admin, async (req,res)=>{
 app.get("/api/admin/security-audit", auth, admin, async (_req,res)=>{
   const checks=[
     {name:"JWT-Schlüssel dauerhaft gesetzt",ok:!!(process.env.JWT_SECRET&&process.env.JWT_SECRET.length>=32),severity:"critical",detail:"JWT_SECRET muss in Render dauerhaft und mit mindestens 32 Zeichen gesetzt sein."},
-    {name:"Eigener Bot-Schutz aktiv",ok:true,severity:"medium",detail:"IP-basierte API- und Auth-Limits sowie ein serverseitiges Honeypot-Feld sind aktiv. Limits liegen aktuell im Prozessspeicher."},
+    {name:"Eigener Bot-Schutz aktiv",ok:true,severity:"medium",detail:"KI-Anfragen werden zusätzlich mit atomaren PostgreSQL-Limits pro gehashter IP und Konto begrenzt; Auth- und allgemeine API-Limits ergänzen den Schutz."},
     {name:"Mindestens ein KI-Anbieter konfiguriert",ok:!!process.env.GROQ_API_KEY||!!(process.env.CLOUDFLARE_ACCOUNT_ID&&process.env.CLOUDFLARE_API_TOKEN)||(process.env.GEMINI_API_ENABLED==="true"&&process.env.GEMINI_FREE_TIER_DATA_ACK==="true"&&!!process.env.GEMINI_API_KEY),severity:"high",detail:"Mindestens Groq, Cloudflare Workers AI oder ausdrücklich freigegebenes Google Gemini muss konfiguriert sein."},
     {name:"HTTPS-Frontend",ok:String(process.env.FRONTEND_ORIGIN||"https://tulixpro.github.io").startsWith("https://"),severity:"medium",detail:"Frontend-Origin sollte HTTPS verwenden."},
     {name:"Helmet-Sicherheitsheader",ok:true,severity:"medium",detail:"Helmet ist im Express-Server aktiviert; CSP wird separat über Hosting/Policy verwaltet."},
@@ -257,6 +258,58 @@ async function releaseDailyQuota(userId){await pool.query("UPDATE user_message_u
 app.get("/api/admin/quota",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT value FROM app_settings WHERE key=$1",["daily_message_limit"]);res.json({limit:Number(q.rows[0]?.value)||20})});
 app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Number(req.body.limit);if(!Number.isInteger(limit)||limit<1||limit>500)return res.status(400).json({error:"Das Tagesbudget muss eine ganze Zahl zwischen 1 und 500 sein."});await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["daily_message_limit",String(limit)]);res.json({ok:true,limit})});
 app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.set("Cache-Control","no-store").json({unlimited:true});const q=await getDailyQuota(req.user.id);res.set("Cache-Control","no-store").json({unlimited:false,...q})});
+// Shared abuse protection: PostgreSQL counters work across restarts and instances.
+// Store only HMACs of IP/account identifiers, never raw IP addresses.
+async function checkChatRateBucket(bucketKey, limit) {
+  const result = await pool.query(
+    `INSERT INTO api_rate_limits(bucket_key, window_started_at, request_count)
+     VALUES($1, CURRENT_TIMESTAMP, 1)
+     ON CONFLICT(bucket_key) DO UPDATE SET
+       request_count = CASE
+         WHEN api_rate_limits.window_started_at <= CURRENT_TIMESTAMP - INTERVAL '1 minute' THEN 1
+         ELSE api_rate_limits.request_count + 1
+       END,
+       window_started_at = CASE
+         WHEN api_rate_limits.window_started_at <= CURRENT_TIMESTAMP - INTERVAL '1 minute' THEN CURRENT_TIMESTAMP
+         ELSE api_rate_limits.window_started_at
+       END
+     WHERE api_rate_limits.window_started_at <= CURRENT_TIMESTAMP - INTERVAL '1 minute'
+        OR api_rate_limits.request_count < $2
+     RETURNING request_count`,
+    [bucketKey, limit]
+  );
+  return result.rowCount > 0;
+}
+
+let rateLimitCleanupCounter = 0;
+async function enforceChatAbuseLimits(req, res, next) {
+  try {
+    const ip = String(req.ip || "unknown");
+    const userId = String(req.user.id);
+    const ipHash = crypto.createHmac("sha256", TOKEN_SECRET).update("ip:" + ip).digest("hex");
+    const userHash = crypto.createHmac("sha256", TOKEN_SECRET).update("user:" + userId).digest("hex");
+    const ipAllowed = await checkChatRateBucket("chat:ip:" + ipHash, 15);
+    if (!ipAllowed) {
+      res.set("Retry-After", "60");
+      return res.status(429).json({ error: "Von diesem Netzwerk kommen gerade zu viele KI-Anfragen. Bitte eine Minute warten." });
+    }
+    const userLimit = req.user.role === "admin" ? 10 : 6;
+    const userAllowed = await checkChatRateBucket("chat:user:" + userHash, userLimit);
+    if (!userAllowed) {
+      res.set("Retry-After", "60");
+      return res.status(429).json({ error: "Du sendest gerade zu viele KI-Anfragen. Bitte eine Minute warten." });
+    }
+    rateLimitCleanupCounter++;
+    if (rateLimitCleanupCounter % 100 === 0) {
+      pool.query("DELETE FROM api_rate_limits WHERE window_started_at < CURRENT_TIMESTAMP - INTERVAL '1 day'").catch(error => console.error("Rate-limit cleanup error:", error));
+    }
+    return next();
+  } catch (error) {
+    console.error("Chat abuse limiter unavailable:", error.message);
+    return res.status(503).json({ error: "Der Spam-Schutz ist gerade nicht verfügbar. Bitte später erneut versuchen." });
+  }
+}
+
 app.post("/api/chat", auth, async (req,res,next)=>{
   try {
     const maintenance = await getMaintenance();
@@ -265,7 +318,7 @@ app.post("/api/chat", auth, async (req,res,next)=>{
   } catch {
     return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."});
   }
-}, rateLimit({windowMs:60_000,limit:12,skip:req=>req.user?.role==="admin",message:{error:"Zu viele Nachrichten. Bitte kurz warten."}}), async (req,res)=>{
+}, enforceChatAbuseLimits, async (req,res)=>{
   const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
   const messages = [{role:"system",content:"Du bist TILLBOT, der KI-Assistent des TILLBOT-Projekts. TILLBOT wird vom TILLBOT-Team entwickelt und gepflegt. Wenn du gefragt wirst, wer dich entwickelt hat, antworte: „Ich bin TILLBOT, der KI-Assistent des TILLBOT-Teams.“ Behaupte nicht, dass das Team ein eigenes Grundmodell von Grund auf trainiert hat: Das zugrunde liegende Sprachmodell wird als externer KI-Dienst bereitgestellt. Antworte standardmäßig auf Deutsch in einem klaren, professionellen und respektvollen Ton. Passe die Detailtiefe an die Aufgabe an, bleibe ruhig und präzise und erkläre Fachbegriffe bei Bedarf verständlich. Erfinde keine Testergebnisse und behaupte nicht, Code ausgeführt zu haben. Schreibe Code sicher und führe niemals automatisch vom Nutzer gelieferten oder generierten Code aus."},
     ...history.filter(m=>["user","assistant"].includes(m.role)&&typeof m.content==="string").map(m=>({role:m.role,content:m.content.slice(0,8000)}))];
