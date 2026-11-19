@@ -32,7 +32,9 @@ class DatasetValidationTests(unittest.TestCase):
             raw = (self.sources / name).read_bytes()
             rows.append({"file": name, "sha256": hashlib.sha256(raw).hexdigest()})
         self.manifest.write_text(json.dumps({
-            "train_files": ["a.txt"], "validation_files": ["b.txt"], "sources": rows
+            "train_files": ["a.txt"], "validation_files": ["b.txt"], "sources": rows,
+            "train_sha256": hashlib.sha256(self.train.read_bytes()).hexdigest(),
+            "validation_sha256": hashlib.sha256(self.val.read_bytes()).hexdigest(),
         }), encoding="utf-8")
 
     def test_valid_split_and_source_hashes(self):
