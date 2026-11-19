@@ -26,6 +26,22 @@ Required tokenizer tests:
 
 Do not change the active checkpoint format without a versioned migration.
 
+### BPE prototype status
+
+`tokenizer.py` now contains a deterministic byte-level BPE trainer and JSON
+serialization format. Its base vocabulary is the 256 possible bytes; learned merges
+extend the vocabulary. The CLI accepts reviewed training text only:
+
+```bash
+python core_model/train_tokenizer.py --input ./prepared_data/train.txt --vocab-size 2048 --output ./artifacts/tillbot-tokenizer.json
+```
+
+This tokenizer is currently **not connected** to `TillbotCore`. The model still has
+256 input/output classes and must not receive IDs from the larger BPE vocabulary.
+Integration is a separate migration that must change model vocabulary dimensions,
+checkpoint metadata, generation decode, training batches, and tests atomically.
+Do not fit BPE merges on validation or test data.
+
 ## Model experiment contract
 
 Each run must record:
