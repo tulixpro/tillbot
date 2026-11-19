@@ -6,7 +6,7 @@ TILLBOT is a browser-based AI workspace with a static GitHub Pages frontend and 
 
 - **Frontend:** `index.html`, `style.css`, `app.js`, PWA manifest and service worker; hosted on GitHub Pages.
 - **Backend:** `server.js` (Express 5) and `database.js` (PostgreSQL); deploy the Node service on Render or another Node host.
-- **AI:** Chat requests go through a server-side provider adapter. Groq is the default primary provider; Cloudflare Workers AI can be configured as a free-tier fallback. Provider keys stay on the server and are never sent to the browser.
+- **AI:** Chat requests go through a server-side multi-provider adapter. Groq and Cloudflare Workers AI are supported, with optional Google Gemini as a third provider. Provider keys stay on the server and are never sent to the browser.
 - **Authentication:** Username/password accounts, bcrypt password hashes and JWT sessions (7 days).
 - **Data:** Accounts, chat history, support tickets, usage counters and app settings are stored in PostgreSQL.
 - **Desktop:** Electron entry point is `windows/main.cjs`; `npm run desktop` starts the desktop shell.
@@ -27,9 +27,11 @@ Required environment variables (set in the hosting provider's secret/environment
 - `DATABASE_URL` – PostgreSQL connection URL.
 - `JWT_SECRET` – stable random secret, at least 32 characters. Changing it invalidates existing sessions.
 - `GROQ_API_KEY` – Groq API key (required when Groq is used as primary or fallback).
-- `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` – optional Cloudflare Workers AI credentials for the second provider; set them only in the host's secret settings.
-- `AI_PROVIDER` – primary provider: `groq` (default) or `cloudflare`.
-- `AI_FALLBACK_PROVIDER` – optional fallback provider. Defaults to the other supported provider (`cloudflare` when primary is Groq, otherwise `groq`). Set `none` to disable fallback.
+- `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` – optional Cloudflare Workers AI credentials.
+- `GEMINI_API_KEY` – optional Google Gemini API key. Gemini is disabled unless both `GEMINI_API_ENABLED=true` and `GEMINI_FREE_TIER_DATA_ACK=true` are set.
+- `AI_PROVIDER` – first-choice provider: `groq` (default), `cloudflare` or `gemini`.
+- `AI_FALLBACK_PROVIDER` – optional second provider. Defaults to Cloudflare when Groq is primary, otherwise Groq.
+- `AI_PROVIDER_ORDER` – optional comma-separated ordered provider list, e.g. `groq,cloudflare,gemini`. Only configured and explicitly enabled providers are attempted.
 - `FRONTEND_ORIGIN` – allowed frontend origin, e.g. `https://tulixpro.github.io`.
 - `ADMIN_USERNAME` and `ADMIN_SETUP_SECRET` – one-time admin bootstrap configuration. Use a strong setup secret and remove/rotate it after setup where operationally possible.
 
@@ -37,6 +39,7 @@ Optional:
 
 - `GROQ_MODEL` / `GROQ_VISION_MODEL` – optional Groq model overrides.
 - `CLOUDFLARE_MODEL` / `CLOUDFLARE_VISION_MODEL` – optional Cloudflare model overrides.
+- `GEMINI_MODEL` / `GEMINI_VISION_MODEL` – optional Gemini model overrides.
 - `MAINTENANCE_MESSAGE` – fallback maintenance notice.
 - `MAINTENANCE_ENABLED` is not read directly; maintenance is controlled via the admin panel/database setting.
 
