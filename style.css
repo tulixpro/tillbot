@@ -1395,3 +1395,21 @@ header{background:rgba(25,21,40,.88)!important;border-color:rgba(190,170,255,.13
   #app .composerArea>.powerTools button{min-height:25px!important;padding:4px 6px!important;font-size:9px!important}
   #app .composerTools button{min-width:28px!important;min-height:29px!important;height:29px!important}
 }
+
+
+/* TILLBOT CORE public demo — expanded layout refresh */
+.publicDemoEmbed{
+ width:min(1480px,98%)!important;
+ margin:0 auto 32px!important;
+ padding:clamp(18px,2.8vw,36px)!important;
+}
+.publicDemoEmbed iframe{
+ height: min(1080px, 92vh)!important;
+ min-height:860px!important;
+}
+.publicDemoEmbedHead{max-width:900px!important;margin-bottom:22px!important}
+.publicDemoEmbedHead p{font-size:15px!important}
+@media(max-width:700px){
+ .publicDemoEmbed{width:100%!important;padding:12px 8px!important;margin-bottom:22px!important}
+ .publicDemoEmbed iframe{height:900px!important;min-height:820px!important}
+}
