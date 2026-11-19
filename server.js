@@ -243,6 +243,7 @@ app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Math.max(1,Ma
 app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.json({unlimited:true});const q=await checkDailyQuota(req.user.id);res.json({unlimited:false,count:q.count||0,remaining:q.remaining||0,limit:q.limit||30,blocked:q.blocked||false,until:q.until||null})});
 app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
   if(req.user.role!=="admin"){const q=await checkDailyQuota(req.user.id);if(q.blocked)return res.status(429).json({error:"Dein Tagesbudget ist aufgebraucht. Du kannst ab "+new Date(q.until).toLocaleString("de-DE")+" Uhr wieder schreiben.",quota:{blocked:true,until:q.until,remaining:0}});req.dailyQuota=q}
+  const image = req.body.image;
   const provider = String(process.env.AI_PROVIDER || "groq").trim().toLowerCase();
   let apiUrl, apiKey, model;
   if (provider === "cloudflare") {
