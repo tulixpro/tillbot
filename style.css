@@ -1670,3 +1670,24 @@ body[data-theme="light"] #app .composer{background:#f4f4f4!important;border-colo
 body[data-theme="light"] #app .composer textarea{color:#242424!important}
 body[data-theme="light"] .bubble.user{background:#f2f2f2!important;color:#242424!important;border-color:#e5e5e5!important}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+
+/* TILLBOT Learn: calm, focused workspace styling */
+.learnModeBtn{background:var(--panel,#17191f)!important;color:var(--text,#f4f4f5)!important;border:1px solid var(--line,#34363d)!important;border-radius:10px!important;font-weight:650}
+.learnModeBtn:hover{background:var(--card,#202229)!important}
+.learnDialog{background:var(--panel,#17191f)!important;color:var(--text,#f4f4f5)!important;border:1px solid var(--line,#34363d)!important;border-radius:18px!important;box-shadow:0 24px 80px #0008}
+.learnDialog::backdrop{background:#090a0dcc;backdrop-filter:blur(5px)}
+.learnKicker{color:var(--muted,#a1a1aa)!important;letter-spacing:.12em}
+.learnHead{border-color:var(--line,#34363d)!important}
+.learnHead p,.learnMessage{color:var(--muted,#a1a1aa)!important}
+.learnCreator{border-color:var(--line,#34363d)!important}
+.learnCreator textarea{background:var(--card,#202229)!important;color:var(--text,#f4f4f5)!important;border:1px solid var(--line,#34363d)!important;border-radius:12px!important}
+.learnControls button,.learnFooter button,.learnQuizActions button{background:var(--card,#202229)!important;color:var(--text,#f4f4f5)!important;border:1px solid var(--line,#34363d)!important;border-radius:10px!important}
+.learnControls .primary,.learnFooter .primary,.learnQuizActions .primary{background:var(--accent,#777)!important;color:#fff!important;border-color:transparent!important}
+.learnCardRow{background:var(--card,#202229)!important;border:1px solid var(--line,#34363d)!important}
+.learnCardRow p{color:var(--muted,#a1a1aa)!important}
+.learnFlashcard{background:var(--card,#202229)!important;border:1px solid var(--line,#34363d)!important;border-radius:16px!important}
+.learnFlashcard small{color:var(--muted,#a1a1aa)!important}
+.learnDeckHead span,.learnQuiz>span{color:var(--muted,#a1a1aa)!important}
+body[data-theme="light"] .learnDialog{background:#fff!important;color:#17191f!important}
+body[data-theme="light"] .learnCreator textarea,body[data-theme="light"] .learnControls button,body[data-theme="light"] .learnFooter button,body[data-theme="light"] .learnQuizActions button,body[data-theme="light"] .learnCardRow,body[data-theme="light"] .learnFlashcard{background:#f7f7f8!important;color:#17191f!important;border-color:#e4e4e7!important}
