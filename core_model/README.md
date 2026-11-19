@@ -16,24 +16,26 @@ A random small model does not know German, facts, or instruction following. Mean
 training requires a large, varied, legally usable corpus, compute, repeated training,
 held-out evaluation, and safety testing. This prototype is not comparable to ChatGPT.
 
-## Experimental BPE tokenizer (not yet wired into the model)
+## Byte-level BPE tokenizer integration
 
-A deterministic byte-level BPE tokenizer prototype is available in `tokenizer.py`.
-It starts with all 256 byte values, learns merge rules only from the supplied text,
-and can save/load a versioned JSON vocabulary. It preserves UTF-8 byte coverage and
-supports round-trip decoding. This is a separate experiment: the current Transformer
-still has a fixed 256-token embedding/output layer and **continues to use byte IDs**.
-Do not pass BPE token IDs into the current model yet.
+The deterministic byte-level BPE tokenizer is now connected to the Transformer,
+training batches, generation, chat, probes and benchmarks. The model's embedding
+and output layers use the tokenizer vocabulary size. Historical checkpoints without
+tokenizer metadata continue to load as UTF-8 byte models.
 
-Fit the tokenizer only on the approved training split (never validation/test text):
+Build a tokenizer **only from the approved training split** (never validation/test text):
 
 ```bash
 python core_model/tokenizer.py --input ./prepared_data/train.txt --vocab-size 2048 --output ./artifacts/tillbot-tokenizer.json
+python core_model/train.py --profile laptop --device cpu --train-data ./prepared_data/train.txt --val-data ./prepared_data/val.txt --tokenizer ./artifacts/tillbot-tokenizer.json --steps 2000
 ```
 
-The tokenizer's own tests run with the Core test suite. Before integrating it into
-the model, the embedding/output vocabulary, loss validation, generation decoding,
-checkpoint metadata, and migration/version checks must all be updated together.
+Checkpoints embed the tokenizer metadata and a SHA-256 integrity hash. Resume refuses
+to continue if the tokenizer differs, even when two tokenizers happen to have the same
+vocabulary size. Generation and chat reconstruct the matching tokenizer from the
+checkpoint, so a separate tokenizer file is not needed at inference time. BPE IDs must
+never be mixed with a byte-token checkpoint. These changes do not include trained
+weights or demonstrate useful conversational quality.
 
 ## Free local development
 
