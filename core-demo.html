@@ -49,7 +49,7 @@ details.tutorial{margin:16px 0;border:1px solid var(--line);border-radius:15px;b
 </div>
 <p><strong>Hinweis:</strong> Bitte keine vertraulichen Informationen eingeben. Die Demo speichert den Chat nicht dauerhaft.</p>
 </details>
-<section class="currentAi" aria-labelledby="current-ai-title"><h2 id="current-ai-title">Bestehender TILLBOT-Assistent</h2><p>Dieser Bereich öffnet die aktuelle TILLBOT-Anwendung. Sie ist vom experimentellen CORE-Prototyp getrennt und benötigt dein normales TILLBOT-Konto.</p><iframe src="./" title="Bestehender TILLBOT-Assistent" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="microphone"></iframe></section>
+
 <footer class="footer"><span>TILLBOT CORE · Forschungsprototyp</span><span id="demo-status">Keine Verbindung zu einem Modellserver</span></footer>
 </main>
 <script>
@@ -64,7 +64,7 @@ details.tutorial{margin:16px 0;border:1px solid var(--line);border-radius:15px;b
   if(q.includes('wer bist')||q.includes('was ist tillbot')||q.includes('tillbot core')||q==='was ist core')return'TILLBOT CORE ist das Projekt für ein eigenständiges Sprachmodell mit eigener Tokenisierung, Modellarchitektur, Trainingspipeline und Laufzeit. Der aktuelle Stand ist ein experimenteller Prototyp – noch kein leistungsfähiger Assistent.';
   if(q.includes('wie geht')||q.includes('nächste')||q.includes('weiter'))return'Die nächsten Schritte sind: Trainingspipeline messbar und reproduzierbar machen, rechtlich geprüfte deutsche Trainingsdaten vorbereiten, Tests bestehen lassen und erst danach kontrolliert trainieren und evaluieren.';
   if(q.includes('lernst')||q.includes('lernen')||q.includes('merkst'))return'Nein. Diese Browserdemo trainiert nicht aus dem Chat und speichert nichts dauerhaft. Die Nachrichten sind nur während dieser geöffneten Seite im sichtbaren Verlauf.';
-  if(q.includes('internet')||q.includes('online')||q.includes('daten'))return'Diese Demo benötigt keine API und sendet deine Nachrichten nicht an einen Server. Die Antworten kommen aus eingebauten Regeln und Textbausteinen.';
+  if(q.includes('internet')||q.includes('online')||q.includes('daten'))return'Öffentlich testbar, ohne Konto und ohne API: Deine Eingaben bleiben in dieser geöffneten Browserseite. Antworten stammen aus vorbereiteten Regeln und Textbausteinen.';
   if(q.includes('deutsch')||q.includes('sprache'))return'Deutsch ist die erste Zielsprache für TILLBOT CORE. Die Oberfläche und die vorbereiteten Antworten dieser Demo sind auf Deutsch.';
   if(q.includes('danke'))return'Gern! Du kannst weitere Beispielfragen anklicken oder direkt eine Frage zum Projekt stellen.';
   return'Das kann ich in dieser frühen Demo noch nicht zuverlässig beantworten. Im Moment kenne ich nur einige vorbereitete Themen rund um TILLBOT CORE. Das eigentliche Sprachmodell muss noch entwickelt und trainiert werden.';
