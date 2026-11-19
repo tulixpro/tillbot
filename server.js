@@ -218,7 +218,14 @@ app.post("/api/admin/bootstrap", auth, rateLimit({ windowMs: 15 * 60_000, limit:
   res.json({ ok: true, message: "Admin aktiviert. Bitte neu anmelden." });
 });
 
-app.get("/api/me", auth, (req, res) => res.json({ user: req.user }));
+app.get("/api/me", auth, async (req, res) => {
+  const { rows } = await pool.query("SELECT expires_at,note FROM premium_entitlements WHERE user_id=$1 AND expires_at>CURRENT_TIMESTAMP", [req.user.id]);
+  const entitlement = rows[0] || null;
+  res.set("Cache-Control","no-store").json({
+    user: req.user,
+    premium: { active: !!entitlement, expiresAt: entitlement?.expires_at || null, label: entitlement ? "Premium" : "Free" }
+  });
+});
 app.post("/api/support/tickets",auth,rateLimit({windowMs:60000,limit:4}),async(req,res)=>{const subject=String(req.body.subject||"").trim().slice(0,120),message=String(req.body.message||"").trim().slice(0,4000);if(subject.length<4||message.length<10)return res.status(400).json({error:"Betreff (min. 4) und Nachricht (min. 10 Zeichen) erforderlich."});const {rows}=await pool.query("INSERT INTO support_tickets(user_id,subject,message) VALUES($1,$2,$3) RETURNING id,status,created_at",[req.user.id,subject,message]);res.status(201).json({ticket:rows[0]})});
 app.get("/api/support/tickets",auth,async(req,res)=>{const {rows}=req.user.role==="admin"?await pool.query("SELECT t.*,u.username FROM support_tickets t JOIN users u ON u.id=t.user_id ORDER BY t.updated_at DESC LIMIT 100"):await pool.query("SELECT id,subject,message,status,admin_reply,created_at,updated_at FROM support_tickets WHERE user_id=$1 ORDER BY updated_at DESC",[req.user.id]);res.json(rows)});
 app.patch("/api/admin/tickets/:id",auth,admin,async(req,res)=>{const status=["open","in_progress","closed"].includes(req.body.status)?req.body.status:null,reply=typeof req.body.reply==="string"?req.body.reply.trim().slice(0,4000):null;if(!status&&reply===null)return res.status(400).json({error:"Status oder Antwort angeben"});const {rows}=await pool.query("UPDATE support_tickets SET status=COALESCE($1,status),admin_reply=COALESCE($2,admin_reply),updated_at=CURRENT_TIMESTAMP WHERE id=$3 RETURNING id,status,admin_reply,updated_at",[status,reply,Number(req.params.id)]);if(!rows[0])return res.status(404).json({error:"Ticket nicht gefunden"});res.json({ticket:rows[0]})});
@@ -261,8 +268,24 @@ app.delete("/api/chats/:id", auth, async (req, res) => {
 
 // Admin user management (role changes are server-authorized).
 app.get("/api/admin/users", auth, admin, async (_req,res)=>{
- const {rows}=await pool.query("SELECT id,username,role FROM users ORDER BY id ASC LIMIT 500");
+ const {rows}=await pool.query("SELECT u.id,u.username,u.role,e.expires_at AS premium_expires_at,(e.expires_at>CURRENT_TIMESTAMP) AS premium_active FROM users u LEFT JOIN premium_entitlements e ON e.user_id=u.id ORDER BY u.id ASC LIMIT 500");
  res.set("Cache-Control","no-store");res.json(rows);
+});
+app.put("/api/admin/users/:id/premium", auth, admin, async (req,res)=>{
+ const id=Number(req.params.id), enabled=req.body.enabled===true;
+ if(!Number.isSafeInteger(id)||id<1) return res.status(400).json({error:"Ungültige Benutzer-ID."});
+ if(enabled){
+   const days=Number(req.body.days);
+   if(!Number.isInteger(days)||days<1||days>365) return res.status(400).json({error:"Premium-Laufzeit muss zwischen 1 und 365 Tagen liegen."});
+   const note=typeof req.body.note==="string"?req.body.note.trim().slice(0,120):"Manuell durch Admin vergeben";
+   const {rows}=await pool.query("INSERT INTO premium_entitlements(user_id,expires_at,note,granted_by) SELECT id,CURRENT_TIMESTAMP+($2::text||' days')::interval,$3,$4 FROM users WHERE id=$1 ON CONFLICT(user_id) DO UPDATE SET expires_at=EXCLUDED.expires_at,note=EXCLUDED.note,granted_by=EXCLUDED.granted_by,updated_at=CURRENT_TIMESTAMP RETURNING user_id,expires_at,note",[id,days,note,req.user.id]);
+   if(!rows[0]) return res.status(404).json({error:"Benutzer nicht gefunden."});
+   return res.json({ok:true,active:true,expiresAt:rows[0].expires_at});
+ }
+ const result=await pool.query("DELETE FROM premium_entitlements WHERE user_id=$1",[id]);
+ const exists=await pool.query("SELECT id FROM users WHERE id=$1",[id]);
+ if(!exists.rowCount) return res.status(404).json({error:"Benutzer nicht gefunden."});
+ res.json({ok:true,active:false,removed:result.rowCount>0});
 });
 app.put("/api/admin/users/:id/role", auth, admin, async (req,res)=>{
  const id=Number(req.params.id),role=req.body.role;
@@ -317,11 +340,23 @@ app.get("/api/admin/metrics", auth, admin, async (_req, res) => {
   });
 });
 
-async function checkDailyQuota(userId){const {rows}=await pool.query("INSERT INTO user_message_usage(user_id) VALUES($1) ON CONFLICT(user_id) DO UPDATE SET user_id=EXCLUDED.user_id RETURNING usage_date,message_count,blocked_until",[userId]);let u=rows[0];const now=new Date();if(String(u.usage_date).slice(0,10)!==now.toISOString().slice(0,10)){const reset=await pool.query("UPDATE user_message_usage SET usage_date=CURRENT_DATE,message_count=0,blocked_until=NULL WHERE user_id=$1 RETURNING usage_date,message_count,blocked_until",[userId]);u=reset.rows[0]}if(u.blocked_until&&new Date(u.blocked_until)>now)return {blocked:true,until:u.blocked_until,count:u.message_count};if(u.blocked_until&&new Date(u.blocked_until)<=now){const resetAfterPause=await pool.query("UPDATE user_message_usage SET message_count=0,blocked_until=NULL WHERE user_id=$1 RETURNING usage_date,message_count,blocked_until",[userId]);u=resetAfterPause.rows[0]}const limitResult=await pool.query("SELECT value FROM app_settings WHERE key='daily_message_limit'");const dailyLimit=Math.max(1,Math.min(500,Number(limitResult.rows[0]?.value)||30));if(u.message_count>=dailyLimit){const until=new Date(now.getTime()+12*60*60*1000);await pool.query("UPDATE user_message_usage SET blocked_until=$1 WHERE user_id=$2",[until,userId]);return {blocked:true,until,count:u.message_count}}return {blocked:false,count:u.message_count,remaining:dailyLimit-u.message_count,limit:dailyLimit}}
-async function incrementDailyQuota(userId){await pool.query("UPDATE user_message_usage SET message_count=message_count+1,blocked_until=CASE WHEN message_count+1>=(SELECT CAST(value AS INTEGER) FROM app_settings WHERE key='daily_message_limit') THEN CURRENT_TIMESTAMP+INTERVAL '12 hours' ELSE blocked_until END WHERE user_id=$1",[userId])}
-app.get("/api/admin/quota",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT value FROM app_settings WHERE key=$1",["daily_message_limit"]);res.json({limit:Number(q.rows[0]?.value)||30})});
-app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Math.max(1,Math.min(500,Math.floor(Number(req.body.limit)||30)));await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["daily_message_limit",String(limit)]);res.json({ok:true,limit})});
-app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.json({unlimited:true});const q=await checkDailyQuota(req.user.id);res.json({unlimited:false,count:q.count||0,remaining:q.remaining||0,limit:q.limit||30,blocked:q.blocked||false,until:q.until||null})});
+async function checkDailyQuota(userId){
+ const {rows}=await pool.query("INSERT INTO user_message_usage(user_id) VALUES($1) ON CONFLICT(user_id) DO UPDATE SET user_id=EXCLUDED.user_id RETURNING usage_date,message_count,blocked_until",[userId]);let u=rows[0];const now=new Date();
+ if(String(u.usage_date).slice(0,10)!==now.toISOString().slice(0,10)){const reset=await pool.query("UPDATE user_message_usage SET usage_date=CURRENT_DATE,message_count=0,blocked_until=NULL WHERE user_id=$1 RETURNING usage_date,message_count,blocked_until",[userId]);u=reset.rows[0]}
+ if(u.blocked_until&&new Date(u.blocked_until)>now)return {blocked:true,until:u.blocked_until,count:u.message_count};
+ if(u.blocked_until&&new Date(u.blocked_until)<=now){const resetAfterPause=await pool.query("UPDATE user_message_usage SET message_count=0,blocked_until=NULL WHERE user_id=$1 RETURNING usage_date,message_count,blocked_until",[userId]);u=resetAfterPause.rows[0]}
+ const {rows:planRows}=await pool.query("SELECT (e.expires_at>CURRENT_TIMESTAMP) AS premium FROM users u LEFT JOIN premium_entitlements e ON e.user_id=u.id WHERE u.id=$1",[userId]);
+ const premium=!!planRows[0]?.premium;
+ const setting=premium?"premium_message_limit":"daily_message_limit";
+ const limitResult=await pool.query("SELECT value FROM app_settings WHERE key=$1",[setting]);
+ const dailyLimit=Math.max(1,Math.min(500,Number(limitResult.rows[0]?.value)||(premium?150:30)));
+ if(u.message_count>=dailyLimit){const until=new Date(now.getTime()+12*60*60*1000);await pool.query("UPDATE user_message_usage SET blocked_until=$1 WHERE user_id=$2",[until,userId]);return {blocked:true,until,count:u.message_count,premium}}
+ return {blocked:false,count:u.message_count,remaining:dailyLimit-u.message_count,limit:dailyLimit,premium};
+}
+async function incrementDailyQuota(userId){await pool.query("UPDATE user_message_usage SET message_count=message_count+1 WHERE user_id=$1",[userId])}
+app.get("/api/admin/quota",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT key,value FROM app_settings WHERE key=ANY($1::text[])",[["daily_message_limit","premium_message_limit"]]);const settings=Object.fromEntries(q.rows.map(r=>[r.key,Number(r.value)]));res.json({limit:settings.daily_message_limit||30,premiumLimit:settings.premium_message_limit||150})});
+app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Math.max(1,Math.min(500,Math.floor(Number(req.body.limit)||30)));const premiumLimit=Math.max(limit,Math.min(500,Math.floor(Number(req.body.premiumLimit)||150)));await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["daily_message_limit",String(limit)]);await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["premium_message_limit",String(premiumLimit)]);res.json({ok:true,limit,premiumLimit})});
+app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.json({unlimited:true});const q=await checkDailyQuota(req.user.id);res.json({unlimited:false,count:q.count||0,remaining:q.remaining||0,limit:q.limit||30,blocked:q.blocked||false,until:q.until||null,premium:!!q.premium})});
 app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
   if(req.user.role!=="admin"){const q=await checkDailyQuota(req.user.id);if(q.blocked)return res.status(429).json({error:"Dein Tagesbudget ist aufgebraucht. Du kannst ab "+new Date(q.until).toLocaleString("de-DE")+" Uhr wieder schreiben.",quota:{blocked:true,until:q.until,remaining:0}});req.dailyQuota=q}
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "GROQ_API_KEY fehlt in Render" });
