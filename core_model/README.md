@@ -22,9 +22,9 @@ python core_model/train.py --data data/train.txt --steps 5000
 python core_model/generate.py --checkpoint artifacts/tillbot-core.pt --prompt "TILLBOT:"
 ```
 
-The default corpus path is `data/train.txt` at the repository root. Supply a large, curated, UTF-8 corpus; see `core_model/data/README.md`. For GPU training, install a PyTorch build compatible with the installed CUDA version.
+The default corpus path is the small project-authored starter set `core_model/data/seed_dialogues.txt`. It is only for a smoke test and will be heavily overfit; it does not create a useful assistant. For meaningful training, prepare a much larger, varied, licensed UTF-8 corpus and pass its path with `--data`; see `core_model/data/README.md` and `core_model/BEHAVIOR.md`. For GPU training, install a PyTorch build compatible with the installed CUDA version.
 
-## Integration plan
+## Conversation quality and safety\n\nSee `BEHAVIOR.md` for the intended professional response style and `EVALUATION.md` for manual tests covering arithmetic, identity, factual uncertainty, insults, privacy, and language switching. The examples in `data/seed_dialogues.txt` are original starter examples, not enough training data for robust behavior.\n\n## Integration plan
 
 1. Build and test the model independently from the live service.
 2. Collect only licensed, high-quality training data.
