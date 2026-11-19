@@ -19,6 +19,10 @@
     .suggestions{display:flex;gap:8px;flex-wrap:wrap;padding:0 22px 16px}.suggestions button{border:1px solid var(--line);background:#142239;color:#cfe0f8;border-radius:99px;padding:8px 12px;cursor:pointer}
     form{display:flex;gap:10px;padding:16px 18px;border-top:1px solid var(--line);background:#0e1929}input{min-width:0;flex:1;border:1px solid #344963;background:#101e31;color:var(--text);padding:13px 15px;border-radius:12px;font:inherit;outline:none}input:focus{border-color:var(--accent)}button.send{border:0;background:var(--accent);color:#071326;font-weight:750;padding:0 20px;border-radius:12px;cursor:pointer}button:focus-visible{outline:2px solid white;outline-offset:3px}
     footer{display:flex;justify-content:space-between;gap:12px;padding:0 22px 16px;color:var(--muted);font-size:12px}
+    .current-ai{margin:0 22px 18px;padding:16px;border:1px solid var(--line);border-radius:16px;background:#0d1828}
+    .current-ai h2{font-size:17px;margin:0 0 5px}.current-ai p{margin:0 0 12px;color:var(--muted);font-size:13px}
+    .current-ai iframe{display:block;width:100%;height:760px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    @media(max-width:540px){.current-ai{margin:0 14px 14px;padding:12px}.current-ai iframe{height:680px}}
     @media(max-width:540px){body{padding:0}.app{min-height:100vh;border-radius:0;border:0}.status{display:none}header{padding:18px}.notice{margin:14px 14px 0}#messages{padding:16px}.msg{max-width:94%}.suggestions{padding:0 14px 14px}form{padding:12px}footer{padding:0 14px 14px}}
   </style>
 </head>
@@ -41,7 +45,12 @@
       <input id="message-input" autocomplete="off" maxlength="500" placeholder="Schreib eine Nachricht …" aria-label="Deine Nachricht">
       <button class="send" type="submit">Senden</button>
     </form>
-    <footer><span>Prototyp · Keine Anmeldung · Keine Übertragung</span><span id="count">0 Nachrichten</span></footer>
+    <section class="current-ai" aria-labelledby="current-ai-title">
+      <h2 id="current-ai-title">Aktuelle TILLBOT-KI</h2>
+      <p>Hier kannst du zusätzlich den bestehenden TILLBOT-Assistenten verwenden. Melde dich im eingebetteten Bereich mit deinem TILLBOT-Konto an. Dieser Chat nutzt den bestehenden TILLBOT-Dienst – nicht das experimentelle CORE-Modell.</p>
+      <iframe src="./" title="Aktueller TILLBOT-KI-Chat" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="microphone"></iframe>
+    </section>
+    <footer><span>CORE-Prototyp · Aktuelle KI separat · Keine Übertragung im CORE-Chat</span><span id="count">0 Nachrichten</span></footer>
   </main>
   <script>
     (() => {
