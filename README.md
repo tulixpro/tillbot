@@ -6,7 +6,7 @@ TILLBOT is a browser-based AI workspace with a static GitHub Pages frontend and 
 
 - **Frontend:** `index.html`, `style.css`, `app.js`, PWA manifest and service worker; hosted on GitHub Pages.
 - **Backend:** `server.js` (Express 5) and `database.js` (PostgreSQL); deploy the Node service on Render or another Node host.
-- **AI:** Chat requests go from the backend to Groq's OpenAI-compatible API. The browser never receives the Groq API key.
+- **AI:** Chat requests go through a server-side provider adapter. Groq is the default primary provider; Cloudflare Workers AI can be configured as a free-tier fallback. Provider keys stay on the server and are never sent to the browser.
 - **Authentication:** Username/password accounts, bcrypt password hashes and JWT sessions (7 days).
 - **Data:** Accounts, chat history, support tickets, usage counters and app settings are stored in PostgreSQL.
 - **Desktop:** Electron entry point is `windows/main.cjs`; `npm run desktop` starts the desktop shell.
@@ -26,14 +26,17 @@ Required environment variables (set in the hosting provider's secret/environment
 
 - `DATABASE_URL` – PostgreSQL connection URL.
 - `JWT_SECRET` – stable random secret, at least 32 characters. Changing it invalidates existing sessions.
-- `GROQ_API_KEY` – key for the AI API.
+- `GROQ_API_KEY` – Groq API key (required when Groq is used as primary or fallback).
+- `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` – optional Cloudflare Workers AI credentials for the second provider; set them only in the host's secret settings.
+- `AI_PROVIDER` – primary provider: `groq` (default) or `cloudflare`.
+- `AI_FALLBACK_PROVIDER` – optional fallback provider. Defaults to the other supported provider (`cloudflare` when primary is Groq, otherwise `groq`). Set `none` to disable fallback.
 - `FRONTEND_ORIGIN` – allowed frontend origin, e.g. `https://tulixpro.github.io`.
 - `ADMIN_USERNAME` and `ADMIN_SETUP_SECRET` – one-time admin bootstrap configuration. Use a strong setup secret and remove/rotate it after setup where operationally possible.
 
 Optional:
 
-- `GROQ_MODEL` – text model (default configured in `server.js`).
-- `GROQ_VISION_MODEL` – vision model (default configured in `server.js`).
+- `GROQ_MODEL` / `GROQ_VISION_MODEL` – optional Groq model overrides.
+- `CLOUDFLARE_MODEL` / `CLOUDFLARE_VISION_MODEL` – optional Cloudflare model overrides.
 - `MAINTENANCE_MESSAGE` – fallback maintenance notice.
 - `MAINTENANCE_ENABLED` is not read directly; maintenance is controlled via the admin panel/database setting.
 
@@ -49,8 +52,9 @@ Optional:
 
 ## Limits & privacy
 
-- AI responses require an internet connection and a working backend, database and Groq API key. GitHub Pages alone cannot run the backend.
-- The small UI quick actions guide the same AI model through prompts; they do not create independent tools or guarantee specialized behavior.
+- AI responses require an internet connection, backend, database and at least one configured provider. The backend can retry with the configured fallback after provider rate limits (HTTP 429), temporary server errors or connection/time-out failures. It does not silently switch to an unconfigured or paid provider. Both providers have their own limits, and a fallback can also be unavailable; this improves resilience but does not guarantee uninterrupted service.
+- Cloudflare Workers AI has a limited free allowance of 10,000 Neurons per day; exceeding it returns a rate-limit error. Groq's limits vary by model and account and can include requests and token limits. Check the provider dashboards for the current account-specific limits.
+- The small UI quick actions guide the selected external AI model through prompts; they do not create independent models or guarantee specialized behavior.
 - Speech recognition and speech synthesis depend on browser/device support.
 - Uploaded images and chat content are sent to the backend/AI provider to answer the request. Chat histories and account data are stored in PostgreSQL. Do not submit passwords, private documents or sensitive personal data.
 - The admin security audit checks selected configuration/database conditions; it is **not** a penetration test or guarantee of security. GitHub Actions runs JavaScript syntax checks and an npm audit of production dependencies; Dependabot checks dependencies weekly.
