@@ -24,8 +24,8 @@ def main() -> None:
         raise SystemExit("--max-new-tokens must be between 1 and 1024")
     if not 0.1 <= args.temperature <= 2.0:
         raise SystemExit("--temperature must be between 0.1 and 2.0")
-    if args.top_k < 0 or args.top_k > 256:
-        raise SystemExit("--top-k must be between 0 and 256")
+    if args.top_k < 0:
+        raise SystemExit("--top-k must be non-negative; it cannot exceed the checkpoint vocabulary")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     try:
