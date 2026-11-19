@@ -18,7 +18,9 @@ class ByteBPETokenizer:
     BASE_VOCAB_SIZE = 256
 
     def __init__(self, merges: list[tuple[int, int]] | None = None):
-        self.merges = list(merges or [])
+        raw_merges = list(merges or [])
+        self.merges = [tuple(pair) if isinstance(pair, (tuple, list)) else pair
+                       for pair in raw_merges]
         self._validate_merges()
         self._rank = {pair: self.BASE_VOCAB_SIZE + index
                       for index, pair in enumerate(self.merges)}
