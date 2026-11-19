@@ -16,6 +16,16 @@ A random small model does not know German, facts, or instruction following. Mean
 training requires a large, varied, legally usable corpus, compute, repeated training,
 held-out evaluation, and safety testing. This prototype is not comparable to ChatGPT.
 
+## German-first development milestone
+
+The first language target is German, with a general-purpose assistant scope. See
+[`GERMAN_FIRST_MILESTONE.md`](GERMAN_FIRST_MILESTONE.md) for the data-rights
+requirements, corpus composition, hardware limits, and release gates.
+
+An original German evaluation-only set is stored at
+[`data/german_eval.jsonl`](data/german_eval.jsonl). It is a held-out quality
+check, not training material. Do not merge it into the training corpus.
+
 ## Dataset split and provenance validation
 
 After preparing a source-level split, validate it before fitting the tokenizer or
