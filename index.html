@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f5f7fb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="description" content="TILLBOT – Dein persönlicher KI-Workspace."><link rel="icon" type="image/svg+xml" href="./icons/tillbot.svg?v=6"><link rel="apple-touch-icon" href="./icons/tillbot.svg"><link rel="manifest" href="manifest.json?v=6"><title>TILLBOT 3.0 – Dein KI-Workspace</title><link rel="stylesheet" href="style.css?v=52"><style>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f5f7fb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="description" content="TILLBOT – Dein persönlicher KI-Workspace."><link rel="icon" type="image/svg+xml" href="./icons/tillbot.svg?v=6"><link rel="apple-touch-icon" href="./icons/tillbot.svg"><link rel="manifest" href="manifest.json?v=6"><title>TILLBOT 3.0 – Dein KI-Workspace</title><link rel="stylesheet" href="style.css?v=53"><style>
 .tillbot-guide{width:min(760px,92%);margin:16px auto 8px;text-align:left;border:1px solid var(--line,#d9e1ec);border-radius:14px;background:var(--surface,rgba(120,140,170,.07));padding:12px 15px}
 .tillbot-guide summary{cursor:pointer;font-weight:700;list-style:none}.tillbot-guide summary::-webkit-details-marker{display:none}
 .tillbot-guide summary:after{content:"＋";float:right;color:var(--accent,#5289d8)}
@@ -23,7 +23,16 @@
     <button id="authSubmit" class="primary authSubmit" type="button" onclick="window.tillbotAuthSubmit &amp;&amp; window.tillbotAuthSubmit()"><span id="authSubmitText">Anmelden</span><span class="authArrow" aria-hidden="true">→</span></button>
     <p id="authMsg" class="msg authMessage" role="status" aria-live="polite"></p>
     <div class="authTrust"><span>🔒 Geschützte Verbindung</span><span>Deine Chats bleiben erhalten</span></div>
-    <div class="publicDemo"><div><strong>Erst ausprobieren?</strong><span>Die TILLBOT-CORE-Demo ist öffentlich und ohne Konto testbar.</span></div><a href="./core-demo.html" target="_blank" rel="noopener noreferrer">CORE-Demo öffnen <span aria-hidden="true">↗</span></a></div>
+    <div class="publicDemo"><div><strong>Erst ausprobieren?</strong><span>Die TILLBOT-CORE-Demo ist öffentlich und ohne Konto testbar.</span></div><a href="#public-core-demo">Direkt hier testen <span aria-hidden="true">↓</span></a></div>
+  </section>
+  <section class="publicDemoEmbed" id="public-core-demo" aria-labelledby="publicCoreTitle">
+    <div class="publicDemoEmbedHead">
+      <span class="eyebrow">OHNE ANMELDUNG · DIREKT AUF DIESER WEBSITE</span>
+      <h2 id="publicCoreTitle">Teste TILLBOT CORE direkt hier.</h2>
+      <p>Schreibe eine Nachricht oder wähle eine Beispielfrage. Die Demo läuft lokal in deinem Browser.</p>
+    </div>
+    <iframe src="./core-demo.html?embed=1" title="Öffentliche TILLBOT CORE Demo" loading="lazy" referrerpolicy="no-referrer"></iframe>
+    <p class="publicDemoEmbedNote">Hinweis: CORE ist aktuell ein regelbasierter Forschungsprototyp und noch kein trainiertes Sprachmodell. Deine Eingaben werden nicht an einen Server gesendet.</p>
   </section>
   <p class="authCopyright">TILLBOT 3.0 <span>·</span> DEIN KI-WORKSPACE</p>
 </div>
