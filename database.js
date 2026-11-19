@@ -34,9 +34,13 @@ async function initDatabase() {
     CREATE INDEX IF NOT EXISTS chats_user_updated ON chats(user_id, updated_at);
     CREATE TABLE IF NOT EXISTS support_tickets(id BIGSERIAL PRIMARY KEY,user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,subject TEXT NOT NULL,message TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'open',admin_reply TEXT NOT NULL DEFAULT '',created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP);
     CREATE INDEX IF NOT EXISTS tickets_user_updated ON support_tickets(user_id,updated_at);
-    CREATE TABLE IF NOT EXISTS user_message_usage (user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, usage_date DATE NOT NULL DEFAULT CURRENT_DATE, message_count INTEGER NOT NULL DEFAULT 0, blocked_until TIMESTAMPTZ);\n    CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS user_message_usage (user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, usage_date DATE NOT NULL DEFAULT CURRENT_DATE, message_count INTEGER NOT NULL DEFAULT 0, blocked_until TIMESTAMPTZ);
+    CREATE TABLE IF NOT EXISTS api_rate_limits (bucket_key TEXT PRIMARY KEY, window_started_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, request_count INTEGER NOT NULL DEFAULT 0);\n    CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     INSERT INTO app_settings(key,value) VALUES ('maintenance_enabled','false') ON CONFLICT(key) DO NOTHING;
-    INSERT INTO app_settings(key,value) VALUES ('daily_message_limit','30') ON CONFLICT(key) DO NOTHING;
+    INSERT INTO app_settings(key,value) VALUES ('daily_message_limit','20') ON CONFLICT(key) DO NOTHING;
+    INSERT INTO app_settings(key,value) VALUES ('daily_quota_default_v2_migrated','false') ON CONFLICT(key) DO NOTHING;
+    UPDATE app_settings SET value='20' WHERE key='daily_message_limit' AND value='30' AND (SELECT value FROM app_settings WHERE key='daily_quota_default_v2_migrated')='false';
+    UPDATE app_settings SET value='true' WHERE key='daily_quota_default_v2_migrated' AND value='false';
     INSERT INTO app_settings(key,value) VALUES ('maintenance_message','TILLBOT wird gerade gewartet. Bitte später erneut versuchen.') ON CONFLICT(key) DO NOTHING;
   `);
 }
