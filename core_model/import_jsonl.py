@@ -74,7 +74,7 @@ def main() -> int:
     if any(output.iterdir()):
         raise SystemExit(f"Output directory must be empty: {output}")
     for index, (prompt, completion) in enumerate(pairs, 1):
-        document = f"Nutzer: {prompt}\\nTILLBOT: {completion}\\n"
+        document = f"Nutzer: {prompt}\nTILLBOT: {completion}\n"
         (output / f"example-{index:06d}.txt").write_text(document, encoding="utf-8")
     manifest = {
         "input_file": source.name,
