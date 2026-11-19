@@ -5,6 +5,8 @@ It uses UTF-8 bytes as tokens so German characters need no external tokenizer.
 """
 from __future__ import annotations
 
+import math
+
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -58,6 +60,12 @@ class TillbotCore(nn.Module):
     def __init__(self, width: int = 128, heads: int = 4, layers: int = 4,
                  context: int = 256, dropout: float = 0.1):
         super().__init__()
+        if width < 8 or heads < 1 or width % heads:
+            raise ValueError("width must be >= 8 and divisible by a positive head count")
+        if layers < 1 or context < 2:
+            raise ValueError("layers must be positive and context must be at least 2")
+        if not 0.0 <= dropout < 1.0:
+            raise ValueError("dropout must be in [0, 1)")
         self.context = context
         self.token_embedding = nn.Embedding(256, width)
         self.position_embedding = nn.Embedding(context, width)
@@ -79,9 +87,20 @@ class TillbotCore(nn.Module):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, tokens: torch.Tensor, targets: torch.Tensor | None = None):
+        if tokens.ndim != 2 or tokens.size(1) == 0:
+            raise ValueError("tokens must be a non-empty [batch, sequence] tensor")
+        if tokens.dtype != torch.long:
+            raise ValueError("tokens must use torch.long byte IDs")
+        if torch.any((tokens < 0) | (tokens > 255)):
+            raise ValueError("token IDs must be in the byte range 0..255")
         _, length = tokens.shape
         if length > self.context:
             raise ValueError(f"sequence length {length} exceeds context {self.context}")
+        if targets is not None:
+            if targets.shape != tokens.shape or targets.dtype != torch.long:
+                raise ValueError("targets must be torch.long and match the tokens shape")
+            if torch.any((targets < 0) | (targets > 255)):
+                raise ValueError("target IDs must be in the byte range 0..255")
         positions = torch.arange(length, device=tokens.device)
         x = self.token_embedding(tokens) + self.position_embedding(positions)[None, :, :]
         logits = self.lm_head(self.final_norm(self.blocks(x)))
@@ -91,17 +110,57 @@ class TillbotCore(nn.Module):
         return logits, loss
 
     @torch.no_grad()
-    def generate(self, tokens: torch.Tensor, max_new_tokens: int = 120,
-                 temperature: float = 0.8, top_k: int = 40) -> torch.Tensor:
+    def generate(
+        self,
+        tokens: torch.Tensor,
+        max_new_tokens: int = 120,
+        temperature: float = 0.8,
+        top_k: int = 40,
+        repetition_penalty: float = 1.0,
+        do_sample: bool = True,
+    ) -> torch.Tensor:
+        """Append byte tokens with optional top-k sampling and repetition control.
+
+        Set do_sample=False for deterministic greedy decoding. Repetition penalty
+        applies to byte IDs observed in the current context window; with a byte
+        tokenizer this is a lightweight heuristic, not word-level repetition control.
+        """
+        if tokens.ndim != 2 or tokens.size(0) < 1 or tokens.size(1) < 1:
+            raise ValueError("tokens must be a non-empty [batch, sequence] tensor")
+        if tokens.dtype != torch.long or torch.any((tokens < 0) | (tokens > 255)):
+            raise ValueError("tokens must contain torch.long byte IDs in 0..255")
+        if not isinstance(max_new_tokens, int) or max_new_tokens < 0:
+            raise ValueError("max_new_tokens must be a non-negative integer")
+        if not math.isfinite(temperature) or temperature <= 0:
+            raise ValueError("temperature must be finite and greater than zero")
+        if not isinstance(top_k, int) or not 0 <= top_k <= 256:
+            raise ValueError("top_k must be between 0 and 256")
+        if not math.isfinite(repetition_penalty) or repetition_penalty < 1.0:
+            raise ValueError("repetition_penalty must be finite and at least 1.0")
+
         self.eval()
         for _ in range(max_new_tokens):
             context = tokens[:, -self.context:]
             logits, _ = self(context)
-            logits = logits[:, -1, :] / max(temperature, 1e-5)
+            scores = logits[:, -1, :].clone() / temperature
+
+            if repetition_penalty > 1.0:
+                for row in range(tokens.size(0)):
+                    seen = torch.unique(context[row])
+                    selected = scores[row, seen]
+                    scores[row, seen] = torch.where(
+                        selected > 0,
+                        selected / repetition_penalty,
+                        selected * repetition_penalty,
+                    )
+
             if top_k:
-                values, _ = torch.topk(logits, min(top_k, logits.size(-1)))
-                logits[logits < values[:, [-1]]] = -float("inf")
-            probabilities = F.softmax(logits, dim=-1)
-            next_token = torch.multinomial(probabilities, num_samples=1)
+                threshold = torch.topk(scores, min(top_k, scores.size(-1)), dim=-1).values[:, -1:]
+                scores = scores.masked_fill(scores < threshold, -torch.inf)
+
+            if do_sample:
+                next_token = torch.multinomial(F.softmax(scores, dim=-1), num_samples=1)
+            else:
+                next_token = torch.argmax(scores, dim=-1, keepdim=True)
             tokens = torch.cat((tokens, next_token), dim=1)
         return tokens
