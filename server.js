@@ -257,26 +257,29 @@ async function releaseDailyQuota(userId){await pool.query("UPDATE user_message_u
 app.get("/api/admin/quota",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT value FROM app_settings WHERE key=$1",["daily_message_limit"]);res.json({limit:Number(q.rows[0]?.value)||20})});
 app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Number(req.body.limit);if(!Number.isInteger(limit)||limit<1||limit>500)return res.status(400).json({error:"Das Tagesbudget muss eine ganze Zahl zwischen 1 und 500 sein."});await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["daily_message_limit",String(limit)]);res.json({ok:true,limit})});
 app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.set("Cache-Control","no-store").json({unlimited:true});const q=await getDailyQuota(req.user.id);res.set("Cache-Control","no-store").json({unlimited:false,...q})});
-app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, rateLimit({ windowMs: 60_000, limit: 12, skip: req => req.user?.role === "admin", message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
-  if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "Der KI-Anbieter ist derzeit nicht konfiguriert." });
-  const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
-  const messages = [{ role: "system", content: "Du bist TILLBOT, der KI-Assistent des TILLBOT-Projekts. TILLBOT wird vom TILLBOT-Team entwickelt und gepflegt. Wenn du gefragt wirst, wer dich entwickelt hat, antworte: „Ich bin TILLBOT, der KI-Assistent des TILLBOT-Teams.“ Behaupte nicht, dass das Team ein eigenes Grundmodell von Grund auf trainiert hat: Das zugrunde liegende Sprachmodell wird als externer KI-Dienst bereitgestellt. Antworte standardmäßig auf Deutsch in einem klaren, professionellen, erwachsenen und respektvollen Ton. Verwende keine kindliche Ansprache, keine unnötigen Emojis, keine übertriebenen Begeisterungsfloskeln und keine Kosenamen. Verwende keine kindliche Ansprache, keine unnötigen Emojis, keine übertriebenen Begeisterungsfloskeln und keine Kosenamen. Passe die Detailtiefe an die Aufgabe an, bleibe ruhig und präzise und erkläre Fachbegriffe bei Bedarf verständlich. Bei Programmierfragen: liefere korrekten, möglichst vollständigen Code in Markdown-Codeblöcken mit passendem Sprachlabel (z. B. ```js), erkläre kurz Verwendung und wichtige Schritte, nenne nötige Dateien/Abhängigkeiten und weise auf Annahmen hin. Bei Debugging: analysiere erst den Fehler, nenne Ursache und zeige eine konkrete Lösung. Erfinde keine Testergebnisse und behaupte nicht, Code ausgeführt zu haben. Schreibe Code sicher und warne vor riskanten Aktionen; führe niemals automatisch vom Nutzer gelieferten oder generierten Code aus. Bei großen Projekten strukturiere die Antwort in Dateien und frage nur bei wirklich fehlenden Anforderungen nach." },
-    ...history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
-      .map(m => ({ role: m.role, content: m.content.slice(0, 8000) }))];
-  const userText = String(req.body.message || "").slice(0, 8000);
-  const image = req.body.image;
-  if (!userText && !(image && typeof image.data === "string")) return res.status(400).json({answer:"Bitte gib eine Nachricht ein oder hänge ein Bild an."});
-  if (image && typeof image.data === "string") {
-    if (!["image/jpeg", "image/png", "image/webp"].includes(image.mime) || image.data.length > 2_500_000) {
-      return res.status(400).json({ answer: "Fotoformat nicht erlaubt oder Bild zu groß (bitte kleineres Foto verwenden)." });
-    }
-    messages.push({ role: "user", content: [
-      { type: "text", text: userText || "Bitte beschreibe dieses Bild." },
-      { type: "image_url", image_url: { url: "data:" + image.mime + ";base64," + image.data } }
-    ]});
-  } else if (userText) {
-    messages.push({ role: "user", content: userText });
+app.post("/api/chat", auth, async (req,res,next)=>{
+  try {
+    const maintenance = await getMaintenance();
+    if (maintenance.enabled) return res.status(503).json({error:maintenance.message});
+    next();
+  } catch {
+    return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."});
   }
+}, rateLimit({windowMs:60_000,limit:12,skip:req=>req.user?.role==="admin",message:{error:"Zu viele Nachrichten. Bitte kurz warten."}}), async (req,res)=>{
+  const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
+  const messages = [{role:"system",content:"Du bist TILLBOT, der KI-Assistent des TILLBOT-Projekts. TILLBOT wird vom TILLBOT-Team entwickelt und gepflegt. Wenn du gefragt wirst, wer dich entwickelt hat, antworte: „Ich bin TILLBOT, der KI-Assistent des TILLBOT-Teams.“ Behaupte nicht, dass das Team ein eigenes Grundmodell von Grund auf trainiert hat: Das zugrunde liegende Sprachmodell wird als externer KI-Dienst bereitgestellt. Antworte standardmäßig auf Deutsch in einem klaren, professionellen und respektvollen Ton. Passe die Detailtiefe an die Aufgabe an, bleibe ruhig und präzise und erkläre Fachbegriffe bei Bedarf verständlich. Erfinde keine Testergebnisse und behaupte nicht, Code ausgeführt zu haben. Schreibe Code sicher und führe niemals automatisch vom Nutzer gelieferten oder generierten Code aus."},
+    ...history.filter(m=>["user","assistant"].includes(m.role)&&typeof m.content==="string").map(m=>({role:m.role,content:m.content.slice(0,8000)}))];
+  const userText=String(req.body.message||"").slice(0,8000);
+  const image=req.body.image;
+  if(!userText&&!(image&&typeof image.data==="string"))return res.status(400).json({answer:"Bitte gib eine Nachricht ein oder hänge ein Bild an."});
+  if(image&&typeof image.data==="string"){
+    if(!["image/jpeg","image/png","image/webp"].includes(image.mime)||image.data.length>2_500_000)return res.status(400).json({answer:"Fotoformat nicht erlaubt oder Bild zu groß (bitte kleineres Foto verwenden)."});
+    messages.push({role:"user",content:[
+      {type:"text",text:userText||"Bitte beschreibe dieses Bild."},
+      {type:"image_url",image_url:{url:"data:"+image.mime+";base64,"+image.data}}
+    ]});
+  }else if(userText){messages.push({role:"user",content:userText})}
+
   let quotaReserved=false;
   if(req.user.role!=="admin"){
     const quota=await reserveDailyQuota(req.user.id);
@@ -286,24 +289,90 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
     }
     quotaReserved=true;
   }
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30_000);
-  try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST", signal: controller.signal,
-      headers: { Authorization: "Bearer " + process.env.GROQ_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: (image ? (process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b") : (process.env.GROQ_MODEL || "openai/gpt-oss-120b")), messages, max_completion_tokens: 800, temperature: 0.7, stream:!!req.body.stream })
-    });
-    if(req.body.stream&&response.ok){res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});res.flushHeaders?.();const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",full="";while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const lines=pending.split("\n");pending=lines.pop()||"";for(const line of lines){const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta){full+=delta;res.write("data: "+JSON.stringify({delta})+"\n\n")}}catch{}}}res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined})+"\n\n");return res.end()}
-    const data = await response.json();
-    if (!response.ok) { if(quotaReserved)await releaseDailyQuota(req.user.id); quotaReserved=false; return res.status(502).json({ answer: "KI-Anbieter-Fehler: " + (data.error?.message || response.status) }); }
-    res.json({ answer: data.choices?.[0]?.message?.content || "Keine Antwort",quota:req.user.role==="admin"?{unlimited:true}:undefined });
-  } catch (error) {
-    if(quotaReserved){try{await releaseDailyQuota(req.user.id)}catch(quotaError){console.error("Quota release error:",quotaError)}}
-    console.error("Chat API error:", error);
-    res.status(500).json({ answer: error.name === "AbortError" ? "KI-Anfrage dauerte zu lange" : "KI-Serverfehler" });
-  } finally {
-    clearTimeout(timeout);
+
+  const primary=String(process.env.AI_PROVIDER||"groq").trim().toLowerCase();
+  const fallback=String(process.env.AI_FALLBACK_PROVIDER||(primary==="cloudflare"?"groq":"cloudflare")).trim().toLowerCase();
+  const providerOrder=[...new Set([primary,fallback])].filter(name=>["groq","cloudflare"].includes(name));
+  const getConfig=(name)=>{
+    if(name==="groq"){
+      if(!process.env.GROQ_API_KEY)return null;
+      return {name,apiUrl:"https://api.groq.com/openai/v1/chat/completions",apiKey:process.env.GROQ_API_KEY,
+        model:image?(process.env.GROQ_VISION_MODEL||"qwen/qwen3.8-27b"):(process.env.GROQ_MODEL||"openai/gpt-oss-120b")};
+    }
+    const accountId=String(process.env.CLOUDFLARE_ACCOUNT_ID||"").trim(),apiKey=process.env.CLOUDFLARE_API_TOKEN;
+    if(!accountId||!apiKey)return null;
+    return {name,apiUrl:"https://api.cloudflare.com/client/v4/accounts/"+encodeURIComponent(accountId)+"/ai/v1/chat/completions",apiKey,
+      model:image?(process.env.CLOUDFLARE_VISION_MODEL||"@cf/meta/llama-3.2-11b-vision-instruct"):(process.env.CLOUDFLARE_MODEL||"@cf/zai-org/glm-4.7-flash")};
+  };
+  const shouldFallback=(status)=>status===408||status===429||status>=500;
+  let response=null,activeProvider=null,lastProviderError=null;
+  for(let i=0;i<providerOrder.length;i++){
+    const config=getConfig(providerOrder[i]);
+    if(!config){lastProviderError="Anbieter "+providerOrder[i]+" ist nicht konfiguriert.";continue}
+    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),30_000);
+    try{
+      const body={model:config.model,messages,max_tokens:800,temperature:0.7,stream:!!req.body.stream};
+      if(config.name==="groq"){delete body.max_tokens;body.max_completion_tokens=800}
+      if(config.name==="cloudflare")body.options={rejectIfBusy:true};
+      const attempt=await fetch(config.apiUrl,{
+        method:"POST",signal:controller.signal,
+        headers:{Authorization:"Bearer "+config.apiKey,"Content-Type":"application/json"},
+        body:JSON.stringify(body)
+      });
+      if(attempt.ok){response=attempt;activeProvider=config.name;break}
+      const errorData=await attempt.json().catch(()=>({}));
+      lastProviderError="Anbieter "+config.name+" antwortete mit HTTP "+attempt.status;
+      if(i<providerOrder.length-1&&shouldFallback(attempt.status)){
+        console.warn("AI provider unavailable; trying configured fallback:",config.name,attempt.status);
+        continue;
+      }
+      console.warn("AI provider request failed:",config.name,attempt.status);
+      if(quotaReserved){await releaseDailyQuota(req.user.id);quotaReserved=false}
+      return res.status(attempt.status===429?503:502).json({answer:"Der KI-Dienst ist gerade nicht verfügbar. Bitte versuche es später erneut."});
+    }catch(error){
+      lastProviderError=error.name==="AbortError"?"Zeitüberschreitung bei "+config.name:"Verbindungsfehler bei "+config.name;
+      if(i<providerOrder.length-1&&(error.name==="AbortError"||error instanceof TypeError)){
+        console.warn("AI provider connection failed; trying configured fallback:",config.name,error.name);
+        continue;
+      }
+      throw error;
+    }finally{
+      clearTimeout(timeout);
+    }
+  }
+  if(!response){
+    if(quotaReserved){try{await releaseDailyQuota(req.user.id)}catch(error){console.error("Quota release error:",error)}quotaReserved=false}
+    console.warn("No AI provider could answer:",lastProviderError||"No provider configured");
+    return res.status(503).json({answer:"TILLBOT ist gerade nicht erreichbar. Bitte später erneut versuchen."});
+  }
+
+  try{
+    if(req.body.stream){
+      res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});
+      res.flushHeaders?.();
+      const reader=response.body.getReader(),decoder=new TextDecoder();
+      let pending="";
+      while(true){
+        const {done,value}=await reader.read();
+        if(done)break;
+        pending+=decoder.decode(value,{stream:true});
+        const lines=pending.split("\n");pending=lines.pop()||"";
+        for(const line of lines){
+          const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;
+          const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;
+          try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta)res.write("data: "+JSON.stringify({delta})+"\n\n")}catch{}
+        }
+      }
+      res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined})+"\n\n");
+      return res.end();
+    }
+    const data=await response.json().catch(()=>({}));
+    res.json({answer:data.choices?.[0]?.message?.content||"Keine Antwort",quota:req.user.role==="admin"?{unlimited:true}:undefined});
+  }catch(error){
+    console.error("Chat response error:",activeProvider,error.name);
+    if(!res.headersSent&&quotaReserved){try{await releaseDailyQuota(req.user.id)}catch(quotaError){console.error("Quota release error:",quotaError)}quotaReserved=false}
+    if(!res.headersSent)return res.status(502).json({answer:"Die KI-Antwort konnte nicht verarbeitet werden. Bitte erneut versuchen."});
+    return res.end();
   }
 });
 
