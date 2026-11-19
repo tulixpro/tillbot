@@ -99,6 +99,7 @@ class TillbotCore(nn.Module):
             raise ValueError("tokens must be a non-empty [batch, sequence] tensor")
         if tokens.dtype != torch.long:
             raise ValueError("tokens must use torch.long byte IDs")
+        _, length = tokens.shape
         if torch.any((tokens < 0) | (tokens > 255)):
             raise ValueError("token IDs must be in the byte range 0..255")
         _, length = tokens.shape
