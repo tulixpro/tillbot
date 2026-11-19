@@ -4,6 +4,7 @@ const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool, initDatabase } = require("./database");
+const { normalizeTrainingImport } = require("./training-import");
 
 const app = express();
 // Render forwards requests through one trusted edge proxy. Use a hop count (not `true`)
@@ -112,6 +113,35 @@ app.delete("/api/admin/training/examples/:id", auth, admin, trainingLimit, async
   if(!Number.isSafeInteger(id)||id<1) return res.status(400).json({error:"Ungültige ID."});
   try { const result=await pool.query("DELETE FROM training_examples WHERE id=$1",[id]); if(!result.rowCount)return res.status(404).json({error:"Beispiel nicht gefunden."}); res.json({ok:true}); }
   catch(error) { console.error("Training example delete error:",error); res.status(500).json({error:"Beispiel konnte nicht gelöscht werden."}); }
+});
+app.post("/api/admin/training/import", auth, admin, trainingLimit, async (req,res) => {
+  if (req.body.licenseConfirmed !== true) return res.status(400).json({error:"Bitte bestätige die Nutzungsrechte für alle importierten Beispiele."});
+  let examples;
+  try {
+    examples = normalizeTrainingImport(req.body.examples);
+  } catch (error) {
+    return res.status(400).json({error:error.message});
+  }
+  const sourceNote = typeof req.body.sourceNote === "string" ? req.body.sourceNote.trim().slice(0,300) : "";
+  const category = typeof req.body.category === "string" ? req.body.category.trim().slice(0,60) || "Import" : "Import";
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    for (const item of examples) {
+      await client.query(
+        "INSERT INTO training_examples(prompt,completion,category,source_note,license_confirmed,approved,created_by) VALUES($1,$2,$3,$4,true,false,$5)",
+        [item.prompt,item.completion,category,sourceNote,req.user.id]
+      );
+    }
+    await client.query("COMMIT");
+    res.status(201).json({ok:true,imported:examples.length,approved:0});
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Training import error:",error);
+    res.status(500).json({error:"Import fehlgeschlagen; es wurden keine Beispiele übernommen."});
+  } finally {
+    client.release();
+  }
 });
 app.get("/api/admin/training/export", auth, admin, trainingLimit, async (_req,res) => {
   try {
