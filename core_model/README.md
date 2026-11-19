@@ -78,6 +78,16 @@ refuses to continue when the dataset, manifest, tokenizer, model shape, seed, sp
 fraction, or key optimizer/evaluation settings differ. Start a fresh run when any of
 these inputs change; do not silently mix experiments.
 
+## Training telemetry and model size
+
+Each training evaluation writes a JSONL record beside the checkpoint. Records include
+total and trainable parameter counts, cumulative training tokens, approximate tokens
+per second for the current invocation, elapsed wall-clock time, device, losses, and
+peak CUDA memory when training on CUDA (otherwise `null`). The checkpoint also stores
+the model parameter counts. Throughput includes evaluation and checkpoint work, so it
+is a practical run-level measurement rather than a kernel-only benchmark. CPU runs do
+not report accelerator memory.
+
 ## Byte-level BPE tokenizer integration
 
 The deterministic byte-level BPE tokenizer is now connected to the Transformer,
