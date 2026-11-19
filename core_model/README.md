@@ -28,7 +28,7 @@ Do not pass BPE token IDs into the current model yet.
 Fit the tokenizer only on the approved training split (never validation/test text):
 
 ```bash
-python core_model/train_tokenizer.py --input ./prepared_data/train.txt --vocab-size 2048 --output ./artifacts/tillbot-tokenizer.json
+python core_model/tokenizer.py --input ./prepared_data/train.txt --vocab-size 2048 --output ./artifacts/tillbot-tokenizer.json
 ```
 
 The tokenizer's own tests run with the Core test suite. Before integrating it into
