@@ -89,3 +89,53 @@ TILLBOT gilt erst dann als bereit für die kostenlose Cloudflare-Umstellung, wen
 4. Quota-/Kapazitätsfehler verständlich und ohne kostenpflichtigen Fallback behandelt werden,
 5. die Datenbank- und Hostingkosten geklärt sind,
 6. ein freigegebener Deploy live ist und ein Testchat auf der öffentlichen Website funktioniert.
+
+
+## 9. Qualitätsstrategie: bestmögliche Qualität ohne Kosten
+
+Ziel ist ein möglichst guter TILLBOT bei einem harten Kostenlimit von 0 EUR. Das bedeutet nicht, dass ein Gratisanbieter unbegrenzte oder jederzeit verfügbare Nutzung garantiert.
+
+### Architekturentscheidung
+
+- TILLBOT bleibt die eigene Anwendung: Oberfläche, Konten, Verlauf, Datenschutzentscheidungen, Provider-Adapter, Tests und später eigene Core-Forschung.
+- Das Sprachmodell hinter dem Chat ist vorerst ein externer Dienst. Ein kostenlos nutzbarer Anbieter macht dessen Modell nicht zu einem selbst trainierten TILLBOT-Modell.
+- Provider bleiben austauschbar. Ein Wechsel erfolgt nur nach Tests und ausdrücklicher Konfiguration; niemals automatisch zu einem Anbieter, der Kosten verursachen könnte.
+- Zuerst wird Text-Chat stabilisiert. Bild-, Audio- und andere Funktionen werden erst dann als kostenlos unterstützt beworben, wenn sie separat geprüft wurden.
+
+### Modell nicht nach Namen oder Parameterzahl auswählen
+
+Vor einer Auswahl wird ein kleines, festes TILLBOT-Testset gepflegt. Es enthält selbst erstellte, nicht private Beispielaufgaben für:
+1. Deutsch: klare Antworten, Grammatik und Zusammenfassungen.
+2. Mehrstufiges Denken: einfache Logik- und Planungsaufgaben mit nachvollziehbaren Kriterien.
+3. Mathematik: Aufgaben mit überprüfbarem Ergebnis.
+4. Programmieren: kleine Aufgaben mit erwarteten Ausgaben und Syntaxprüfung.
+5. Gesprächsqualität: Umgang mit unklaren Fragen, Rückfragen und Fehlerkorrektur.
+6. Sicherheit: höfliche Ablehnung gefährlicher oder unpassender Anfragen und Schutz vor erfundenen Behauptungen.
+
+Jeder Modellkandidat wird mit identischen Prompts und Einstellungen getestet. Bewertet werden Korrektheit, Befolgung der Aufgabe, Deutschqualität, Latenz, Fehlerrate, Kontextverhalten und tatsächliche Gratis-Verfügbarkeit. Es wird kein Modell als „so gut wie ChatGPT“ bezeichnet, solange unabhängige Tests das nicht belegen.
+
+### Kandidaten und laufende Prüfung
+
+- Cloudflare Workers AI bleibt der erste zu prüfende kostenfreie Kandidat aus PR #24. Die dort eingetragene Modell-ID muss unmittelbar vor Aktivierung im aktuellen offiziellen Modellkatalog auf Free-Verfügbarkeit und Status geprüft werden.
+- Cloudflare dokumentiert Limits und Kapazitätsfehler; 10.000 Neurons pro Tag sind ein begrenztes Kontingent, keine feste Anzahl Chatnachrichten. Siehe [Workers AI Limits](https://developers.cloudflare.com/workers-ai/platform/limits/) und [Pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/).
+- Groq kann als bestehende Integration für Vergleichstests erhalten bleiben, wird aber nur als kostenfrei behandelt, wenn das konkrete Konto und die aktuellen Limits dies bestätigen. Die Limits sind kontospezifisch; siehe [Groq Rate Limits](https://console.groq.com/docs/rate-limits).
+- Neue Anbieter werden nicht allein aufgrund einer kostenlosen Testoberfläche aufgenommen. Vorher müssen API-Nutzungsbedingungen, Datenschutz, Gratisgrenzen, Modellstatus und die Eignung für den Einsatz mit Konten Minderjähriger geprüft werden.
+
+### Umsetzungsphasen
+
+1. **Sicherheit und Kosten zuerst:** keine automatische Provider-Umschaltung, keine stillen Paid-Fallbacks, keine Abrechnungsaktivierung; API-Schlüssel nur serverseitig.
+2. **Provider-Adapter absichern:** Konfiguration validieren, Zeitlimits setzen, Fehlercodes unterscheiden, Streaming-Ende und Abbruch sauber behandeln und keine Provider-Geheimnisse in Logs ausgeben.
+3. **Automatisierte Provider-Tests:** Mock-Tests für erfolgreiche Antworten, ungültige Zugangsdaten, 429/Quota, 5xx, Timeout, kaputtes JSON, leere Antwort, Streaming und Bildanfrage.
+4. **Modellvergleich:** Testset gegen alle tatsächlich kostenlosen Kandidaten ausführen; Ergebnisse dokumentieren, nicht aus Modellwerbung ableiten.
+5. **Kleiner Live-Test:** nur nach Freigabe, mit einem Testkonto und ohne aktivierte kostenpflichtige Nutzung; anschließend Quota- und Fehlerfälle prüfen.
+6. **Öffentliche Aktivierung:** erst nach Review, erfolgreichen Tests, bestätigtem Datenbanktarif und ausdrücklicher Freigabe. Bis dahin bleibt der bestehende Live-Stand unverändert.
+7. **Core separat:** die Trainingspipeline und das kleine Transformer-Projekt bleiben Forschungsarbeit. Kein automatisches Nachtrainieren mit privaten Chatverläufen. Trainingsdaten müssen rechtlich nutzbar, geprüft und bewusst freigegeben sein.
+
+### Erfolgskriterien
+
+- Keine unerwarteten Kosten und kein Paid-Fallback.
+- Der aktive Provider und seine Modell-ID sind in der Serverkonfiguration eindeutig.
+- Quota-, Kapazitäts- und Netzwerkfehler werden verständlich angezeigt.
+- Ein reproduzierbarer Modellvergleich ist vorhanden.
+- Die wichtigsten Providerpfade sind automatisiert getestet.
+- Eine Veröffentlichung erfolgt erst nach ausdrücklicher Freigabe und einem erfolgreichen Testchat.
