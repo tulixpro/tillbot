@@ -7,7 +7,7 @@ model weights. It is **not** connected to the live TILLBOT chat.
 ## Honest status
 
 - Architecture and training code: implemented.
-- Trained model weights: **not included**; no training run has been completed here.
+- Trained model weights: **not included**; CI runs only a tiny two-step CPU smoke test to verify the training code, not to create a useful model.
 - Starter dialogues: original project-authored examples for a smoke test only.
 - Useful conversational ability: **not achieved**.
 - Production readiness: **not ready**.
