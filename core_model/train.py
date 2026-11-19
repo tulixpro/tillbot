@@ -10,6 +10,7 @@ import hashlib
 import json
 import math
 import random
+import time
 from pathlib import Path
 
 import torch
@@ -190,6 +191,10 @@ def main():
     config = {"width": args.width, "heads": args.heads, "layers": args.layers,
               "context": args.context, "vocab_size": vocab_size}
     model = TillbotCore(**config).to(device)
+    parameter_count = sum(parameter.numel() for parameter in model.parameters())
+    trainable_parameter_count = sum(
+        parameter.numel() for parameter in model.parameters() if parameter.requires_grad
+    )
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
     output = Path(args.out)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -213,6 +218,9 @@ def main():
         print(f"Resuming at step {start_step}; best validation loss={best_val:.4f}")
 
     log_path = output.with_suffix(".metrics.jsonl")
+    run_started_at = time.perf_counter()
+    if device.type == "cuda":
+        torch.cuda.reset_peak_memory_stats(device)
     stale_evaluations = 0
     for step in range(start_step + 1, start_step + args.steps + 1):
         model.train()
@@ -239,9 +247,24 @@ def main():
             else:
                 stale_evaluations += 1
 
-            record = {"step": step, "train_loss": loss.item(),
-                      "validation_loss": mean_val, "best_validation_loss": best_val,
-                      "device": str(device), "corpus_sha256": corpus_hash}
+            elapsed_seconds = max(time.perf_counter() - run_started_at, 1e-9)
+            tokens_this_run = (step - start_step) * args.batch_size * args.context
+            record = {
+                "step": step,
+                "train_loss": loss.item(),
+                "validation_loss": mean_val,
+                "best_validation_loss": best_val,
+                "device": str(device),
+                "corpus_sha256": corpus_hash,
+                "parameter_count": parameter_count,
+                "trainable_parameter_count": trainable_parameter_count,
+                "tokens_processed": step * args.batch_size * args.context,
+                "tokens_per_second": round(tokens_this_run / elapsed_seconds, 2),
+                "elapsed_seconds": round(elapsed_seconds, 3),
+                "peak_memory_bytes": (
+                    torch.cuda.max_memory_allocated(device) if device.type == "cuda" else None
+                ),
+            }
             print(json.dumps(record, ensure_ascii=False))
             with log_path.open("a", encoding="utf-8") as log:
                 log.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -250,6 +273,8 @@ def main():
                 "model_state": model.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
                 "config": config,
+                "parameter_count": parameter_count,
+                "trainable_parameter_count": trainable_parameter_count,
                 "training_steps": step,
                 "validation_loss": best_val,
                 "tokenizer": "byte-bpe-v1" if tokenizer is not None else "utf8-byte-v1",
