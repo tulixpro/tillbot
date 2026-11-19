@@ -91,6 +91,14 @@ TILLBOT gilt erst dann als bereit für die kostenlose Cloudflare-Umstellung, wen
 6. ein freigegebener Deploy live ist und ein Testchat auf der öffentlichen Website funktioniert.
 
 
+## 8. Tägliches Nachrichtenbudget
+
+Der geplante Standard für normale Konten beträgt 20 erfolgreiche KI-Anfragen pro Datenbank-Kalendertag. Der Wert kann im Admin-Dashboard zwischen 1 und 500 angepasst werden. Admin-Konten sind vom TILLBOT-Tageslimit und vom app-internen Minutenlimit ausgenommen.
+
+Das Budget wird serverseitig und atomar reserviert, bevor ein Modellanbieter aufgerufen wird. Bei einem Anbieterfehler oder einem Fehler vor Abschluss wird die Reservierung zurückgegeben. Die Anzeige im Chat zeigt den verbleibenden Tagesstand und den nächsten Reset an.
+
+Wichtig: Das Admin-Budget ist nur innerhalb von TILLBOT unbegrenzt. Externe Anbieter können weiterhin eigene Rate-Limits, Tageskontingente oder Kapazitätsgrenzen durchsetzen. Das gilt insbesondere für kostenlose Tarife.
+
 ## 9. Qualitätsstrategie: bestmögliche Qualität ohne Kosten
 
 Ziel ist ein möglichst guter TILLBOT bei einem harten Kostenlimit von 0 EUR. Das bedeutet nicht, dass ein Gratisanbieter unbegrenzte oder jederzeit verfügbare Nutzung garantiert.
