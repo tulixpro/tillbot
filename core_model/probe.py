@@ -12,6 +12,7 @@ from pathlib import Path
 import torch
 
 from model import TillbotCore
+from tokenizer_runtime import tokenizer_from_checkpoint, encode_text, decode_tokens
 
 
 PROBES = [
@@ -45,6 +46,7 @@ def main() -> int:
         raise SystemExit(f"Checkpoint not found: {checkpoint_path}. Train Core first.")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
+    tokenizer = tokenizer_from_checkpoint(checkpoint)
     config = checkpoint.get("config")
     if not isinstance(config, dict):
         raise SystemExit("Checkpoint is missing a valid model config.")
@@ -70,12 +72,11 @@ def main() -> int:
         "",
     ]
     for index, (category, prompt) in enumerate(PROBES, 1):
-        encoded = prompt.encode("utf-8")
-        prompt_ids = list(encoded[-config["context"]:])
+        prompt_ids = encode_text(prompt, tokenizer)[-config["context"]:]
         tokens = torch.tensor(prompt_ids, dtype=torch.long, device=device)[None, :]
         with torch.no_grad():
             output = model.generate(tokens, max_new_tokens=args.tokens, temperature=0.8, top_k=40)
-        continuation = bytes(output[0, len(prompt_ids):].tolist()).decode("utf-8", errors="replace")
+        continuation = decode_tokens(output[0, len(prompt_ids):].tolist(), tokenizer)
         lines.extend([
             f"## {index}. {category}",
             "",
