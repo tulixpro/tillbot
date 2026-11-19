@@ -34,7 +34,7 @@ Required environment variables (set in the hosting provider's secret/environment
 Optional:
 
 - `GROQ_MODEL` / `GROQ_VISION_MODEL` – optional Groq model overrides.
-- `CLOUDFLARE_MODEL` – optional Cloudflare text model override (default: `@cf/meta/llama-3.3-70b-instruct-fp8-fast`).
+- `CLOUDFLARE_MODEL` – optional Cloudflare text model override (default: `@cf/zai-org/glm-4.7-flash`).
 - `CLOUDFLARE_VISION_MODEL` – optional Cloudflare image model override (default: `@cf/meta/llama-3.2-11b-vision-instruct`).
 - `MAINTENANCE_MESSAGE` – fallback maintenance notice.
 - `MAINTENANCE_ENABLED` is not read directly; maintenance is controlled via the admin panel/database setting.
