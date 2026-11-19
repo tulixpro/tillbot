@@ -1128,3 +1128,36 @@ body::before,body::after{content:none!important;display:none!important;backgroun
  #auth .authSubmit{min-height:42px!important;height:42px!important}
  #sidebar button{font-size:12px!important}
 }
+
+
+/* Final mobile override: compact, single-line horizontally scrollable tool chips. */
+@media screen and (max-width: 760px){
+  #app .composerArea #powerTools{
+    display:flex!important;flex-wrap:nowrap!important;gap:5px!important;
+    max-height:40px!important;height:40px!important;overflow-x:auto!important;
+    overflow-y:hidden!important;align-items:center!important;
+    padding:2px 2px 5px!important;mask-image:none!important;
+    scrollbar-width:none!important;
+  }
+  #app .composerArea #powerTools::-webkit-scrollbar{display:none!important}
+  #app .composerArea #powerTools button,
+  #app .composerArea #powerTools button[data-tool]{
+    display:inline-flex!important;flex:0 0 auto!important;
+    width:auto!important;min-width:0!important;max-width:none!important;
+    min-height:25px!important;height:25px!important;max-height:25px!important;
+    padding:3px 7px!important;margin:0!important;
+    border-radius:7px!important;font-size:10px!important;
+    line-height:1!important;font-weight:600!important;white-space:nowrap!important;
+    box-shadow:none!important;transform:none!important;
+  }
+  #app .composerArea #togglePowerTools{
+    display:inline-flex!important;align-self:flex-start!important;
+    min-height:25px!important;height:25px!important;padding:3px 8px!important;
+    margin:0!important;font-size:10px!important;line-height:1!important;
+    border-radius:7px!important;
+  }
+  #sidebar button,#sidebar .sidebottom button,#sidebar #newChat,#sidebar #learnModeBtn{
+    min-height:34px!important;height:auto!important;padding:6px 9px!important;
+    font-size:12px!important;border-radius:8px!important;
+  }
+}
