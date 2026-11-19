@@ -147,6 +147,32 @@ checkpoint to `artifacts/tillbot-core.last.pt`, and metrics to
 `artifacts/tillbot-core.metrics.jsonl`. Continue the best checkpoint with
 `--resume`. These artifacts are local and are not committed to Git.
 
+## Schnelltest: Core lokal ausprobieren
+
+Dieser Test prüft nur, ob Training und Chat technisch zusammenlaufen. Er trainiert
+ein winziges Demo-Checkpoint ausschließlich mit den eigens für das Projekt
+geschriebenen Beispieldialogen. Die Antworten sind voraussichtlich schlecht oder
+zufällig und stellen **keine** deutsche Allgemeine KI dar. Der Live-Webchat wird
+nicht verändert.
+
+Im Repository-Hauptordner:
+
+```bash
+python core_model/try_core.py
+```
+
+Der Befehl trainiert kurz auf der CPU und öffnet danach einen lokalen Terminal-Chat.
+Beenden mit `/exit`. Optional:
+
+```bash
+python core_model/try_core.py --steps 10 --max-new-tokens 32
+```
+
+Für die geprüfte Vorauswahl möglicher deutscher Quellen siehe
+[`GERMAN_DATASET_CANDIDATES.md`](GERMAN_DATASET_CANDIDATES.md).
+Diese Kandidaten sind nicht automatisch freigegeben; keine externen Daten werden
+mit dem Schnelltest heruntergeladen oder verwendet.
+
 ## Local generation and chat
 
 After a checkpoint exists:
