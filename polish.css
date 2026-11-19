@@ -1,0 +1,378 @@
+/* TILLBOT 3.1 visual polish — progressive, non-destructive overrides */
+:root {
+  color-scheme: dark;
+  --tb-glass: rgba(8, 31, 51, .72);
+  --tb-line: rgba(174, 230, 255, .16);
+  --tb-muted: #a8c8dc;
+  --tb-glow: 0 18px 55px rgba(0, 12, 28, .28);
+  --tb-focus: #83e7ff;
+}
+html { scroll-behavior: smooth; }
+body { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+button, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+/* Compact controls without making touch targets uncomfortably small. */
+button { min-height: 36px; padding: 8px 11px; font-size: 13px; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 3px solid var(--tb-focus);
+  outline-offset: 3px;
+}
+button:active { transform: translateY(0) scale(.985); }
+button:disabled { cursor: not-allowed; filter: saturate(.55); transform: none; }
+::selection { color: #041a2a; background: #8cebdc; }
+.authCard, .settingsGroup, .adminActions, .maintenanceCard { box-shadow: var(--tb-glow); }
+.authCard { border: 1px solid var(--tb-line); backdrop-filter: blur(24px) saturate(1.2); }
+.authPill, .tag, .versionBadge { backdrop-filter: blur(14px); }
+.authInputWrap:focus-within, .composer:focus-within {
+  border-color: rgba(109, 226, 218, .72);
+  box-shadow: 0 0 0 4px rgba(63, 205, 184, .11);
+}
+#prompt { line-height: 1.55; }
+#chat { scroll-behavior: smooth; overscroll-behavior: contain; }
+#sidebar button, .sidebottom button { min-height: 34px; padding: 7px 10px; font-size: 12px; }
+#newChat, #authSubmit { min-height: 42px; }
+.suggestions { gap: 7px; }
+.suggestions button, .powerTools button, .learnModeBtn {
+  min-height: 32px; padding: 6px 10px; font-size: 11px;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.suggestions button:hover, .powerTools button:hover, .learnModeBtn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(112, 229, 215, .45);
+  box-shadow: 0 8px 24px rgba(0, 10, 25, .18);
+}
+.composerTools { gap: 5px; }
+.composerTools button { min-width: 36px; min-height: 36px; padding: 6px 8px; font-size: 11px; }
+#send { min-width: 40px; min-height: 40px; }
+.toolsToggle { min-height: 30px; padding: 5px 9px; font-size: 11px; }
+.settingsGroup button, .customizeButtons button, dialog button { min-height: 34px; padding: 7px 10px; font-size: 12px; }
+.systemNotice { border: 1px solid var(--tb-line); box-shadow: var(--tb-glow); }
+.settingsGroup, .adminActions { border: 1px solid var(--tb-line); border-radius: 18px; }
+input, textarea, select { accent-color: #39d7b1; }
+dialog { max-width: min(760px, calc(100vw - 24px)); max-height: min(88dvh, 900px); overscroll-behavior: contain; }
+dialog::backdrop { background: rgba(1, 10, 22, .72); backdrop-filter: blur(7px); }
+@media (max-width: 820px) {
+  body { background-attachment: scroll; }
+  .layout { min-height: var(--tb-visual-height, 100dvh); height: var(--tb-visual-height, 100dvh); }
+  main { min-height: 0; }
+  header { padding-left: max(14px, env(safe-area-inset-left)); padding-right: max(14px, env(safe-area-inset-right)); }
+  .composerArea { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  #prompt { max-height: 32dvh; }
+  .auth { min-height: 100dvh; padding: max(20px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom)); }
+  .authCard { width: min(100%, 480px); }
+  dialog { width: calc(100vw - 16px); max-width: none; max-height: 90dvh; padding: 18px; }
+  .composerTools { gap: 4px; }
+  .composerTools button { min-width: 34px; min-height: 34px; padding: 5px 7px; font-size: 10px; }
+  #send { min-width: 36px; min-height: 36px; }
+  .suggestions button { min-height: 30px; padding: 5px 8px; font-size: 10px; }
+  .powerTools button { min-height: 30px; padding: 5px 8px; font-size: 10px; }
+}
+@media (max-width: 420px) {
+  :root { font-size: 16px; }
+  .authIntro h1 { font-size: clamp(1.8rem, 9vw, 2.5rem); }
+  .suggestions { gap: 6px; }
+  .composerTools { gap: 4px; }
+  .composerTools button { min-width: 32px; padding: 5px 6px; }
+  .tag { max-width: 38vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* TILLBOT 3.2 — cohesive premium finish */
+:root {
+  --tb-surface: rgba(12, 39, 61, .76);
+  --tb-surface-strong: rgba(9, 30, 49, .94);
+  --tb-accent: #55e0c2;
+  --tb-accent-blue: #68b9ff;
+}
+body { background-color: #071a2b; }
+.layout { isolation: isolate; }
+#sidebar {
+  background: linear-gradient(180deg, rgba(5, 24, 41, .97), rgba(7, 34, 51, .94));
+  border-right: 1px solid rgba(151, 224, 255, .13);
+}
+.brand { padding: 5px 3px 12px; }
+.brandIcon { border: 1px solid rgba(255,255,255,.22); box-shadow: 0 8px 28px rgba(38, 211, 177, .2); }
+#newChat {
+  border-radius: 13px;
+  box-shadow: 0 8px 24px rgba(27, 196, 161, .16);
+}
+#history button {
+  border-radius: 10px;
+  transition: background .16s ease, color .16s ease, transform .16s ease;
+}
+#history button:hover { transform: translateX(2px); }
+header {
+  position: relative;
+  z-index: 2;
+  border-bottom-color: rgba(163, 224, 255, .12);
+  background: rgba(5, 24, 41, .78);
+}
+.headTitle strong { letter-spacing: -.8px; }
+#who {
+  padding: 6px 11px;
+  border: 1px solid rgba(137, 222, 255, .18);
+  border-radius: 999px;
+  background: rgba(76, 164, 202, .08);
+}
+.chat { scroll-padding-block: 22px; }
+.welcome {
+  width: min(100%, 720px);
+  padding: clamp(20px, 4vw, 38px);
+  border: 1px solid rgba(154, 225, 255, .12);
+  border-radius: 26px;
+  background: linear-gradient(145deg, rgba(13, 47, 70, .45), rgba(7, 31, 50, .28));
+  box-shadow: 0 22px 70px rgba(0, 9, 22, .14), inset 0 1px rgba(255,255,255,.035);
+}
+.welcome .cloud {
+  width: 76px; height: 76px; margin: 0 auto 12px;
+  display: grid; place-items: center;
+  border: 1px solid rgba(109, 228, 211, .22);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(54, 210, 177, .13), rgba(71, 153, 255, .13));
+}
+.welcome .cloud img { width: 54px; height: 54px; object-fit: contain; }
+.welcome h1 { letter-spacing: -1.7px; }
+.welcome .muted { max-width: 510px; margin-inline: auto; line-height: 1.65; }
+.suggestions { max-width: 600px; margin-inline: auto; }
+.suggestions button {
+  border: 1px solid rgba(153, 224, 255, .16);
+  background: rgba(255,255,255,.055);
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+}
+.suggestions button:hover {
+  background: rgba(76, 204, 183, .13);
+  border-color: rgba(105, 229, 210, .4);
+}
+.composerArea { position: relative; }
+.composer {
+  border: 1px solid rgba(128, 219, 239, .22);
+  background: rgba(8, 34, 54, .9);
+  box-shadow: 0 16px 48px rgba(0, 9, 22, .28), inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter: blur(20px);
+}
+.composer textarea::placeholder { color: #83a9bd; }
+.composerTools button, .composer #photoBtn, .composer #voiceBtn {
+  border-radius: 11px;
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+.composerTools button:hover, .composer #photoBtn:hover, .composer #voiceBtn:hover {
+  border-color: rgba(100, 226, 205, .45);
+}
+#send {
+  color: #062638;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6de7c8, #71bdff);
+  box-shadow: 0 6px 18px rgba(69, 203, 185, .2);
+}
+#send:hover { filter: brightness(1.07); transform: translateY(-1px); }
+#powerTools {
+  padding: 10px;
+  border: 1px solid rgba(151, 224, 255, .13);
+  border-radius: 15px;
+  background: rgba(7, 29, 47, .72);
+}
+.powerTools button { border-radius: 999px; }
+dialog {
+  border: 1px solid rgba(151, 224, 255, .2);
+  border-radius: 20px;
+  background: linear-gradient(155deg, #0d3049, #081f34);
+  box-shadow: 0 28px 90px rgba(0, 7, 18, .58);
+}
+.settingsGroup { padding-inline: 3px; }
+.settingsGroup button { border-radius: 10px; }
+.authCard { box-shadow: 0 28px 90px rgba(0, 8, 20, .38), inset 0 1px rgba(255,255,255,.04); }
+.authSubmit { border-radius: 13px; }
+@media (max-width: 820px) {
+  .welcome { padding: 22px 15px; border-radius: 20px; }
+  .welcome .cloud { width: 64px; height: 64px; border-radius: 20px; }
+  .welcome .cloud img { width: 46px; height: 46px; }
+  .composer { gap: 6px; }
+  .composer textarea { min-width: 0; }
+}
+@media (max-width: 420px) {
+  .welcome { padding: 18px 12px; }
+  .welcome h1 { letter-spacing: -1px; }
+  #who { max-width: 34vw; overflow: hidden; text-overflow: ellipsis; }
+}
+body[data-theme="light"] .welcome {
+  background: linear-gradient(145deg, rgba(255,255,255,.88), rgba(239,248,255,.78));
+  border-color: rgba(41, 103, 139, .15);
+  box-shadow: 0 18px 55px rgba(37, 84, 110, .1);
+}
+body[data-theme="light"] .composer {
+  background: rgba(255,255,255,.94);
+  border-color: rgba(41, 103, 139, .2);
+}
+body[data-theme="light"] .composer textarea::placeholder { color: #69869a; }
+body[data-theme="light"] #sidebar { background: rgba(246, 251, 255, .97); }
+body[data-theme="light"] header { background: rgba(250, 253, 255, .9); }
+
+
+/* TILLBOT 3.3 — quota clarity and refined workspace details */
+#quotaStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: min(100%, 420px);
+  margin: 7px auto 1px;
+  padding: 6px 11px;
+  border: 1px solid rgba(117, 212, 236, .18);
+  border-radius: 999px;
+  color: #c2e6f2;
+  background: rgba(30, 83, 108, .24);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .015em;
+  text-align: center;
+  line-height: 1.4;
+}
+#quotaStatus.adminQuota {
+  color: #aaf4d8;
+  border-color: rgba(91, 225, 177, .3);
+  background: rgba(25, 126, 92, .16);
+}
+#quotaStatus.quotaBlocked {
+  color: #ffe0a4;
+  border-color: rgba(255, 190, 93, .36);
+  background: rgba(160, 91, 24, .2);
+}
+.composer > small {
+  display: block;
+  margin-top: 6px;
+  color: var(--tb-muted, #a8c8dc);
+  font-size: 10px;
+  letter-spacing: .02em;
+}
+.sideProfile {
+  border: 1px solid rgba(148, 221, 244, .13);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(69, 145, 174, .12), rgba(52, 111, 145, .06));
+}
+.sideProfile .onlineDot { box-shadow: 0 0 0 4px rgba(75, 221, 167, .08), 0 0 13px rgba(75, 221, 167, .55); }
+.quotaAdmin {
+  background: linear-gradient(145deg, rgba(20, 70, 91, .2), rgba(11, 42, 64, .12));
+}
+.quotaAdmin input[type="number"] {
+  max-width: 180px;
+  font-variant-numeric: tabular-nums;
+}
+.adminActions h3 { letter-spacing: -.25px; }
+.adminActions p { line-height: 1.6; }
+.settingsGroup { padding: 15px; }
+button, input, textarea, select { transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline-offset: 3px;
+}
+body[data-theme="light"] #quotaStatus {
+  color: #31576b;
+  background: rgba(218, 240, 248, .72);
+  border-color: rgba(48, 116, 147, .18);
+}
+body[data-theme="light"] #quotaStatus.adminQuota {
+  color: #176548;
+  background: rgba(214, 248, 232, .85);
+  border-color: rgba(32, 147, 99, .22);
+}
+body[data-theme="light"] #quotaStatus.quotaBlocked {
+  color: #86500c;
+  background: rgba(255, 239, 211, .9);
+  border-color: rgba(195, 129, 34, .25);
+}
+body[data-theme="light"] .sideProfile {
+  background: linear-gradient(135deg, rgba(224, 244, 250, .9), rgba(244, 250, 255, .9));
+  border-color: rgba(42, 112, 145, .14);
+}
+@media (max-width: 820px) {
+  #quotaStatus { max-width: calc(100vw - 42px); font-size: 10px; }
+  .sideProfile { margin-bottom: max(6px, env(safe-area-inset-bottom)); }
+  .settingsGroup { padding: 13px; }
+}
+
+
+/* TILLBOT compact-control pass: chips stay small; primary actions remain touch-friendly. */
+#app .welcome .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px !important;
+  margin-top: 14px !important;
+}
+#app .welcome .suggestions button {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 27px !important;
+  height: 27px !important;
+  padding: 4px 9px !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+  font-weight: 550 !important;
+  box-shadow: none !important;
+}
+#app .composerArea #powerTools button {
+  min-height: 28px !important;
+  height: 28px !important;
+  padding: 4px 8px !important;
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+}
+#app .composerArea #togglePowerTools {
+  min-height: 28px !important;
+  height: 28px !important;
+  padding: 4px 9px !important;
+  font-size: 10px !important;
+}
+#app .composerTools button {
+  min-width: 32px !important;
+  min-height: 34px !important;
+  padding: 5px 7px !important;
+  font-size: 10px !important;
+}
+#app .composerTools #send {
+  min-width: 36px !important;
+  min-height: 36px !important;
+}
+#sidebar button, #sidebar .sidebottom button {
+  min-height: 34px !important;
+  padding: 6px 9px !important;
+  font-size: 12px !important;
+}
+#sidebar #newChat, #sidebar #learnModeBtn {
+  min-height: 38px !important;
+}
+@media (max-width: 520px) {
+  #app .welcome .suggestions {
+    gap: 5px !important;
+    margin-top: 12px !important;
+  }
+  #app .welcome .suggestions button {
+    min-height: 25px !important;
+    height: 25px !important;
+    padding: 3px 7px !important;
+    font-size: 9.5px !important;
+  }
+  #app .composerArea #powerTools {
+    max-height: 38px !important;
+    height: 38px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none;
+  }
+  #app .composerArea #powerTools::-webkit-scrollbar { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #app .welcome .suggestions button,
+  #app .composerArea #powerTools button {
+    transition: none !important;
+  }
+}
