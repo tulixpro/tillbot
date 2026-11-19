@@ -91,17 +91,7 @@ class DatasetPreparationTests(unittest.TestCase):
             self.assertEqual(len(manifest1["sources"]), 4)
 
 
-"""Additional tests for the local dataset audit utility."""
-from __future__ import annotations
-
-import json
-import subprocess
-import sys
-import tempfile
-import unittest
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parent
+class DatasetAuditTests(unittest.TestCase):
 
 
 class DatasetAuditTests(unittest.TestCase):
