@@ -100,8 +100,9 @@ Run the CPU regression suite from the repository root:
 python -m unittest discover -s core_model -p 'test_*.py' -v
 ```
 
-The suite checks tensor shapes and loss, causal attention, generation bounds, context limits,
-and reproducible source-level dataset splits with explicit license confirmation. GitHub Actions
+The suite checks tensor shapes and loss, causal attention, cached and uncached generation equivalence,
+generation bounds, context limits, a tiny CPU training smoke test, and reproducible source-level
+dataset splits with explicit license confirmation. GitHub Actions
 runs the same suite for changes to `core_model/`.
 
 ## Inference speed benchmark
