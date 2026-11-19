@@ -102,7 +102,7 @@ app.patch("/api/admin/training/examples/:id", auth, admin, trainingLimit, async 
   if(prompt!==null&&(prompt.length<3||prompt.length>6000)) return res.status(400).json({error:"Prompt muss 3–6.000 Zeichen lang sein."});
   if(completion!==null&&(completion.length<2||completion.length>8000)) return res.status(400).json({error:"Antwort muss 2–8.000 Zeichen lang sein."});
   try {
-    const {rows}=await pool.query("UPDATE training_examples SET approved=COALESCE($1,approved),prompt=COALESCE($2,prompt),completion=COALESCE($3,completion),updated_at=CURRENT_TIMESTAMP WHERE id=$4 RETURNING id,prompt,completion,category,source_note,license_confirmed,approved,created_at,updated_at",[approved,prompt,completion,id]);
+    const {rows}=await pool.query("UPDATE training_examples SET approved=CASE WHEN $2 IS NOT NULL OR $3 IS NOT NULL THEN FALSE ELSE COALESCE($1,approved) END,prompt=COALESCE($2,prompt),completion=COALESCE($3,completion),updated_at=CURRENT_TIMESTAMP WHERE id=$4 RETURNING id,prompt,completion,category,source_note,license_confirmed,approved,created_at,updated_at",[approved,prompt,completion,id]);
     if(!rows[0]) return res.status(404).json({error:"Beispiel nicht gefunden."});
     res.json({example:rows[0]});
   } catch(error) { console.error("Training example update error:",error); res.status(500).json({error:"Beispiel konnte nicht aktualisiert werden."}); }
