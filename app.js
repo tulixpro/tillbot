@@ -164,6 +164,16 @@ $("voiceBtn").onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeec
 document.addEventListener("keydown",e=>{if(e.key==="Escape")$("sidebar").classList.remove("open");if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("newChat").click()}});
 
 /* TILLBOT Power-Tools: funktionale Prompt-Aktionen */
+const toolsToggle=document.getElementById("togglePowerTools");
+const toolsPanel=document.getElementById("powerTools");
+if(toolsToggle&&toolsPanel){
+ toolsToggle.addEventListener("click",()=>{
+  const expanded=toolsToggle.getAttribute("aria-expanded")==="true";
+  toolsToggle.setAttribute("aria-expanded",String(!expanded));
+  toolsPanel.classList.toggle("toolsExpanded",!expanded);
+  toolsToggle.textContent=expanded?"Werkzeuge anzeigen":"Werkzeuge ausblenden";
+ });
+}
 document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("click",()=>{
  const p=$("prompt"), text=p.value.trim(), tool=btn.dataset.tool;
  const templates={
