@@ -28,7 +28,7 @@ function authMode(reg){
  $("tabLogin").classList.toggle("selected",!reg);$("tabRegister").classList.toggle("selected",reg);
  $("tabLogin").setAttribute("aria-selected",String(!reg));$("tabRegister").setAttribute("aria-selected",String(reg));
  $("authTitle").textContent=reg?"Erstelle dein Konto.":"Dein Platz für neue Ideen.";
- $("authDescription").textContent=reg?"Ein Benutzername, ein sicheres Passwort – und dein eigener KI-Bereich.":"Melde dich an und setze deine Chats genau dort fort, wo du aufgehört hast.";
+ $("authDescription").textContent=reg?"Erstelle kostenlos dein Konto mit einem Benutzernamen und einem sicheren Passwort.":"Melde dich an und setze deine Chats genau dort fort, wo du aufgehört hast.";
  $("authSubmitText").textContent=reg?"Konto erstellen":"Anmelden";
  $("password").autocomplete=reg?"new-password":"current-password";
  $("passwordHint").textContent=reg?"Mindestens 10 Zeichen":"Dein Kontopasswort";
@@ -181,6 +181,7 @@ document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("clic
  exam:"Bereite mich auf eine Prüfung vor: Lernziele, kompakte Wiederholung, typische Fragen und danach aktives Abfragen. Fach/Thema: "+(text||"[Thema]"),
  email:"Hilf mir, eine klare und höfliche E-Mail zu schreiben. Erstelle Betreff und Nachricht, passend zum Kontext. Inhalt: "+(text||"[Was soll drinstehen?]"),
  debug:"Analysiere den Code/Fehler systematisch. Erkläre Ursache, Lösung und verbesserten Code. Bitte nichts erfinden, fehlende Infos nachfragen. Code/Fehler: "+(text||"[Code oder Fehlermeldung]"),
+ website:"Du bist ein hilfreicher Website-Bau-Assistent. Entwickle eine moderne, responsive und barrierearme Website. Frage bei fehlenden Angaben gezielt nach Zweck, Zielgruppe, gewünschtem Stil und Seiten. Wenn genug Angaben vorliegen, liefere vollständige, zusammenhängende HTML-, CSS- und JavaScript-Dateien, erkläre wie sie lokal getestet werden und verwende keine kostenpflichtigen Dienste oder erfundenen APIs. Verwende nur Platzhalter für persönliche Daten und niemals echte Zugangsdaten. Website-Projekt: "+(text||"[Beschreibe deine Website-Idee]"),
  optimize:"Du bist Produkt- und UX-Optimierer für die Anwendung TILLBOT. Hilf mir, TILLBOT sinnvoll zu verbessern. Nenne konkrete Verbesserungen für Nutzen, Bedienung, Zuverlässigkeit, Datenschutz und Sicherheit. Priorisiere nach Wirkung und Aufwand und bevorzuge kostenlose, realistisch umsetzbare Änderungen. Behaupte nicht, Zugriff auf den Quellcode oder die Einstellungen zu haben. Wenn wichtige Informationen fehlen, stelle gezielte Rückfragen. Mein Vorschlag oder Problem: "+(text||"[Beschreibe, was an TILLBOT besser werden soll]")
  };
  p.value=templates[tool]||text;p.focus();p.dispatchEvent(new Event("input"));
