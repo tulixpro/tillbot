@@ -1,6 +1,6 @@
-"""Tiny decoder-only Transformer trained from random initialization.
+"""Tiny decoder-only Transformer with configurable token vocabulary.
 
-Educational baseline, not a production-quality assistant. UTF-8 bytes are tokens.
+Educational baseline, not a production-quality assistant. Defaults to UTF-8 bytes.
 """
 from __future__ import annotations
 
@@ -67,20 +67,23 @@ class TillbotCore(nn.Module):
     """Small GPT-style language model with 256 possible byte tokens."""
 
     def __init__(self, width: int = 128, heads: int = 4, layers: int = 4,
-                 context: int = 256, dropout: float = 0.1):
+                 context: int = 256, dropout: float = 0.1, vocab_size: int = 256):
         super().__init__()
         if width < 8 or heads < 1 or width % heads:
             raise ValueError("width must be >= 8 and divisible by a positive head count")
         if layers < 1 or context < 2:
             raise ValueError("layers must be positive and context must be at least 2")
+        if not isinstance(vocab_size, int) or vocab_size < 256:
+            raise ValueError("vocab_size must be an integer of at least 256")
         if not 0.0 <= dropout < 1.0:
             raise ValueError("dropout must be in [0, 1)")
         self.context = context
-        self.token_embedding = nn.Embedding(256, width)
+        self.vocab_size = vocab_size
+        self.token_embedding = nn.Embedding(vocab_size, width)
         self.position_embedding = nn.Embedding(context, width)
         self.blocks = nn.ModuleList([Block(width, heads, dropout) for _ in range(layers)])
         self.final_norm = nn.LayerNorm(width)
-        self.lm_head = nn.Linear(width, 256, bias=False)
+        self.lm_head = nn.Linear(width, vocab_size, bias=False)
         self.token_embedding.weight = self.lm_head.weight
         self.apply(self._init_weights)
 
@@ -100,8 +103,8 @@ class TillbotCore(nn.Module):
         if tokens.dtype != torch.long:
             raise ValueError("tokens must use torch.long byte IDs")
         _, length = tokens.shape
-        if torch.any((tokens < 0) | (tokens > 255)):
-            raise ValueError("token IDs must be in the byte range 0..255")
+        if torch.any((tokens < 0) | (tokens >= self.vocab_size)):
+            raise ValueError(f"token IDs must be in the vocabulary range 0..{self.vocab_size - 1}")
         _, length = tokens.shape
         past_length = 0
         if past_key_values is not None:
@@ -119,8 +122,8 @@ class TillbotCore(nn.Module):
                 raise ValueError("targets cannot be supplied with a generation cache")
             if targets.shape != tokens.shape or targets.dtype != torch.long:
                 raise ValueError("targets must be torch.long and match the tokens shape")
-            if torch.any((targets < 0) | (targets > 255)):
-                raise ValueError("target IDs must be in the byte range 0..255")
+            if torch.any((targets < 0) | (targets >= self.vocab_size)):
+                raise ValueError(f"target IDs must be in the vocabulary range 0..{self.vocab_size - 1}")
         positions = torch.arange(past_length, past_length + length, device=tokens.device)
         x = self.token_embedding(tokens) + self.position_embedding(positions)[None, :, :]
         presents = []
@@ -132,7 +135,7 @@ class TillbotCore(nn.Module):
         logits = self.lm_head(self.final_norm(x))
         loss = None
         if targets is not None:
-            loss = F.cross_entropy(logits.reshape(-1, 256), targets.reshape(-1))
+            loss = F.cross_entropy(logits.reshape(-1, self.vocab_size), targets.reshape(-1))
         return (logits, loss, tuple(presents)) if use_cache else (logits, loss)
 
     @torch.no_grad()
@@ -143,14 +146,14 @@ class TillbotCore(nn.Module):
         """Generate bytes, using a KV cache for faster token-by-token decoding."""
         if tokens.ndim != 2 or tokens.size(0) < 1 or tokens.size(1) < 1:
             raise ValueError("tokens must be a non-empty [batch, sequence] tensor")
-        if tokens.dtype != torch.long or torch.any((tokens < 0) | (tokens > 255)):
-            raise ValueError("tokens must contain torch.long byte IDs in 0..255")
+        if tokens.dtype != torch.long or torch.any((tokens < 0) | (tokens >= self.vocab_size)):
+            raise ValueError(f"tokens must contain torch.long IDs in 0..{self.vocab_size - 1}")
         if not isinstance(max_new_tokens, int) or max_new_tokens < 0:
             raise ValueError("max_new_tokens must be a non-negative integer")
         if not math.isfinite(temperature) or temperature <= 0:
             raise ValueError("temperature must be finite and greater than zero")
-        if not isinstance(top_k, int) or not 0 <= top_k <= 256:
-            raise ValueError("top_k must be between 0 and 256")
+        if not isinstance(top_k, int) or not 0 <= top_k <= self.vocab_size:
+            raise ValueError(f"top_k must be between 0 and {self.vocab_size}")
         if not math.isfinite(repetition_penalty) or repetition_penalty < 1.0:
             raise ValueError("repetition_penalty must be finite and at least 1.0")
         self.eval()
