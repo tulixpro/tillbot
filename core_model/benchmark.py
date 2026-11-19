@@ -70,7 +70,7 @@ def main():
     print({
         "device": str(device),
         "prompt_tokens": len(prompt_ids),
-        "generated_bytes": args.tokens,
+        "generated_tokens": args.tokens,
         "repeats": args.repeats,
         "results": results,
     })
