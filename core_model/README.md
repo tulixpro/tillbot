@@ -16,6 +16,22 @@ A random small model does not know German, facts, or instruction following. Mean
 training requires a large, varied, legally usable corpus, compute, repeated training,
 held-out evaluation, and safety testing. This prototype is not comparable to ChatGPT.
 
+## Dataset split and provenance validation
+
+After preparing a source-level split, validate it before fitting the tokenizer or
+starting training:
+
+```bash
+python core_model/validate_dataset.py --train ./core_model/data/prepared/train.txt --validation ./core_model/data/prepared/val.txt --manifest ./core_model/data/prepared/manifest.json --source-dir ./reviewed_sources --min-chars 300
+```
+
+The validator checks train/validation document overlap after whitespace and
+case normalization, split-file disjointness, manifest inventory consistency,
+source paths and (when `--source-dir` is supplied) original source SHA-256 hashes.
+It does not verify licenses, consent, copyright status or guarantee that personal
+information is absent; those still require human review. Do not put private user
+conversations, credentials or personal data into a training corpus.
+
 ## Byte-level BPE tokenizer integration
 
 The deterministic byte-level BPE tokenizer is now connected to the Transformer,
