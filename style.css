@@ -1161,3 +1161,93 @@ body::before,body::after{content:none!important;display:none!important;backgroun
     font-size:12px!important;border-radius:8px!important;
   }
 }
+
+
+/* TILLBOT mobile polish v1: compact controls, clear hierarchy, reliable tool disclosure. */
+button{
+  font-weight:600;
+  transition:background-color .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease;
+}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid var(--accent,#3997d6);
+  outline-offset:2px;
+}
+@media (min-width:701px){
+  #sidebar button{min-height:36px;padding:7px 11px;font-size:12px;border-radius:9px}
+  .suggestions button{min-height:34px;padding:7px 11px;font-size:12px}
+  .composerTools button{min-height:34px;padding:6px 10px;font-size:12px}
+  .toolsToggle{min-height:28px;padding:5px 9px;font-size:11px}
+  #powerTools button{min-height:29px;padding:5px 9px;font-size:11px}
+}
+.composerTools{gap:5px!important}
+.composerTools button{
+  min-width:34px!important;min-height:34px!important;
+  padding:6px 9px!important;border-radius:9px!important;
+  font-size:11px!important;line-height:1.1!important;
+}
+#send{min-width:36px!important;min-height:36px!important}
+#prompt{line-height:1.45}
+.composer small{font-size:10px!important;opacity:.72}
+.settingsGroup button,.customizeButtons button{
+  min-height:36px;padding:7px 11px;font-size:12px;border-radius:9px
+}
+@media(max-width:760px){
+  #app main{min-width:0}
+  #app header{min-height:54px;padding-top:max(8px,env(safe-area-inset-top));}
+  #app .chat{overscroll-behavior:contain}
+  #app .composerArea{
+    padding-bottom:max(8px,env(safe-area-inset-bottom));
+    gap:5px!important;
+  }
+  #app .composer{
+    gap:5px!important;padding:8px!important;border-radius:14px!important;
+  }
+  #app #prompt{
+    min-height:38px!important;max-height:132px!important;
+    padding:7px 8px!important;font-size:15px!important;
+  }
+  #app .composerTools{gap:4px!important}
+  #app .composerTools button{
+    min-width:32px!important;min-height:32px!important;
+    padding:5px 7px!important;font-size:10px!important;
+    border-radius:8px!important;
+  }
+  #app #send{min-width:34px!important;min-height:34px!important}
+  #app .suggestions{gap:6px!important}
+  #app .suggestions button{
+    min-height:32px!important;padding:6px 9px!important;
+    font-size:11px!important;border-radius:8px!important;
+  }
+  #app .composerArea #powerTools:not(.toolsExpanded){display:none!important}
+  #app .composerArea #powerTools.toolsExpanded{
+    display:flex!important;flex-wrap:nowrap!important;gap:5px!important;
+    height:38px!important;max-height:38px!important;overflow-x:auto!important;
+    overflow-y:hidden!important;align-items:center!important;
+    padding:2px 2px 4px!important;scrollbar-width:none!important;
+  }
+  #app .composerArea #powerTools.toolsExpanded::-webkit-scrollbar{display:none!important}
+  #app .composerArea #powerTools button{
+    flex:0 0 auto!important;min-height:26px!important;height:26px!important;
+    padding:4px 7px!important;font-size:10px!important;border-radius:7px!important;
+  }
+  #app .composerArea #togglePowerTools{
+    display:inline-flex!important;min-height:26px!important;height:26px!important;
+    padding:4px 8px!important;font-size:10px!important;border-radius:7px!important;
+  }
+  #sidebar button,#sidebar .sidebottom button,#sidebar #newChat,#sidebar #learnModeBtn{
+    min-height:35px!important;padding:7px 10px!important;
+    font-size:12px!important;border-radius:8px!important;
+  }
+  #settingsDialog,#adminDialog,#learnDialog{
+    max-width:calc(100vw - 20px)!important;max-height:calc(100dvh - 20px)!important;
+    margin:auto!important;border-radius:16px!important;
+  }
+}
+@media(max-width:380px){
+  #app .composer{padding:7px!important}
+  #app .composerTools button{min-width:30px!important;padding:4px 6px!important}
+  #app .suggestions button{font-size:10px!important;padding:5px 7px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
