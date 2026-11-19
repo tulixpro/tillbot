@@ -13,7 +13,7 @@ from model import TillbotCore
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data", default="data/train.txt")
+    parser.add_argument("--data", default="core_model/data/seed_dialogues.txt")
     parser.add_argument("--out", default="artifacts/tillbot-core.pt")
     parser.add_argument("--steps", type=int, default=5000)
     parser.add_argument("--batch-size", type=int, default=32)
