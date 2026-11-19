@@ -55,6 +55,19 @@ still checks split overlap and manifest structure but does not re-hash the origi
 source files. This is a structural safeguard, not a license or privacy approval.
 Legacy smoke-test commands remain available without strict mode.
 
+## Reproducible dataset and checkpoint identity
+
+The dataset preparation manifest records SHA-256 hashes of both prepared split files
+as well as the original source files. Strict validation checks the split-file hashes
+before training, so editing `train.txt` or `val.txt` after preparation invalidates
+the manifest. Keep the manifest with the exact prepared files.
+
+Checkpoints record the corpus hash, strict manifest hash (when strict validation is
+enabled), tokenizer hash, model configuration, and training settings. `--resume`
+refuses to continue when the dataset, manifest, tokenizer, model shape, seed, split
+fraction, or key optimizer/evaluation settings differ. Start a fresh run when any of
+these inputs change; do not silently mix experiments.
+
 ## Byte-level BPE tokenizer integration
 
 The deterministic byte-level BPE tokenizer is now connected to the Transformer,
