@@ -36,8 +36,9 @@ def main():
         if len(content) < args.min_chars:
             print(f"Skipping short file: {path} ({len(content)} characters)")
             continue
-        docs.append((path.name, content))
-        manifest.append({"file": path.name, "sha256": hashlib.sha256(raw).hexdigest(),
+        relative_path = path.relative_to(source).as_posix()
+        docs.append((relative_path, content))
+        manifest.append({"file": relative_path, "sha256": hashlib.sha256(raw).hexdigest(),
                          "characters": len(content),
                          "rights_review": "user-confirmed; verify source license separately"})
     if len(docs) < 2:
