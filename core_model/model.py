@@ -130,7 +130,7 @@ class TillbotCore(nn.Module):
         loss = None
         if targets is not None:
             loss = F.cross_entropy(logits.reshape(-1, 256), targets.reshape(-1))
-        return logits, loss, (tuple(presents) if use_cache else None)
+        return (logits, loss, tuple(presents)) if use_cache else (logits, loss)
 
     @torch.no_grad()
     def generate(self, tokens: torch.Tensor, max_new_tokens: int = 120,
@@ -152,7 +152,11 @@ class TillbotCore(nn.Module):
             raise ValueError("repetition_penalty must be finite and at least 1.0")
         self.eval()
         tokens = tokens[:, -self.context:]
-        logits, _, cache = self(tokens, use_cache=use_cache)
+        if use_cache:
+            logits, _, cache = self(tokens, use_cache=True)
+        else:
+            logits, _ = self(tokens)
+            cache = None
         for step in range(max_new_tokens):
             scores = logits[:, -1, :].clone() / temperature
             if repetition_penalty > 1.0:
@@ -173,6 +177,8 @@ class TillbotCore(nn.Module):
                 break
             if use_cache and cache[0][0].size(2) < self.context:
                 logits, _, cache = self(next_token, past_key_values=cache, use_cache=True)
+            elif use_cache:
+                logits, _, cache = self(tokens[:, -self.context:], use_cache=True)
             else:
-                logits, _, cache = self(tokens[:, -self.context:], use_cache=use_cache)
+                logits, _ = self(tokens[:, -self.context:])
         return tokens
