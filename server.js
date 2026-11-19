@@ -253,7 +253,7 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
     apiUrl = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/ai/v1/chat/completions`;
     model = image
       ? (process.env.CLOUDFLARE_VISION_MODEL || "@cf/meta/llama-3.2-11b-vision-instruct")
-      : (process.env.CLOUDFLARE_MODEL || "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+      : (process.env.CLOUDFLARE_MODEL || "@cf/zai-org/glm-4.7-flash");
   } else if (provider === "groq") {
     apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) return res.status(503).json({ answer: "Der KI-Dienst ist noch nicht eingerichtet. Bitte Server-Konfiguration prüfen." });
