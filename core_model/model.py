@@ -108,6 +108,8 @@ class TillbotCore(nn.Module):
             past_length = past_key_values[0][0].size(2)
             if any(pair[0].size(2) != past_length for pair in past_key_values):
                 raise ValueError("cache layers have inconsistent sequence lengths")
+            if length != 1:
+                raise ValueError("cached decoding currently accepts exactly one new token at a time")
         _, length = tokens.shape
         if past_length + length > self.context:
             raise ValueError(f"sequence length {past_length + length} exceeds context {self.context}")
