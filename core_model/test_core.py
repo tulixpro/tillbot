@@ -91,10 +91,6 @@ class DatasetPreparationTests(unittest.TestCase):
             self.assertEqual(len(manifest1["sources"]), 4)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 """Additional tests for the local dataset audit utility."""
 from __future__ import annotations
 
@@ -115,7 +111,7 @@ class DatasetAuditTests(unittest.TestCase):
             source.mkdir()
             first = "A sufficiently long sample document. " * 12
             (source / "one.txt").write_text(first + "\nContact test.person@example.org", encoding="utf-8")
-            (source / "two.txt").write_text("  " + first.replace("  ", " ") + "  ", encoding="utf-8")
+            (source / "two.txt").write_text("  " + first + "\\nContact test.person@example.org  ", encoding="utf-8")
             report_path = Path(temp) / "audit.json"
             result = subprocess.run(
                 [sys.executable, str(ROOT / "audit_dataset.py"),
