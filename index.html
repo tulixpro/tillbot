@@ -5,7 +5,7 @@
 .tillbot-guide summary:after{content:"＋";float:right;color:var(--accent,#5289d8)}
 .tillbot-guide[open] summary:after{content:"−"}
 .tillbot-guide p,.tillbot-guide li{font-size:13px;line-height:1.55}.tillbot-guide ul{padding-left:20px;margin:8px 0}.tillbot-guide strong{font-weight:700}
-</style></head>
+.publicDemo{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:15px;padding:13px 14px;border:1px solid rgba(105,174,240,.28);border-radius:13px;background:rgba(76,142,198,.09);text-align:left}.publicDemo strong,.publicDemo span{display:block}.publicDemo strong{font-size:13px;color:var(--text,#edf4fc)}.publicDemo div>span{margin-top:3px;color:var(--muted,#9aadc2);font-size:11px;line-height:1.4}.publicDemo a{flex:0 0 auto;padding:9px 12px;border-radius:10px;background:var(--accent,#347fca);color:white;text-decoration:none;font-size:12px;font-weight:750}.publicDemo a:hover{filter:brightness(1.1)}@media(max-width:420px){.publicDemo{align-items:flex-start;flex-direction:column}.publicDemo a{width:100%;text-align:center}}\n</style></head>
 <body><div id="systemNotice" class="systemNotice hidden" role="status" aria-live="polite"><span class="noticeIcon" aria-hidden="true">✦</span><span id="systemNoticeText"></span><button id="dismissNotice" type="button" aria-label="Hinweis schließen" title="Hinweis schließen">×</button></div><div id="maintenanceScreen" class="maintenanceScreen hidden" role="status"><div class="maintenanceCard"><div class="maintenanceMark">✦</div><span class="eyebrow">TILLBOT 3.0 · SYSTEMUPDATE</span><h1>Wir sind gleich zurück.</h1><p id="maintenanceText">TILLBOT wird gerade gewartet. Bitte später erneut versuchen.</p><div class="maintenanceProgress"><span></span></div><small>Deine Chats bleiben gespeichert.</small></div></div><div id="auth" class="auth authV3">
   <div class="authBackdrop" aria-hidden="true"><span></span><span></span><span></span></div>
   <section class="authbox authCard authRebuilt" aria-labelledby="authTitle">
@@ -23,6 +23,7 @@
     <button id="authSubmit" class="primary authSubmit" type="button" onclick="window.tillbotAuthSubmit &amp;&amp; window.tillbotAuthSubmit()"><span id="authSubmitText">Anmelden</span><span class="authArrow" aria-hidden="true">→</span></button>
     <p id="authMsg" class="msg authMessage" role="status" aria-live="polite"></p>
     <div class="authTrust"><span>🔒 Geschützte Verbindung</span><span>Deine Chats bleiben erhalten</span></div>
+    <div class="publicDemo"><div><strong>Erst ausprobieren?</strong><span>Die TILLBOT-CORE-Demo ist öffentlich und ohne Konto testbar.</span></div><a href="./core-demo.html" target="_blank" rel="noopener noreferrer">CORE-Demo öffnen <span aria-hidden="true">↗</span></a></div>
   </section>
   <p class="authCopyright">TILLBOT 3.0 <span>·</span> DEIN KI-WORKSPACE</p>
 </div>
