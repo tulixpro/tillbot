@@ -10,6 +10,10 @@ Do not include private chats, messages from friends, personal data, passwords, s
 records, account details, scraped copyrighted books, or content with unclear rights.
 Do not assume that content being visible online means it is permitted for model training.
 
+## Audit before preparation
+
+Run `python core_model/audit_dataset.py --source-dir ./reviewed_text` first. Review flagged files manually, remove private or sensitive information, and investigate duplicates. The audit is not a legal review and cannot guarantee that all personal data has been removed.
+
 ## Preparing a corpus
 
 Put reviewed UTF-8 plain-text documents in a separate folder, one source document per
