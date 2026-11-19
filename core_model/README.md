@@ -6,7 +6,7 @@ This directory contains an independently initialized, byte-level decoder-only Tr
 
 - Transformer architecture and model weights are initialized locally from random values.
 - UTF-8 byte tokenizer (256 token IDs), so no external tokenizer/model files are needed.
-- Training and local text generation scripts use PyTorch.
+- Training, local generation, and interactive terminal chat scripts use PyTorch.
 
 ## What it cannot do yet
 
@@ -14,17 +14,22 @@ A randomly initialized small model does not know German, facts, reasoning, or ho
 
 ## Run locally
 
-Python 3.10+ is recommended. Install PyTorch for your operating system from the official PyTorch installation selector, then:
+Python 3.10+ is recommended. Install PyTorch for your operating system from the official PyTorch installation selector, then run commands from the repository root:
 
 ```bash
 python -m pip install -r core_model/requirements.txt
-python core_model/train.py --data data/train.txt --steps 5000
+python core_model/train.py --data core_model/data/seed_dialogues.txt --steps 5000
 python core_model/generate.py --checkpoint artifacts/tillbot-core.pt --prompt "TILLBOT:"
+python core_model/chat.py --checkpoint artifacts/tillbot-core.pt
 ```
 
 The default corpus path is the small project-authored starter set `core_model/data/seed_dialogues.txt`. It is only for a smoke test and will be heavily overfit; it does not create a useful assistant. For meaningful training, prepare a much larger, varied, licensed UTF-8 corpus and pass its path with `--data`; see `core_model/data/README.md` and `core_model/BEHAVIOR.md`. For GPU training, install a PyTorch build compatible with the installed CUDA version.
 
-## Conversation quality and safety\n\nSee `BEHAVIOR.md` for the intended professional response style and `EVALUATION.md` for manual tests covering arithmetic, identity, factual uncertainty, insults, privacy, and language switching. The examples in `data/seed_dialogues.txt` are original starter examples, not enough training data for robust behavior.\n\n## Integration plan
+## Conversation quality and safety
+
+See `BEHAVIOR.md` for the intended professional response style and `EVALUATION.md` for manual tests covering arithmetic, identity, factual uncertainty, insults, privacy, and language switching. The examples in `data/seed_dialogues.txt` are original starter examples, not enough training data for robust behavior. The interactive terminal client is a basic development interface, not a safety layer; do not expose an untrained checkpoint to public users.
+
+## Integration plan
 
 1. Build and test the model independently from the live service.
 2. Collect only licensed, high-quality training data.
