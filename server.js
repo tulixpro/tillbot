@@ -197,7 +197,7 @@ app.get("/api/admin/security-audit", auth, admin, async (_req,res)=>{
   const checks=[
     {name:"JWT-Schlüssel dauerhaft gesetzt",ok:!!(process.env.JWT_SECRET&&process.env.JWT_SECRET.length>=32),severity:"critical",detail:"JWT_SECRET muss in Render dauerhaft und mit mindestens 32 Zeichen gesetzt sein."},
     {name:"Eigener Bot-Schutz aktiv",ok:true,severity:"medium",detail:"IP-basierte API- und Auth-Limits sowie ein serverseitiges Honeypot-Feld sind aktiv. Limits liegen aktuell im Prozessspeicher."},
-    {name:"KI-API-Schlüssel gesetzt",ok:!!process.env.GROQ_API_KEY,severity:"high",detail:"GROQ_API_KEY ist erforderlich, damit Chat-Anfragen funktionieren."},
+    {name:"KI-Anbieter konfiguriert",ok:(String(process.env.AI_PROVIDER||"groq").toLowerCase()==="cloudflare" ? !!(process.env.CLOUDFLARE_ACCOUNT_ID&&process.env.CLOUDFLARE_API_TOKEN) : !!process.env.GROQ_API_KEY),severity:"high",detail:"Je nach AI_PROVIDER müssen Cloudflare-Konto-ID und Token oder GROQ_API_KEY gesetzt sein."},
     {name:"HTTPS-Frontend",ok:String(process.env.FRONTEND_ORIGIN||"https://tulixpro.github.io").startsWith("https://"),severity:"medium",detail:"Frontend-Origin sollte HTTPS verwenden."},
     {name:"Helmet-Sicherheitsheader",ok:true,severity:"medium",detail:"Helmet ist im Express-Server aktiviert; CSP wird separat über Hosting/Policy verwaltet."},
     {name:"API-Rate-Limit",ok:true,severity:"medium",detail:"Globales API-Limit sowie zusätzliche Limits für Login/Registrierung sind aktiv."},
@@ -243,13 +243,32 @@ app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Math.max(1,Ma
 app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.json({unlimited:true});const q=await checkDailyQuota(req.user.id);res.json({unlimited:false,count:q.count||0,remaining:q.remaining||0,limit:q.limit||30,blocked:q.blocked||false,until:q.until||null})});
 app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
   if(req.user.role!=="admin"){const q=await checkDailyQuota(req.user.id);if(q.blocked)return res.status(429).json({error:"Dein Tagesbudget ist aufgebraucht. Du kannst ab "+new Date(q.until).toLocaleString("de-DE")+" Uhr wieder schreiben.",quota:{blocked:true,until:q.until,remaining:0}});req.dailyQuota=q}
-  if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "GROQ_API_KEY fehlt in Render" });
+  const image = req.body.image;
+  const provider = String(process.env.AI_PROVIDER || "groq").trim().toLowerCase();
+  let apiUrl, apiKey, model;
+  if (provider === "cloudflare") {
+    const accountId = String(process.env.CLOUDFLARE_ACCOUNT_ID || "").trim();
+    apiKey = process.env.CLOUDFLARE_API_TOKEN;
+    if (!accountId || !apiKey) return res.status(503).json({ answer: "Der kostenlose KI-Anbieter ist noch nicht vollständig eingerichtet. Bitte Cloudflare-Konto-ID und API-Token in den Server-Umgebungsvariablen setzen." });
+    apiUrl = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/ai/v1/chat/completions`;
+    model = image
+      ? (process.env.CLOUDFLARE_VISION_MODEL || "@cf/meta/llama-3.2-11b-vision-instruct")
+      : (process.env.CLOUDFLARE_MODEL || "@cf/zai-org/glm-4.7-flash");
+  } else if (provider === "groq") {
+    apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) return res.status(503).json({ answer: "Der KI-Dienst ist noch nicht eingerichtet. Bitte Server-Konfiguration prüfen." });
+    apiUrl = "https://api.groq.com/openai/v1/chat/completions";
+    model = image
+      ? (process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b")
+      : (process.env.GROQ_MODEL || "openai/gpt-oss-120b");
+  } else {
+    return res.status(503).json({ answer: "Der konfigurierte KI-Anbieter wird nicht unterstützt." });
+  }
   const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
-  const messages = [{ role: "system", content: "Du bist TILLBOT, der KI-Assistent des TILLBOT-Projekts. TILLBOT wird vom TILLBOT-Team entwickelt und gepflegt. Wenn du gefragt wirst, wer dich entwickelt hat, antworte: „Ich bin TILLBOT, der KI-Assistent des TILLBOT-Teams.“ Behaupte nicht, dass das Team ein eigenes Grundmodell von Grund auf trainiert hat: Das zugrunde liegende Sprachmodell wird als externer KI-Dienst bereitgestellt. Antworte standardmäßig auf Deutsch in einem klaren, professionellen, erwachsenen und respektvollen Ton. Verwende keine kindliche Ansprache, keine unnötigen Emojis, keine übertriebenen Begeisterungsfloskeln und keine Kosenamen. Verwende keine kindliche Ansprache, keine unnötigen Emojis, keine übertriebenen Begeisterungsfloskeln und keine Kosenamen. Passe die Detailtiefe an die Aufgabe an, bleibe ruhig und präzise und erkläre Fachbegriffe bei Bedarf verständlich. Bei Programmierfragen: liefere korrekten, möglichst vollständigen Code in Markdown-Codeblöcken mit passendem Sprachlabel (z. B. ```js), erkläre kurz Verwendung und wichtige Schritte, nenne nötige Dateien/Abhängigkeiten und weise auf Annahmen hin. Bei Debugging: analysiere erst den Fehler, nenne Ursache und zeige eine konkrete Lösung. Erfinde keine Testergebnisse und behaupte nicht, Code ausgeführt zu haben. Schreibe Code sicher und warne vor riskanten Aktionen; führe niemals automatisch vom Nutzer gelieferten oder generierten Code aus. Bei großen Projekten strukturiere die Antwort in Dateien und frage nur bei wirklich fehlenden Anforderungen nach." },
+  const messages = [{ role: "system", content: "Du bist TILLBOT, der KI-Assistent des TILLBOT-Projekts. TILLBOT wird vom TILLBOT-Team entwickelt und gepflegt. Wenn du gefragt wirst, wer dich entwickelt hat, antworte: „Ich bin TILLBOT, der KI-Assistent des TILLBOT-Teams.“ Behaupte nicht, dass das Team ein eigenes Grundmodell von Grund auf trainiert hat: Das zugrunde liegende Sprachmodell wird als externer KI-Dienst bereitgestellt. Antworte standardmäßig auf Deutsch in einem klaren, professionellen und respektvollen Ton. Passe die Detailtiefe an die Aufgabe an, bleibe ruhig und präzise und erkläre Fachbegriffe bei Bedarf verständlich. Erfinde keine Testergebnisse und behaupte nicht, Code ausgeführt zu haben. Schreibe Code sicher und führe niemals automatisch vom Nutzer gelieferten oder generierten Code aus." },
     ...history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
       .map(m => ({ role: m.role, content: m.content.slice(0, 8000) }))];
   const userText = String(req.body.message || "").slice(0, 8000);
-  const image = req.body.image;
   if (image && typeof image.data === "string") {
     if (!["image/jpeg", "image/png", "image/webp"].includes(image.mime) || image.data.length > 2_500_000) {
       return res.status(400).json({ answer: "Fotoformat nicht erlaubt oder Bild zu groß (bitte kleineres Foto verwenden)." });
@@ -264,19 +283,51 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30_000);
   try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const requestBody = { model, messages, max_tokens: 800, temperature: 0.7, stream: !!req.body.stream };
+    if (provider === "cloudflare") requestBody.options = { rejectIfBusy: true };
+    const response = await fetch(apiUrl, {
       method: "POST", signal: controller.signal,
-      headers: { Authorization: "Bearer " + process.env.GROQ_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: (image ? (process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b") : (process.env.GROQ_MODEL || "openai/gpt-oss-120b")), messages, max_completion_tokens: 800, temperature: 0.7, stream:!!req.body.stream })
+      headers: { Authorization: "Bearer " + apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody)
     });
-    if(req.body.stream&&response.ok){res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});res.flushHeaders?.();const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",full="";while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const lines=pending.split("\n");pending=lines.pop()||"";for(const line of lines){const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta){full+=delta;res.write("data: "+JSON.stringify({delta})+"\n\n")}}catch{}}}if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined})+"\n\n");return res.end()}
-    const data = await response.json();
-    if (!response.ok) return res.status(502).json({ answer: "Groq Fehler: " + (data.error?.message || response.status) });
-    if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);
-    res.json({ answer: data.choices?.[0]?.message?.content || "Keine Antwort",quota:req.user.role==="admin"?{unlimited:true}:undefined });
+    if (req.body.stream && response.ok) {
+      res.status(200).set({ "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", "Connection": "keep-alive", "X-Accel-Buffering": "no" });
+      res.flushHeaders?.();
+      const reader = response.body.getReader(), decoder = new TextDecoder();
+      let pending = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        pending += decoder.decode(value, { stream: true });
+        const lines = pending.split("\n"); pending = lines.pop() || "";
+        for (const line of lines) {
+          const dataLine = line.trim();
+          if (!dataLine.startsWith("data:")) continue;
+          const raw = dataLine.slice(5).trim();
+          if (raw === "[DONE]") continue;
+          try {
+            const packet = JSON.parse(raw), delta = packet.choices?.[0]?.delta?.content;
+            if (typeof delta === "string" && delta) res.write("data: " + JSON.stringify({ delta }) + "\n\n");
+          } catch {}
+        }
+      }
+      if (req.user.role !== "admin" && req.dailyQuota) await incrementDailyQuota(req.user.id);
+      res.write("data: " + JSON.stringify({ done: true, quota: req.user.role === "admin" ? { unlimited: true } : undefined }) + "\n\n");
+      return res.end();
+    }
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.warn("AI provider request failed:", provider, response.status);
+      const quotaMessage = provider === "cloudflare"
+        ? "Das kostenlose KI-Tageskontingent ist möglicherweise aufgebraucht oder der Dienst ist gerade ausgelastet. Bitte später erneut versuchen."
+        : "Der KI-Dienst ist momentan nicht erreichbar. Bitte später erneut versuchen.";
+      return res.status(response.status === 429 ? 429 : 502).json({ answer: quotaMessage });
+    }
+    if (req.user.role !== "admin" && req.dailyQuota) await incrementDailyQuota(req.user.id);
+    res.json({ answer: data.choices?.[0]?.message?.content || "Keine Antwort", quota: req.user.role === "admin" ? { unlimited: true } : undefined });
   } catch (error) {
-    console.error("Chat API error:", error);
-    res.status(500).json({ answer: error.name === "AbortError" ? "KI-Anfrage dauerte zu lange" : "KI-Serverfehler" });
+    console.error("Chat API error:", provider, error.name);
+    res.status(500).json({ answer: error.name === "AbortError" ? "Die KI-Anfrage dauerte zu lange. Bitte erneut versuchen." : "Der KI-Dienst ist momentan nicht erreichbar." });
   } finally {
     clearTimeout(timeout);
   }
