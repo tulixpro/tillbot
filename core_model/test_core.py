@@ -80,7 +80,7 @@ class ModelTests(unittest.TestCase):
         with torch.no_grad():
             _, _, cache = self.model(prompt, use_cache=True)
             cached_logits, _, _ = self.model(next_byte, past_key_values=cache, use_cache=True)
-            full_logits, _, _ = self.model(torch.cat((prompt, next_byte), dim=1))
+            full_logits, _ = self.model(torch.cat((prompt, next_byte), dim=1))
         self.assertTrue(torch.allclose(cached_logits[:, -1], full_logits[:, -1], atol=1e-5))
 
     def test_cached_generation_handles_context_window_rollover(self):
