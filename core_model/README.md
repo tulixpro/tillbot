@@ -1,40 +1,159 @@
-# TILLBOT Core — from-scratch prototype
+# TILLBOT Core — from-scratch research prototype
 
-This directory contains an independently initialized, byte-level decoder-only Transformer. It does **not** load Groq, OpenAI, Qwen, or any pretrained model weights. It is a research prototype and is not connected to the live TILLBOT chat.
+TILLBOT Core is a small decoder-only Transformer initialized from random weights.
+It uses a UTF-8 byte tokenizer and does not load Groq, OpenAI, Qwen, or other pretrained
+model weights. It is **not** connected to the live TILLBOT chat.
 
-## What is genuinely independent
+## Honest status
 
-- Transformer architecture and model weights are initialized locally from random values.
-- UTF-8 byte tokenizer (256 token IDs), so no external tokenizer/model files are needed.
-- Training, local generation, and interactive terminal chat scripts use PyTorch.
+- Architecture and training code: implemented.
+- Trained model weights: **not included**; CI runs only a tiny two-step CPU smoke test to verify the training code, not to create a useful model.
+- Starter dialogues: original project-authored examples for a smoke test only.
+- Useful conversational ability: **not achieved**.
+- Production readiness: **not ready**.
 
-## What it cannot do yet
+A random small model does not know German, facts, or instruction following. Meaningful
+training requires a large, varied, legally usable corpus, compute, repeated training,
+held-out evaluation, and safety testing. This prototype is not comparable to ChatGPT.
 
-A randomly initialized small model does not know German, facts, reasoning, or how to follow instructions. It needs a large, legally usable training corpus, compute, repeated training, evaluation, and safety testing. The included small configuration is only a starting point. It is not comparable to ChatGPT and must not replace the production provider.
+## Free local development
 
-## Run locally
-
-Python 3.10+ is recommended. Install PyTorch for your operating system from the official PyTorch installation selector, then run commands from the repository root:
+Python 3.10+ is recommended. For older laptops, use the explicit CPU-friendly
+profile. It selects a 32-wide, 2-layer model with a 64-byte context and batch size 2;
+this keeps memory use lower but also limits what the model can learn. It does not
+make training fast, and the resulting model remains experimental. Install a PyTorch build suitable for your machine from
+the official PyTorch installation selector, then from the repository root:
 
 ```bash
 python -m pip install -r core_model/requirements.txt
-python core_model/train.py --data core_model/data/seed_dialogues.txt --steps 5000
+```
+
+Laptop smoke test (the tiny starter set is not useful assistant training):
+
+```bash
+python core_model/train.py --profile laptop --device cpu --data core_model/data/seed_dialogues.txt --steps 20 --eval-interval 10 --eval-batches 2
+```
+
+The `--profile laptop` settings are a starting point, not a performance guarantee.
+For a real experiment, keep the CPU profile initially and increase training time
+only after checking temperature, memory use and validation metrics. `--device cpu`
+avoids trying to use legacy NVIDIA GPUs that current PyTorch builds may not support.
+
+Standard smoke test only (the tiny starter set is not useful assistant training):
+
+```bash
+python core_model/train.py --data core_model/data/seed_dialogues.txt --steps 20 --context 32 --batch-size 2 --eval-interval 10 --eval-batches 2
+```
+
+For a real experiment, first place reviewed, licensed UTF-8 text documents in a folder
+outside the repository. Do not use private chats, personal data, passwords, scraped
+copyrighted books, or material whose license does not permit ML training. Keep source
+and license evidence. Prepare a source-level split:
+
+```bash
+python core_model/prepare_dataset.py --source-dir ./reviewed_text --out-dir ./prepared_data --confirm-licensed-data
+python core_model/train.py --profile laptop --device cpu --train-data ./prepared_data/train.txt --val-data ./prepared_data/val.txt --steps 2000
+```
+
+The dataset tool records filenames and hashes in `manifest.json`; it cannot verify
+licenses for you. A human must review every source. A CPU run is free but can be very
+slow. No cloud GPU, paid service, or background training is provisioned by this project.
+
+The trainer writes the best checkpoint to `artifacts/tillbot-core.pt`, a latest
+checkpoint to `artifacts/tillbot-core.last.pt`, and metrics to
+`artifacts/tillbot-core.metrics.jsonl`. Continue the best checkpoint with
+`--resume`. These artifacts are local and are not committed to Git.
+
+## Local generation and chat
+
+After a checkpoint exists:
+
+```bash
 python core_model/generate.py --checkpoint artifacts/tillbot-core.pt --prompt "TILLBOT:"
 python core_model/chat.py --checkpoint artifacts/tillbot-core.pt
 ```
 
-The default corpus path is the small project-authored starter set `core_model/data/seed_dialogues.txt`. It is only for a smoke test and will be heavily overfit; it does not create a useful assistant. For meaningful training, prepare a much larger, varied, licensed UTF-8 corpus and pass its path with `--data`; see `core_model/data/README.md` and `core_model/BEHAVIOR.md`. For GPU training, install a PyTorch build compatible with the installed CUDA version.
+The terminal client is a developer tool, not a safety layer.
 
-## Conversation quality and safety
+## Import from the TILLBOT admin training center
 
-See `BEHAVIOR.md` for the intended professional response style and `EVALUATION.md` for manual tests covering arithmetic, identity, factual uncertainty, insults, privacy, and language switching. The examples in `data/seed_dialogues.txt` are original starter examples, not enough training data for robust behavior. The interactive terminal client is a basic development interface, not a safety layer; do not expose an untrained checkpoint to public users.
+Download the approved JSONL export from the admin training center. Before importing,
+review the source rights and privacy of every example. Then convert the JSONL file into
+one UTF-8 document per example:
 
-## Integration plan
+```bash
+python core_model/import_jsonl.py --input ./tillbot-training-approved.jsonl --out-dir ./reviewed_text --confirm-licensed-data
+```
 
-1. Build and test the model independently from the live service.
-2. Collect only licensed, high-quality training data.
-3. Track validation loss and held-out benchmarks; test German, instruction following, hallucinations, and safety.
-4. Export a checkpoint and build a separate inference service only after measuring memory and latency.
-5. Keep the existing hosted AI as fallback until the local model demonstrably passes tests.
+The converter accepts the admin export's `messages` format and simple
+`prompt`/`completion` JSONL rows, removes exact case-insensitive duplicates,
+and refuses to overwrite a non-empty output folder. It does not verify rights or
+screen out private data. Audit the output and inspect its manifest before training:
 
-Training on the free Render web-service instance is not realistic: its memory/CPU limits and ephemeral filesystem are unsuitable for training or hosting a useful model. No paid infrastructure is provisioned by this prototype.
+```bash
+python core_model/audit_dataset.py --source-dir ./reviewed_text --report ./prepared_data/audit-report.json --min-chars 1
+python core_model/prepare_dataset.py --source-dir ./reviewed_text --out-dir ./prepared_data --min-chars 1 --confirm-licensed-data
+python core_model/train.py --train-data ./prepared_data/train.txt --val-data ./prepared_data/val.txt --steps 2000
+```
+
+## Corpus audit before training
+
+Before preparing a reviewed corpus, run this local screening report:
+
+```bash
+python core_model/audit_dataset.py --source-dir ./reviewed_text --report ./prepared_data/audit-report.json
+```
+
+It flags exact/whitespace-normalized duplicates, invalid UTF-8, short documents, and possible email addresses, phone numbers, or credentials. It prints only file names and flags, not matched values. A non-zero exit means review the report before continuing. This is only a screening aid: it cannot establish data rights or guarantee that personal data is absent.
+
+## Automated tests
+
+Run the CPU regression suite from the repository root:
+
+```bash
+python -m unittest discover -s core_model -p 'test_*.py' -v
+```
+
+The suite checks tensor shapes and loss, causal attention, cached and uncached generation equivalence,
+generation bounds, context limits, a tiny CPU training smoke test, and reproducible source-level
+dataset splits with explicit license confirmation. GitHub Actions
+runs the same suite for changes to `core_model/`.
+
+## Inference speed benchmark
+
+Core generation now supports an optional per-layer key/value cache. This avoids
+recomputing the full prompt for every generated byte; when the context window fills,
+the cache is rebuilt from the latest window. The cache path is tested against the
+uncached greedy reference, including context-window rollover.
+
+Compare both paths on the machine that will run Core:
+
+```bash
+python core_model/benchmark.py --checkpoint artifacts/tillbot-core.pt --tokens 64 --repeats 3
+```
+
+The benchmark reports local tokens/second for cached and uncached decoding and
+checks that both greedy outputs match. Results depend on hardware, model size,
+PyTorch build and prompt length. UTF-8 byte tokenization still generates one byte
+at a time, so it is not a high-throughput production tokenizer.
+
+## Behavior probe
+
+After a checkpoint exists, create a repeatable report with 12 prompts covering German
+conversation, identity, arithmetic, uncertainty, source honesty, privacy, respectful
+responses, formatting, prompt injection, language switching and capability honesty:
+
+```bash
+python core_model/probe.py --checkpoint artifacts/tillbot-core.pt --out artifacts/core-probe-report.md
+```
+
+The script records raw outputs and a manual 0–2 scoring rubric. It does not automatically
+decide whether answers are safe or correct. Review every output; random or undertrained
+weights will likely produce meaningless text.
+
+## Evaluation and integration
+
+See `EVALUATION.md` for release gates. Validation loss alone does not measure answer
+quality. Do not expose this checkpoint to public users or replace the current hosted
+provider until held-out quality, safety, memory, and latency tests pass. Keep production
+and Core isolated throughout development.
