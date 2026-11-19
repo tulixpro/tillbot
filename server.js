@@ -292,19 +292,31 @@ app.post("/api/chat", auth, async (req,res,next)=>{
 
   const primary=String(process.env.AI_PROVIDER||"groq").trim().toLowerCase();
   const fallback=String(process.env.AI_FALLBACK_PROVIDER||(primary==="cloudflare"?"groq":"cloudflare")).trim().toLowerCase();
-  const providerOrder=[...new Set([primary,fallback])].filter(name=>["groq","cloudflare"].includes(name));
+  const requestedOrder=String(process.env.AI_PROVIDER_ORDER||[primary,fallback,"gemini"].join(","))
+    .split(",").map(name=>name.trim().toLowerCase()).filter(Boolean);
+  const providerOrder=[...new Set(requestedOrder)].filter(name=>["groq","cloudflare","gemini"].includes(name));
   const getConfig=(name)=>{
     if(name==="groq"){
       if(!process.env.GROQ_API_KEY)return null;
       return {name,apiUrl:"https://api.groq.com/openai/v1/chat/completions",apiKey:process.env.GROQ_API_KEY,
         model:image?(process.env.GROQ_VISION_MODEL||"qwen/qwen3.8-27b"):(process.env.GROQ_MODEL||"openai/gpt-oss-120b")};
     }
-    const accountId=String(process.env.CLOUDFLARE_ACCOUNT_ID||"").trim(),apiKey=process.env.CLOUDFLARE_API_TOKEN;
-    if(!accountId||!apiKey)return null;
-    return {name,apiUrl:"https://api.cloudflare.com/client/v4/accounts/"+encodeURIComponent(accountId)+"/ai/v1/chat/completions",apiKey,
-      model:image?(process.env.CLOUDFLARE_VISION_MODEL||"@cf/meta/llama-3.2-11b-vision-instruct"):(process.env.CLOUDFLARE_MODEL||"@cf/zai-org/glm-4.7-flash")};
+    if(name==="cloudflare"){
+      const accountId=String(process.env.CLOUDFLARE_ACCOUNT_ID||"").trim(),apiKey=process.env.CLOUDFLARE_API_TOKEN;
+      if(!accountId||!apiKey)return null;
+      return {name,apiUrl:"https://api.cloudflare.com/client/v4/accounts/"+encodeURIComponent(accountId)+"/ai/v1/chat/completions",apiKey,
+        model:image?(process.env.CLOUDFLARE_VISION_MODEL||"@cf/meta/llama-3.2-11b-vision-instruct"):(process.env.CLOUDFLARE_MODEL||"@cf/zai-org/glm-4.7-flash")};
+    }
+    if(name==="gemini"){
+      // Gemini's free tier may use submitted content to improve Google's products.
+      // Require two explicit server-side opt-ins before sending any user content there.
+      if(process.env.GEMINI_API_ENABLED!=="true"||process.env.GEMINI_FREE_TIER_DATA_ACK!=="true"||!process.env.GEMINI_API_KEY)return null;
+      return {name,apiUrl:"https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",apiKey:process.env.GEMINI_API_KEY,
+        model:image?(process.env.GEMINI_VISION_MODEL||"gemini-3.6-flash"):(process.env.GEMINI_MODEL||"gemini-3.1-flash-lite")};
+    }
+    return null;
   };
-  const shouldFallback=(status)=>status===408||status===429||status>=500;
+  const shouldFallback=(status)=>[401,402,403,404,408,409,425,429].includes(status)||status>=500;
   let response=null,activeProvider=null,lastProviderError=null;
   for(let i=0;i<providerOrder.length;i++){
     const config=getConfig(providerOrder[i]);
