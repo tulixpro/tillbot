@@ -1341,3 +1341,30 @@ header{background:rgba(25,21,40,.88)!important;border-color:rgba(190,170,255,.13
 .publicDemoEmbedNote{margin:12px 4px 0;text-align:center;font-size:11px}
 .authCopyright{margin:0 0 8px!important}
 @media(max-width:700px){.auth{padding:18px 10px!important}.publicDemoEmbed{width:100%;padding:15px 10px;border-radius:16px}.publicDemoEmbed iframe{height:720px;border-radius:12px}}
+
+
+/* Subtle TILLBOT logo watermark behind the conversation */
+#chat{
+  position:relative;
+  isolation:isolate;
+}
+#chat::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  pointer-events:none;
+  top:50%;
+  left:50%;
+  width:min(58%,500px);
+  aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M120 390C70 390 35 355 35 310c0-45 35-80 80-85 15-70 75-115 145-115 65 0 115 40 135 95 15-7 30-10 45-10 40 0 70 30 70 70 0 40-30 70-70 70-5 35-35 55-75 55H120Z' fill='none' stroke='%23c4a9ff' stroke-width='20' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+  opacity:.075;
+}
+#chat>*{z-index:1}
+@media(max-width:700px){
+  #chat::before{width:min(76%,390px);opacity:.065}
+}
