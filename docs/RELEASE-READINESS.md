@@ -20,20 +20,22 @@ Dieses Dokument hält den aktuellen technischen Stand und einen vorsichtigen, ko
 | [#18 – TILLBOT Core](https://github.com/tulixpro/tillbot/pull/18) | Kleines Transformer-Forschungsprojekt mit zufälligen Startgewichten | Nicht trainiert; kein Ersatz für den Live-KI-Dienst. |
 | [#20 – Core-Trainingspipeline](https://github.com/tulixpro/tillbot/pull/20) | Datensatzprüfung, Trainingsablauf, Checkpoints, Tests und Evaluation | Baut auf #18 auf; noch kein leistungsfähiges trainiertes Modell. |
 | [#23 – Trainingsdaten-Center](https://github.com/tulixpro/tillbot/pull/23) | Admin-Oberfläche zum Prüfen und Exportieren freigegebener Trainingsbeispiele | Verwaltet Daten; trainiert selbst kein Modell. |
-| [#24 – Cloudflare Workers AI | kostenloser Anbieter-Modus](https://github.com/tulixpro/tillbot/pull/24) | Opt-in-Adapter; nicht zusammengeführt, nicht live aktiviert und noch nicht mit echten Zugangsdaten end-to-end getestet. |
-| [#25 – UI-Politur](https://github.com/tulixpro/tillbot/pull/25) | Mobile- und Bedienungsverbesserungen | Nicht zusammengeführt; noch kein echter Browser-/Gerätetest. |
+| [#27 – Provider-Kette und Tagesbudget](https://github.com/tulixpro/tillbot/pull/27) | Groq als primärer Anbieter, Cloudflare als optionale Reserve, optional Gemini mit ausdrücklicher Datenschutzfreigabe; tägliches Kontingent und serverseitiger Spam-Schutz. Noch nicht zusammengeführt oder live getestet. |
+| [#24 – älterer Cloudflare-Adapter](https://github.com/tulixpro/tillbot/pull/24) | Frühere Einzelanbieter-Implementierung; #27 ist der maßgebliche neuere Provider-Stand. Nicht zusätzlich separat veröffentlichen. |
+| [#25 – UI-Politur](https://github.com/tulixpro/tillbot/pull/25) | Mobile- und Bedienungsverbesserungen sowie kompaktere Buttons/Chips | Nicht zusammengeführt; letzter CSS-Stand wartet noch auf CI und echten Browser-/Gerätetest. |
 
-Die PRs bleiben getrennt reviewbar. #20 hängt von #18 ab und muss in der richtigen Reihenfolge behandelt werden. Nichts davon gilt als live, bevor es geprüft, freigegeben und veröffentlicht wurde.
+Die PRs bleiben getrennt reviewbar. #20 hängt von #18 ab und muss in der richtigen Reihenfolge behandelt werden. #27 ist der maßgebliche Provider-/Quota-Vorschlag; #24 ist ein älterer, überholter Adapter und soll nicht parallel mit #27 aktiviert werden. Nichts davon gilt als live, bevor es geprüft, freigegeben und veröffentlicht wurde.
 
 ## 3. Kostenfreier KI-Betrieb
 
-Der optionale Cloudflare-Modus aus PR #24 verwendet standardmäßig das Modell `@cf/zai-org/glm-4.7-flash`.
+Der Provider-Vorschlag aus PR #27 priorisiert standardmäßig Groq und kann Cloudflare Workers AI als Reserve verwenden. Gemini ist nur nach ausdrücklicher Aktivierung aller Schutzvariablen verfügbar und bleibt zunächst deaktiviert.
 
-Benötigte Render-Umgebungsvariablen für diesen Modus:
+Benötigte Render-Umgebungsvariablen für die Provider-Kette (nur serverseitig):
 
-- `AI_PROVIDER=cloudflare`
-- `CLOUDFLARE_ACCOUNT_ID`
-- `CLOUDFLARE_API_TOKEN`
+- Groq: `GROQ_API_KEY`
+- Cloudflare: `CLOUDFLARE_ACCOUNT_ID` und `CLOUDFLARE_API_TOKEN`
+- Reihenfolge: optional `AI_PROVIDER_ORDER`; nur konfigurierte Anbieter werden verwendet.
+- Gemini bleibt aus: eine Aktivierung würde zusätzlich `GEMINI_API_KEY`, `GEMINI_API_ENABLED=true` und `GEMINI_FREE_TIER_DATA_ACK=true` benötigen.
 
 Sicherheitsregeln:
 
@@ -41,14 +43,17 @@ Sicherheitsregeln:
 - Niemals Schlüssel in GitHub-Dateien, Frontend-Code, Screenshots oder Chatnachrichten schreiben.
 - Ein Elternteil/Erziehungsberechtigter sollte beim Erstellen und Verwalten des Cloudflare-Kontos helfen.
 - Keine Zahlungsart, kein Upgrade und keine kostenpflichtige Überschreitung aktivieren.
-- Wenn das kostenlose Kontingent erschöpft oder der Dienst ausgelastet ist, soll TILLBOT eine verständliche Fehlermeldung zeigen – nicht heimlich zu einem möglicherweise kostenpflichtigen Anbieter wechseln.
+- Wenn alle ausdrücklich konfigurierten Gratisanbieter erschöpft oder ausgelastet sind, soll TILLBOT eine verständliche Fehlermeldung zeigen – niemals heimlich zu einem möglicherweise kostenpflichtigen Anbieter wechseln.
+- Die kostenlose Gemini-API kann Inhalte zur Verbesserung von Google-Produkten verwenden. Gemini bleibt deshalb deaktiviert, bis Datenschutztext, Alters-/Datenschutzanforderungen und die Einwilligung passend geprüft sind.
 
 Cloudflare Workers AI dokumentiert ein begrenztes kostenloses Tageskontingent von 10.000 Neurons. Das ist **nicht unbegrenzt** und lässt sich nicht pauschal in eine feste Zahl von Chatnachrichten umrechnen. Die Verfügbarkeit des Vision-Modells im kostenlosen Tarif muss separat geprüft werden; Bildanalyse darf bis dahin nicht als garantiert kostenlos beworben werden.
 
 ## 4. Vor Veröffentlichung zwingend prüfen
 
-- [ ] PR #24 technisch reviewen: Provider-Auswahl, Fehlerbehandlung, Streaming und Bildpfad.
-- [ ] Automatische Tests für beide Provider-Modi ergänzen bzw. ausführen.
+- [ ] PR #27 technisch reviewen: Provider-Reihenfolge, Fehlerbehandlung, Quota-Freigabe, Streaming und Bildpfad.
+- [ ] PR #24 als älteren Adapter nicht parallel aktivieren.
+- [ ] Automatische Tests für jeden aktivierten Provider-Modus ergänzen bzw. ausführen.
+- [ ] Gemini bis zur Datenschutzprüfung ausgeschaltet lassen.
 - [ ] Cloudflare-Verbindung mit einem Testkonto und ohne aktivierte Abrechnung prüfen.
 - [ ] Text-Chat, Streaming, ungültige Zugangsdaten, Rate-Limit/Quota und Kapazitätsfehler testen.
 - [ ] Vision/Bildanalyse separat prüfen; bei fehlender Free-Verfügbarkeit deaktiviert lassen oder klar kennzeichnen.
