@@ -11,9 +11,9 @@ import json
 import re
 from pathlib import Path
 
-EMAIL = re.compile(r"(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b")
-PHONE = re.compile(r"(?<!\\w)(?:\\+?\\d[\\d ()/-]{7,}\\d)(?!\\w)")
-SECRET = re.compile(r"(?i)\\b(password|passwort|api[_ -]?key|secret|token)\\s*[:=]\\s*[^\\s]{4,}")
+EMAIL = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
+PHONE = re.compile(r"(?<!\w)(?:\+?\d[\d ()/-]{7,}\d)(?!\w)")
+SECRET = re.compile(r"(?i)\b(password|passwort|api[_ -]?key|secret|token)\s*[:=]\s*[^\s]{4,}")
 
 
 def main() -> int:
