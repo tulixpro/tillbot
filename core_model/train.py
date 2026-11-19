@@ -172,7 +172,7 @@ def main():
     stale_evaluations = 0
     for step in range(start_step + 1, start_step + args.steps + 1):
         model.train()
-        x, y = batch(train_data)
+        x, y = batch(train_ids)
         _, loss = model(x, y)
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
@@ -184,7 +184,7 @@ def main():
             values = []
             with torch.no_grad():
                 for _ in range(args.eval_batches):
-                    vx, vy = batch(val_data)
+                    vx, vy = batch(val_ids)
                     _, val_loss = model(vx, vy)
                     values.append(val_loss.item())
             mean_val = sum(values) / len(values)
