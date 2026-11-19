@@ -1042,3 +1042,28 @@ body::before,body::after{content:none!important;display:none!important;backgroun
 .authRebuilt .authProtection small{display:block;margin-top:3px;font-size:11px;line-height:1.45;color:#607d74}
 .authRebuilt .authTrust{color:#718098}
 @media(max-width:520px){.composerArea>.powerTools{max-height:68px!important}.composerArea>.powerTools button{font-size:9px!important;padding:4px 6px!important}}
+
+
+/* Mobile-first workspace: hide the large action grid until requested. */
+.toolsToggle{display:none}
+@media(max-width:700px){
+ .toolsToggle{display:inline-flex!important;align-self:flex-start;align-items:center;gap:6px;
+  margin:0 0 2px 2px;padding:5px 9px!important;min-height:27px!important;
+  border:1px solid #8aa6bd55!important;border-radius:8px!important;
+  background:#ffffff0b!important;color:#a9c6d8!important;font-size:11px!important;
+  font-weight:600!important;box-shadow:none!important}
+ .composerArea>.powerTools{display:none!important;max-height:88px!important;overflow:auto!important}
+ .composerArea>.powerTools.toolsExpanded{display:flex!important;gap:5px!important;padding:3px 1px 6px!important}
+ .composerArea>.powerTools button{font-size:10px!important;min-height:26px!important;padding:4px 7px!important;border-radius:7px!important}
+ aside .closeMenu,aside .newChat,aside .learnModeBtn,aside .sidebottom button{
+  min-height:38px!important;padding:8px 11px!important;font-size:13px!important;border-radius:9px!important
+ }
+ aside .brand{margin:2px 0 8px!important}
+ aside .logo{color:#f1f6ff!important;font-size:19px!important}
+ aside .brand small{color:#9db5cc!important}
+ aside{gap:9px!important;padding:14px!important}
+ .sideProfile{padding-top:8px!important}
+ .welcome .cloud{font-size:48px!important}
+ .welcome h1{font-size:clamp(26px,7vw,32px)!important;letter-spacing:-1.2px!important}
+ .welcome .muted{font-size:14px!important;line-height:1.5}
+}
