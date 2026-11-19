@@ -33,6 +33,23 @@ def read_bytes(path: str) -> tuple[torch.Tensor, str]:
     return torch.tensor(list(raw), dtype=torch.long), hashlib.sha256(raw).hexdigest()
 
 
+def validate_resume_metadata(saved: dict, corpus_hash: str, tokenizer_hash: str,
+                              manifest_hash: str | None, config: dict, run_config: dict) -> None:
+    """Refuse to resume weights against a different dataset or training setup."""
+    if saved.get("corpus_sha256") != corpus_hash:
+        raise SystemExit("Checkpoint dataset differs from current data; refusing unsafe resume.")
+    if saved.get("dataset_manifest_sha256") != manifest_hash:
+        raise SystemExit("Checkpoint dataset manifest differs; refusing unsafe resume.")
+    if saved.get("tokenizer_sha256") != tokenizer_hash:
+        raise SystemExit("Checkpoint tokenizer differs from the current tokenizer; refusing unsafe resume.")
+    saved_config = dict(saved.get("config", {}))
+    saved_config.setdefault("vocab_size", 256)
+    if saved_config != config:
+        raise SystemExit("Checkpoint model config differs from current training arguments.")
+    if saved.get("training_config") != run_config:
+        raise SystemExit("Checkpoint training configuration differs; start a new run instead of resuming.")
+
+
 def split_documents(data: torch.Tensor, validation_fraction: float, seed: int):
     """Split on blank-line document boundaries to reduce train/validation leakage."""
     text = bytes(data.tolist()).decode("utf-8")
@@ -133,6 +150,10 @@ def main():
     device_name = ("cuda" if torch.cuda.is_available() else "cpu") if args.device == "auto" else args.device
     device = torch.device(device_name)
 
+    manifest_hash = None
+    if args.strict_data_validation:
+        manifest_hash = hashlib.sha256(Path(args.dataset_manifest).read_bytes()).hexdigest()
+
     if args.train_data:
         train_data, train_hash = read_bytes(args.train_data)
         val_data, val_hash = read_bytes(args.val_data)
@@ -179,16 +200,10 @@ def main():
         if not output.is_file():
             raise SystemExit(f"Cannot resume: checkpoint not found: {output}")
         saved = torch.load(output, map_location=device, weights_only=True)
-        saved_config = dict(saved.get("config", {}))
-        saved_config.setdefault("vocab_size", 256)
-        if saved_config != config:
-            raise SystemExit("Checkpoint model config differs from current training arguments.")
-        saved_tokenizer = saved.get("tokenizer_metadata", {"type": "utf8-byte-v1"})
-        saved_hash = saved.get("tokenizer_sha256", hashlib.sha256(json.dumps(
-            saved_tokenizer, sort_keys=True, separators=(",", ":")
-        ).encode("utf-8")).hexdigest())
-        if saved_hash != tokenizer_hash:
-            raise SystemExit("Checkpoint tokenizer differs from the current tokenizer; refusing unsafe resume.")
+        run_config = {"seed": args.seed, "batch_size": args.batch_size,
+                      "learning_rate": args.learning_rate, "eval_interval": args.eval_interval,
+                      "eval_batches": args.eval_batches, "patience": args.patience}
+        validate_resume_metadata(saved, corpus_hash, tokenizer_hash, manifest_hash, config, run_config)
         model.load_state_dict(saved["model_state"])
         if "optimizer_state" in saved:
             optimizer.load_state_dict(saved["optimizer_state"])
@@ -240,6 +255,11 @@ def main():
                 "tokenizer_metadata": tokenizer_metadata,
                 "tokenizer_sha256": tokenizer_hash,
                 "corpus_sha256": corpus_hash,
+                "dataset_manifest_sha256": manifest_hash,
+                "training_config": {"seed": args.seed, "batch_size": args.batch_size,
+                                    "learning_rate": args.learning_rate,
+                                    "eval_interval": args.eval_interval,
+                                    "eval_batches": args.eval_batches, "patience": args.patience},
             }
             if improved or not output.exists():
                 torch.save(state, output)
