@@ -1,40 +1,69 @@
-# TILLBOT Core — from-scratch prototype
+# TILLBOT Core — from-scratch research prototype
 
-This directory contains an independently initialized, byte-level decoder-only Transformer. It does **not** load Groq, OpenAI, Qwen, or any pretrained model weights. It is a research prototype and is not connected to the live TILLBOT chat.
+TILLBOT Core is a small decoder-only Transformer initialized from random weights.
+It uses a UTF-8 byte tokenizer and does not load Groq, OpenAI, Qwen, or other pretrained
+model weights. It is **not** connected to the live TILLBOT chat.
 
-## What is genuinely independent
+## Honest status
 
-- Transformer architecture and model weights are initialized locally from random values.
-- UTF-8 byte tokenizer (256 token IDs), so no external tokenizer/model files are needed.
-- Training, local generation, and interactive terminal chat scripts use PyTorch.
+- Architecture and training code: implemented.
+- Trained model weights: **not included**; no training run has been completed here.
+- Starter dialogues: original project-authored examples for a smoke test only.
+- Useful conversational ability: **not achieved**.
+- Production readiness: **not ready**.
 
-## What it cannot do yet
+A random small model does not know German, facts, or instruction following. Meaningful
+training requires a large, varied, legally usable corpus, compute, repeated training,
+held-out evaluation, and safety testing. This prototype is not comparable to ChatGPT.
 
-A randomly initialized small model does not know German, facts, reasoning, or how to follow instructions. It needs a large, legally usable training corpus, compute, repeated training, evaluation, and safety testing. The included small configuration is only a starting point. It is not comparable to ChatGPT and must not replace the production provider.
+## Free local development
 
-## Run locally
-
-Python 3.10+ is recommended. Install PyTorch for your operating system from the official PyTorch installation selector, then run commands from the repository root:
+Python 3.10+ is recommended. Install a PyTorch build suitable for your machine from
+the official PyTorch installation selector, then from the repository root:
 
 ```bash
 python -m pip install -r core_model/requirements.txt
-python core_model/train.py --data core_model/data/seed_dialogues.txt --steps 5000
+```
+
+Smoke test only (the tiny starter set is not useful assistant training):
+
+```bash
+python core_model/train.py --data core_model/data/seed_dialogues.txt --steps 20 --context 32 --batch-size 2 --eval-interval 10 --eval-batches 2
+```
+
+For a real experiment, first place reviewed, licensed UTF-8 text documents in a folder
+outside the repository. Do not use private chats, personal data, passwords, scraped
+copyrighted books, or material whose license does not permit ML training. Keep source
+and license evidence. Prepare a source-level split:
+
+```bash
+python core_model/prepare_dataset.py --source-dir ./reviewed_text --out-dir ./prepared_data --confirm-licensed-data
+python core_model/train.py --train-data ./prepared_data/train.txt --val-data ./prepared_data/val.txt --steps 2000 --context 128 --batch-size 8
+```
+
+The dataset tool records filenames and hashes in `manifest.json`; it cannot verify
+licenses for you. A human must review every source. A CPU run is free but can be very
+slow. No cloud GPU, paid service, or background training is provisioned by this project.
+
+The trainer writes the best checkpoint to `artifacts/tillbot-core.pt`, a latest
+checkpoint to `artifacts/tillbot-core.last.pt`, and metrics to
+`artifacts/tillbot-core.metrics.jsonl`. Continue the best checkpoint with
+`--resume`. These artifacts are local and are not committed to Git.
+
+## Local generation and chat
+
+After a checkpoint exists:
+
+```bash
 python core_model/generate.py --checkpoint artifacts/tillbot-core.pt --prompt "TILLBOT:"
 python core_model/chat.py --checkpoint artifacts/tillbot-core.pt
 ```
 
-The default corpus path is the small project-authored starter set `core_model/data/seed_dialogues.txt`. It is only for a smoke test and will be heavily overfit; it does not create a useful assistant. For meaningful training, prepare a much larger, varied, licensed UTF-8 corpus and pass its path with `--data`; see `core_model/data/README.md` and `core_model/BEHAVIOR.md`. For GPU training, install a PyTorch build compatible with the installed CUDA version.
+The terminal client is a developer tool, not a safety layer.
 
-## Conversation quality and safety
+## Evaluation and integration
 
-See `BEHAVIOR.md` for the intended professional response style and `EVALUATION.md` for manual tests covering arithmetic, identity, factual uncertainty, insults, privacy, and language switching. The examples in `data/seed_dialogues.txt` are original starter examples, not enough training data for robust behavior. The interactive terminal client is a basic development interface, not a safety layer; do not expose an untrained checkpoint to public users.
-
-## Integration plan
-
-1. Build and test the model independently from the live service.
-2. Collect only licensed, high-quality training data.
-3. Track validation loss and held-out benchmarks; test German, instruction following, hallucinations, and safety.
-4. Export a checkpoint and build a separate inference service only after measuring memory and latency.
-5. Keep the existing hosted AI as fallback until the local model demonstrably passes tests.
-
-Training on the free Render web-service instance is not realistic: its memory/CPU limits and ephemeral filesystem are unsuitable for training or hosting a useful model. No paid infrastructure is provisioned by this prototype.
+See `EVALUATION.md` for release gates. Validation loss alone does not measure answer
+quality. Do not expose this checkpoint to public users or replace the current hosted
+provider until held-out quality, safety, memory, and latency tests pass. Keep production
+and Core isolated throughout development.
