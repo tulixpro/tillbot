@@ -13,9 +13,9 @@ def main():
     parser.add_argument("--tokens", type=int, default=160)
     parser.add_argument("--temperature", type=float, default=0.8)
     parser.add_argument("--top-k", type=int, default=40,
-                        help="0 disables top-k filtering; otherwise 1..256")
+                        help="0 disables top-k filtering; otherwise 1..vocabulary size")
     parser.add_argument("--repetition-penalty", type=float, default=1.0,
-                        help="1.0 disables the byte-level repetition heuristic")
+                        help="1.0 disables the token-level repetition heuristic")
     parser.add_argument("--greedy", action="store_true",
                         help="Use deterministic greedy decoding instead of sampling")
     args = parser.parse_args()
