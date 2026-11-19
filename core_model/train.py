@@ -56,6 +56,10 @@ def main():
     parser.add_argument("--train-data", help="Explicit training text file")
     parser.add_argument("--val-data", help="Explicit held-out validation text file")
     parser.add_argument("--out", default="artifacts/tillbot-core.pt")
+    parser.add_argument("--profile", choices=("standard", "laptop"), default="standard",
+                        help="laptop uses a smaller CPU-friendly model configuration")
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto",
+                        help="auto uses CUDA when available; choose cpu for older GPUs")
     parser.add_argument("--steps", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--context", type=int, default=128)
@@ -71,6 +75,11 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
+
+    if args.profile == "laptop":
+        # Small enough for CPU experimentation on older laptops; still a toy model.
+        args.batch_size, args.context = 2, 64
+        args.width, args.heads, args.layers = 32, 4, 2
 
     if bool(args.train_data) != bool(args.val_data):
         parser.error("--train-data and --val-data must be supplied together")
@@ -89,7 +98,10 @@ def main():
     torch.manual_seed(args.seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(args.seed)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if args.device == "cuda" and not torch.cuda.is_available():
+        raise SystemExit("CUDA was requested but is not available in this PyTorch installation.")
+    device_name = ("cuda" if torch.cuda.is_available() else "cpu") if args.device == "auto" else args.device
+    device = torch.device(device_name)
 
     if args.train_data:
         train_data, train_hash = read_bytes(args.train_data)
