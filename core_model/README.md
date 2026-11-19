@@ -104,6 +104,20 @@ The suite checks tensor shapes and loss, causal attention, generation bounds, co
 and reproducible source-level dataset splits with explicit license confirmation. GitHub Actions
 runs the same suite for changes to `core_model/`.
 
+## Behavior probe
+
+After a checkpoint exists, create a repeatable report with 12 prompts covering German
+conversation, identity, arithmetic, uncertainty, source honesty, privacy, respectful
+responses, formatting, prompt injection, language switching and capability honesty:
+
+```bash
+python core_model/probe.py --checkpoint artifacts/tillbot-core.pt --out artifacts/core-probe-report.md
+```
+
+The script records raw outputs and a manual 0–2 scoring rubric. It does not automatically
+decide whether answers are safe or correct. Review every output; random or undertrained
+weights will likely produce meaningless text.
+
 ## Evaluation and integration
 
 See `EVALUATION.md` for release gates. Validation loss alone does not measure answer
