@@ -201,7 +201,8 @@ def main():
             raise SystemExit(f"Cannot resume: checkpoint not found: {output}")
         saved = torch.load(output, map_location=device, weights_only=True)
         run_config = {"seed": args.seed, "batch_size": args.batch_size,
-                      "learning_rate": args.learning_rate, "eval_interval": args.eval_interval,
+                      "learning_rate": args.learning_rate, "validation_fraction": args.validation_fraction,
+                      "eval_interval": args.eval_interval,
                       "eval_batches": args.eval_batches, "patience": args.patience}
         validate_resume_metadata(saved, corpus_hash, tokenizer_hash, manifest_hash, config, run_config)
         model.load_state_dict(saved["model_state"])
@@ -258,6 +259,7 @@ def main():
                 "dataset_manifest_sha256": manifest_hash,
                 "training_config": {"seed": args.seed, "batch_size": args.batch_size,
                                     "learning_rate": args.learning_rate,
+                                    "validation_fraction": args.validation_fraction,
                                     "eval_interval": args.eval_interval,
                                     "eval_batches": args.eval_batches, "patience": args.patience},
             }
