@@ -347,7 +347,9 @@ app.post("/api/chat", auth, async (req,res,next)=>{
         console.warn("AI provider connection failed; trying configured fallback:",config.name,error.name);
         continue;
       }
-      throw error;
+      console.warn("AI provider request could not be completed:",config.name,error.name);
+      if(quotaReserved){try{await releaseDailyQuota(req.user.id)}catch(quotaError){console.error("Quota release error:",quotaError)}quotaReserved=false}
+      return res.status(503).json({answer:"Der KI-Dienst ist gerade nicht erreichbar. Bitte versuche es später erneut."});
     }finally{
       clearTimeout(timeout);
     }
