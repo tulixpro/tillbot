@@ -66,7 +66,7 @@ class ModelTests(unittest.TestCase):
             self.model(too_long)
 
     def test_rejects_invalid_token_ids_and_shapes(self):
-        with self.assertRaisesRegex(ValueError, "byte range"):
+        with self.assertRaisesRegex(ValueError, "vocabulary range"):
             self.model(torch.tensor([[256]], dtype=torch.long))
         with self.assertRaisesRegex(ValueError, "non-empty"):
             self.model(torch.empty((1, 0), dtype=torch.long))
