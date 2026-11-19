@@ -32,6 +32,29 @@ It does not verify licenses, consent, copyright status or guarantee that persona
 information is absent; those still require human review. Do not put private user
 conversations, credentials or personal data into a training corpus.
 
+## Strict training preflight
+
+For prepared train/validation corpora, the trainer can enforce the provenance and
+leakage checks immediately before any model initialization or optimizer work. This
+requires the manifest produced by the dataset preparation pipeline:
+
+```bash
+python core_model/train.py --profile laptop --device cpu \
+  --train-data ./prepared_data/train.txt \
+  --val-data ./prepared_data/val.txt \
+  --dataset-manifest ./prepared_data/manifest.json \
+  --source-dir ./reviewed_sources \
+  --min-document-chars 300 \
+  --strict-data-validation --steps 2000
+```
+
+If the strict preflight detects duplicate documents, overlapping source assignments,
+missing or changed source files, invalid manifest entries, or paths escaping the
+source directory, training stops before model construction. Omitting `--source-dir`
+still checks split overlap and manifest structure but does not re-hash the original
+source files. This is a structural safeguard, not a license or privacy approval.
+Legacy smoke-test commands remain available without strict mode.
+
 ## Byte-level BPE tokenizer integration
 
 The deterministic byte-level BPE tokenizer is now connected to the Transformer,
