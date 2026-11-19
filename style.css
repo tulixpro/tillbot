@@ -1304,3 +1304,40 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .demoFrameHead button{border:1px solid rgba(130,205,240,.25);border-radius:9px;padding:7px 10px;background:#102d44;color:#d9f1ff}
 #demoFrame{display:block;width:100%;height:min(78vh,760px);border:0;background:#081321}
 @media(max-width:760px){#sidebar{width:min(86vw,320px);min-width:0;padding:16px}.demoPicker{padding:12px 12px max(16px,env(safe-area-inset-bottom))}.demoPickerCopy p{font-size:11px}#demoFrame{height:72vh}}
+
+
+/* TILLBOT public refresh: violet, coral and warm mint palette */
+:root{--accent:#a78bfa;--line:rgba(190,170,255,.2);--surface:rgba(27,24,48,.78)}
+body{background:radial-gradient(ellipse at 12% 8%,rgba(117,83,190,.34),transparent 36%),radial-gradient(ellipse at 92% 12%,rgba(238,112,132,.18),transparent 32%),radial-gradient(ellipse at 52% 100%,rgba(56,174,157,.13),transparent 38%),#100f1b!important;color:#f4efff}
+#app.layout{background:linear-gradient(180deg,rgba(20,17,34,.94),rgba(14,13,24,.97))!important}
+#sidebar{background:linear-gradient(180deg,#1c1830,#141322)!important;border-color:rgba(190,170,255,.14)!important}
+#sidebar .brandIcon,#sidebar .avatar{background:linear-gradient(135deg,#a78bfa,#f08b9b)!important}
+#sidebar .newChat,.newChat,.primary,.authbox .primary{background:linear-gradient(120deg,#9b7cf2,#e9829a)!important;box-shadow:0 8px 26px rgba(161,119,231,.22)!important}
+header{background:rgba(25,21,40,.88)!important;border-color:rgba(190,170,255,.13)!important}
+.headTitle strong span,.settingsKicker{color:#c4a9ff!important}
+.welcome .eyebrow,.authbox .eyebrow{color:#c4a9ff!important}
+.welcome h1 span{background:linear-gradient(100deg,#c4a9ff,#f39aaa)!important;background-clip:text!important}
+.welcome .cloud{box-shadow:0 12px 35px rgba(167,139,250,.22)!important}
+.suggestions button{background:#211d34!important;border-color:rgba(190,170,255,.16)!important;color:#e7ddff!important}
+.suggestions button:hover{background:#2a2442!important;border-color:#b69bff!important}
+#app .composer{background:#1d1a2d!important;border-color:#51446d!important}
+#app .composer:focus-within{border-color:#b49aff!important;box-shadow:0 0 0 4px rgba(180,154,255,.13),0 18px 55px #0003!important}
+#app .composer #send{background:linear-gradient(135deg,#a78bfa,#ef91a1)!important}
+.bubble.user{background:linear-gradient(135deg,#8d75df,#d97991)!important}
+.bubble.bot{background:#211e31!important;border-color:rgba(190,170,255,.14)!important}
+.auth{background:radial-gradient(ellipse at 50% 0%,rgba(115,85,178,.28),transparent 56%),#100f1b!important;display:flex!important;flex-direction:column;justify-content:flex-start!important;gap:18px;padding-top:34px!important}
+.authbox{background:rgba(29,25,46,.96)!important;border-color:rgba(190,170,255,.2)!important;box-shadow:0 28px 90px rgba(0,0,0,.38)!important}
+.authbox input{background:#171426!important;border-color:rgba(190,170,255,.18)!important}
+.authbox input:focus{border-color:#b49aff!important;box-shadow:0 0 0 3px rgba(180,154,255,.14)!important}
+.authTabs button,.tabs button{background:#211d34!important}
+.authTabs button.selected,.tabs .selected{background:#4b3c70!important;border-color:#b49aff!important}
+.publicDemo{background:rgba(167,139,250,.1)!important;border-color:rgba(190,170,255,.25)!important}
+.publicDemo a{background:linear-gradient(120deg,#9275e7,#d97991)!important}
+.publicDemoEmbed{width:min(1100px,96%);margin:0 auto 26px;padding:24px;border:1px solid rgba(190,170,255,.22);border-radius:24px;background:rgba(29,25,46,.9);box-shadow:0 24px 70px rgba(0,0,0,.24)}
+.publicDemoEmbedHead{text-align:center;margin:0 auto 16px}
+.publicDemoEmbedHead h2{margin:8px 0;font-size:clamp(23px,3vw,32px);letter-spacing:-.8px;color:#fff}
+.publicDemoEmbedHead p,.publicDemoEmbedNote{color:#b7accd;font-size:13px;line-height:1.55}
+.publicDemoEmbed iframe{display:block;width:100%;height:760px;border:1px solid rgba(190,170,255,.2);border-radius:16px;background:#171426}
+.publicDemoEmbedNote{margin:12px 4px 0;text-align:center;font-size:11px}
+.authCopyright{margin:0 0 8px!important}
+@media(max-width:700px){.auth{padding:18px 10px!important}.publicDemoEmbed{width:100%;padding:15px 10px;border-radius:16px}.publicDemoEmbed iframe{height:720px;border-radius:12px}}
