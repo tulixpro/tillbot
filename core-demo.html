@@ -51,8 +51,8 @@
       const count = document.getElementById('count');
       let sent = 0;
       function answer(text) {
-        const q = text.toLocaleLowerCase('de').replace(/[?!.,]/g, ' ').replace(/\\s+/g, ' ').trim();
-        if (/^(hi|hallo|hey|guten morgen|guten tag|moin)\\b/.test(q)) return 'Hallo! Schön, dass du die TILLBOT-Demo ausprobierst. Was möchtest du wissen?';
+        const q = text.toLocaleLowerCase('de').replace(/[?!.,]/g, ' ').replace(/\s+/g, ' ').trim();
+        if (/^(hi|hallo|hey|guten morgen|guten tag|moin)\b/.test(q)) return 'Hallo! Schön, dass du die TILLBOT-Demo ausprobierst. Was möchtest du wissen?';
         if (q.includes('was kannst') || q.includes('funktionen') || q.includes('hilfe')) return 'In dieser Demo kann ich einige Fragen zu TILLBOT CORE beantworten und den Chatablauf zeigen. Freie Wissensfragen, Websuche, langfristiges Gedächtnis und echtes Lernen sind noch nicht eingebaut.';
         if (q.includes('wer bist') || q.includes('was ist tillbot') || q.includes('tillbot core')) return 'TILLBOT CORE ist das Projekt für ein eigenständiges Sprachmodell mit eigener Tokenisierung, Modellarchitektur, Trainingspipeline und Laufzeit. Der aktuelle Stand ist ein experimenteller Prototyp – noch kein leistungsfähiger Assistent.';
         if (q.includes('wie geht') || q.includes('nächste') || q.includes('weiter')) return 'Die nächsten Schritte sind: Modell- und Datenpipeline stabilisieren, rechtlich geprüfte deutsche Trainingsdaten vorbereiten, reproduzierbare Tests bestehen lassen und erst danach kontrolliert trainieren und evaluieren.';
