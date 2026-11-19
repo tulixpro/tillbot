@@ -9,6 +9,7 @@ import argparse
 import torch
 
 from model import TillbotCore
+from tokenizer_runtime import tokenizer_from_checkpoint, encode_text, decode_tokens
 
 
 def main() -> None:
@@ -35,6 +36,7 @@ def main() -> None:
             "see core_model/README.md."
         )
 
+    tokenizer = tokenizer_from_checkpoint(checkpoint)
     config = checkpoint["config"]
     model = TillbotCore(**config).to(device)
     model.load_state_dict(checkpoint["model_state"])
@@ -58,7 +60,7 @@ def main() -> None:
             break
 
         prompt = history + f"\nNutzer: {user_text}\nTILLBOT:"
-        prompt_ids = list(prompt.encode("utf-8"))
+        prompt_ids = encode_text(prompt, tokenizer)
         # Keep the prompt within the model's context window.
         prompt_ids = prompt_ids[-config["context"]:]
         tokens = torch.tensor(prompt_ids, dtype=torch.long, device=device)[None, :]
@@ -69,9 +71,7 @@ def main() -> None:
                 temperature=args.temperature,
                 top_k=args.top_k,
             )
-        continuation = bytes(output[0, len(prompt_ids):].tolist()).decode(
-            "utf-8", errors="replace"
-        ).strip()
+        continuation = decode_tokens(output[0, len(prompt_ids):].tolist(), tokenizer).strip()
         print(f"TILLBOT: {continuation or '(keine Ausgabe)'}\n")
 
         history += f"\nNutzer: {user_text}\nTILLBOT: {continuation}"
