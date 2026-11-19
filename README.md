@@ -55,6 +55,8 @@ Optional:
 
 ## Limits & privacy
 
+- Chat abuse protection uses shared PostgreSQL counters: at most 6 AI requests per account per minute (10 for admins) and 15 per IP/network per minute. IP identifiers are HMAC-hashed before storage; old counters are periodically cleaned up. The daily account quota still applies separately. These controls reduce automated bursts but cannot guarantee that all abuse is prevented.
+
 - AI responses require an internet connection, backend, database and at least one configured provider. The backend can retry with the configured fallback after provider rate limits (HTTP 429), temporary server errors or connection/time-out failures. It does not silently switch to an unconfigured or paid provider. Both providers have their own limits, and a fallback can also be unavailable; this improves resilience but does not guarantee uninterrupted service.
 - Cloudflare Workers AI has a limited free allowance of 10,000 Neurons per day; exceeding it returns a rate-limit error. Groq's limits vary by model and account and can include requests and token limits. Check the provider dashboards for the current account-specific limits.
 - The small UI quick actions guide the selected external AI model through prompts; they do not create independent models or guarantee specialized behavior.
