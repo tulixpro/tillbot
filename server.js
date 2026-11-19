@@ -3,6 +3,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { pool, initDatabase } = require("./database");
 const { normalizeTrainingImport } = require("./training-import");
 
@@ -216,6 +217,45 @@ app.post("/api/admin/bootstrap", auth, rateLimit({ windowMs: 15 * 60_000, limit:
   }
   await pool.query("UPDATE users SET role='admin' WHERE id=$1", [req.user.id]);
   res.json({ ok: true, message: "Admin aktiviert. Bitte neu anmelden." });
+});
+
+// Premium code management. Raw codes are returned once; only SHA-256 digests are stored.
+app.post("/api/admin/premium-codes", auth, admin, rateLimit({windowMs:60_000,limit:5}), async (req,res)=>{
+  const count=Number(req.body.count),days=Number(req.body.days),validDays=Number(req.body.validDays||30);
+  if(!Number.isInteger(count)||count<1||count>20) return res.status(400).json({error:"Es können 1 bis 20 Codes auf einmal erstellt werden."});
+  if(!Number.isInteger(days)||days<1||days>365) return res.status(400).json({error:"Premium-Laufzeit muss 1 bis 365 Tage betragen."});
+  if(!Number.isInteger(validDays)||validDays<1||validDays>365) return res.status(400).json({error:"Code-Gültigkeit muss 1 bis 365 Tage betragen."});
+  const codes=[];
+  const client=await pool.connect();
+  try{
+    await client.query("BEGIN");
+    for(let i=0;i<count;i++){
+      const code="TBP-"+crypto.randomBytes(12).toString("hex").toUpperCase();
+      const digest=crypto.createHash("sha256").update(code).digest("hex");
+      await client.query("INSERT INTO premium_codes(code_hash,duration_days,created_by,expires_at) VALUES($1,$2,$3,CURRENT_TIMESTAMP+($4::text||' days')::interval)",[digest,days,req.user.id,validDays]);
+      codes.push(code);
+    }
+    await client.query("COMMIT");
+    res.status(201).json({codes,durationDays:days,validDays,createdAt:new Date().toISOString(),warning:"Codes werden nur einmal angezeigt. Sicher aufbewahren; wer einen Code besitzt, kann ihn einlösen."});
+  }catch(error){await client.query("ROLLBACK");console.error("Premium code generation failed:",error);res.status(500).json({error:"Premium-Codes konnten nicht erstellt werden."});}
+  finally{client.release();}
+});
+app.post("/api/premium/redeem", auth, rateLimit({windowMs:15*60_000,limit:8,message:{error:"Zu viele Code-Versuche. Bitte später erneut versuchen."}}), async(req,res)=>{
+  const code=String(req.body.code||"").trim().toUpperCase();
+  if(!/^TBP-[A-F0-9]{24}$/.test(code)) return res.status(400).json({error:"Code-Format ungültig."});
+  const digest=crypto.createHash("sha256").update(code).digest("hex");
+  const client=await pool.connect();
+  try{
+    await client.query("BEGIN");
+    const claimed=await client.query("UPDATE premium_codes SET redeemed_at=CURRENT_TIMESTAMP,redeemed_by=$2 WHERE code_hash=$1 AND redeemed_at IS NULL AND expires_at>CURRENT_TIMESTAMP RETURNING duration_days",[digest,req.user.id]);
+    if(!claimed.rows[0]){await client.query("ROLLBACK");return res.status(400).json({error:"Code ungültig, abgelaufen oder bereits eingelöst."});}
+    const days=claimed.rows[0].duration_days;
+    const entitlement=await client.query("INSERT INTO premium_entitlements(user_id,expires_at,note,granted_by) VALUES($1,CURRENT_TIMESTAMP+($2::text||' days')::interval,'Eingelöster Premium-Code',NULL) ON CONFLICT(user_id) DO UPDATE SET expires_at=GREATEST(premium_entitlements.expires_at,CURRENT_TIMESTAMP)+($2::text||' days')::interval,note='Eingelöster Premium-Code',granted_by=NULL,updated_at=CURRENT_TIMESTAMP RETURNING expires_at",[req.user.id,days]);
+    await client.query("UPDATE user_message_usage SET blocked_until=NULL WHERE user_id=$1",[req.user.id]);
+    await client.query("COMMIT");
+    res.set("Cache-Control","no-store").json({ok:true,premium:true,durationDays:days,expiresAt:entitlement.rows[0].expires_at,message:"Premium wurde aktiviert."});
+  }catch(error){await client.query("ROLLBACK");console.error("Premium redemption failed:",error);res.status(500).json({error:"Code konnte gerade nicht eingelöst werden."});}
+  finally{client.release();}
 });
 
 app.get("/api/me", auth, async (req, res) => {
