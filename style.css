@@ -1251,3 +1251,29 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* 2026 workspace polish: compact tools, predictable composer, responsive spacing */
+#app main{min-width:0;min-height:0}
+#app .chat{min-height:0;overscroll-behavior:contain}
+#app .composerArea{flex:0 0 auto;width:100%;min-width:0;position:relative!important;bottom:auto!important;padding:10px clamp(14px,3vw,30px) max(14px,env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,transparent,rgba(7,17,30,.94) 28%,#07111e 100%)!important;backdrop-filter:blur(14px)}
+#app .toolsToggle{display:inline-flex!important;align-items:center;gap:8px;min-height:36px!important;margin:0 auto 8px!important;padding:8px 13px!important;border:1px solid rgba(120,175,210,.25)!important;border-radius:11px!important;background:rgba(17,35,53,.92)!important;color:#c8d9e8!important;font-size:12px!important;font-weight:650!important;box-shadow:none!important;cursor:pointer}
+#app .toolsToggle:hover{border-color:rgba(88,184,255,.65)!important;background:#142b40!important}
+#app .composerArea>.powerTools{display:none!important;max-width:900px;max-height:min(34vh,230px);overflow:auto;overscroll-behavior:contain;margin:0 auto 10px!important;padding:10px!important;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px!important;border:1px solid rgba(130,170,205,.15);border-radius:16px;background:rgba(9,23,37,.96);box-shadow:0 14px 35px rgba(0,0,0,.18)}
+#app .composerArea>.powerTools.toolsExpanded{display:grid!important}
+#app .composerArea>.powerTools button{min-width:0;min-height:38px;padding:8px 10px!important;border:1px solid rgba(135,175,210,.18)!important;border-radius:10px!important;background:rgba(25,45,65,.9)!important;color:#d9e9f7!important;font-size:12px!important;font-weight:600;white-space:normal;line-height:1.25;text-align:left;box-shadow:none!important}
+#app .composerArea>.powerTools button:hover{background:#1b3c55!important;border-color:rgba(88,184,255,.55)!important;transform:translateY(-1px)}
+#app .composer{width:min(900px,100%);min-width:0;margin:0 auto!important;align-items:flex-end}
+#app .composerTools{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+#app .composerTools button{flex:0 0 auto}
+#app #prompt{min-width:0}
+#app .composerArea>small{max-width:900px;margin:7px auto 0;text-align:right}
+@media(max-width:760px){
+ #app .composerArea{padding:7px 10px max(10px,env(safe-area-inset-bottom))!important}
+ #app .composerArea>.powerTools{grid-template-columns:repeat(2,minmax(0,1fr));max-height:28vh;padding:8px!important}
+ #app .composerArea>.powerTools button{min-height:36px!important;font-size:11px!important}
+ #app .toolsToggle{min-height:34px!important;margin-bottom:6px!important}
+ #app .composer{border-radius:18px!important}
+ #app .composerArea>small{text-align:center}
+}
+@media(min-width:761px){#app .welcome{max-width:760px}}
