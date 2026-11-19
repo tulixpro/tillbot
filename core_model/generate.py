@@ -3,6 +3,7 @@ import argparse
 import torch
 
 from model import TillbotCore
+from tokenizer_runtime import tokenizer_from_checkpoint, encode_text, decode_tokens
 
 
 def main():
@@ -23,10 +24,11 @@ def main():
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     checkpoint = torch.load(args.checkpoint, map_location=device, weights_only=True)
+    tokenizer = tokenizer_from_checkpoint(checkpoint)
     config = checkpoint["config"]
     model = TillbotCore(**config).to(device)
     model.load_state_dict(checkpoint["model_state"])
-    prompt = torch.tensor(list(args.prompt.encode("utf-8")), dtype=torch.long, device=device)[None, :]
+    prompt = torch.tensor(encode_text(args.prompt, tokenizer), dtype=torch.long, device=device)[None, :]
     result = model.generate(
         prompt,
         max_new_tokens=args.tokens,
@@ -35,7 +37,7 @@ def main():
         repetition_penalty=args.repetition_penalty,
         do_sample=not args.greedy,
     )
-    print(bytes(result[0].tolist()).decode("utf-8", errors="replace"))
+    print(decode_tokens(result[0].tolist(), tokenizer))
 
 
 if __name__ == "__main__":
