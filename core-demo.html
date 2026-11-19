@@ -54,6 +54,7 @@ details.tutorial{margin:16px 0;border:1px solid var(--line);border-radius:15px;b
 </main>
 <script>
 (()=>{
+ if(new URLSearchParams(window.location.search).has('embed'))document.querySelector('.currentAi')?.remove();
  const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count');
  let sent=0;
  const answer=text=>{
