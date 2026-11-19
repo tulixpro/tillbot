@@ -71,7 +71,7 @@ def main() -> int:
     ]
     for index, (category, prompt) in enumerate(PROBES, 1):
         encoded = prompt.encode("utf-8")
-        prompt_ids = encoded[-config["context"]:]
+        prompt_ids = list(encoded[-config["context"]:])
         tokens = torch.tensor(prompt_ids, dtype=torch.long, device=device)[None, :]
         with torch.no_grad():
             output = model.generate(tokens, max_new_tokens=args.tokens, temperature=0.8, top_k=40)
