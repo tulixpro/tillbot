@@ -40,7 +40,7 @@ Do not describe the model as trained, intelligent, safe, or production-ready unt
 
 - Establish a small, fixed baseline config and parameter-count report.
 - Train from random initialization on a reviewed corpus; do not mix held-out test data into training.
-- Log training and validation loss, tokens processed, throughput, peak memory, elapsed time, and checkpoint hashes.
+- Log training and validation loss, total/trainable parameter counts, tokens processed, approximate throughput, peak accelerator memory, and elapsed time.\n- Store model parameter counts in checkpoints; keep run metrics in a separate JSONL artifact.
 - Support deterministic resume from a checkpoint and record all hyperparameters.
 - Compare at least two seeds or runs before drawing conclusions.
 
