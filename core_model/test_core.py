@@ -53,6 +53,35 @@ class ModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exceeds context"):
             self.model(too_long)
 
+    def test_rejects_invalid_token_ids_and_shapes(self):
+        with self.assertRaisesRegex(ValueError, "byte range"):
+            self.model(torch.tensor([[256]], dtype=torch.long))
+        with self.assertRaisesRegex(ValueError, "non-empty"):
+            self.model(torch.empty((1, 0), dtype=torch.long))
+        with self.assertRaisesRegex(ValueError, "match"):
+            self.model(torch.ones((1, 4), dtype=torch.long),
+                       torch.ones((1, 3), dtype=torch.long))
+
+    def test_greedy_generation_is_deterministic(self):
+        prompt = torch.tensor([[65, 66]], dtype=torch.long)
+        first = self.model.generate(prompt, max_new_tokens=5, do_sample=False)
+        second = self.model.generate(prompt, max_new_tokens=5, do_sample=False)
+        self.assertTrue(torch.equal(first, second))
+
+    def test_generation_rejects_invalid_sampling_parameters(self):
+        prompt = torch.tensor([[65]], dtype=torch.long)
+        with self.assertRaisesRegex(ValueError, "temperature"):
+            self.model.generate(prompt, temperature=0)
+        with self.assertRaisesRegex(ValueError, "top_k"):
+            self.model.generate(prompt, top_k=300)
+        with self.assertRaisesRegex(ValueError, "repetition_penalty"):
+            self.model.generate(prompt, repetition_penalty=0.5)
+
+    def test_zero_token_generation_returns_prompt_unchanged(self):
+        prompt = torch.tensor([[65, 66]], dtype=torch.long)
+        result = self.model.generate(prompt, max_new_tokens=0)
+        self.assertTrue(torch.equal(result, prompt))
+
 
 class DatasetPreparationTests(unittest.TestCase):
     def test_requires_explicit_license_confirmation(self):
