@@ -93,3 +93,57 @@ class DatasetPreparationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+"""Additional tests for the local dataset audit utility."""
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+
+
+class DatasetAuditTests(unittest.TestCase):
+    def test_detects_duplicates_and_private_data_patterns_without_printing_values(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "source"
+            source.mkdir()
+            first = "A sufficiently long sample document. " * 12
+            (source / "one.txt").write_text(first + "\nContact test.person@example.org", encoding="utf-8")
+            (source / "two.txt").write_text("  " + first.replace("  ", " ") + "  ", encoding="utf-8")
+            report_path = Path(temp) / "audit.json"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "audit_dataset.py"),
+                 "--source-dir", str(source), "--report", str(report_path)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 1)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(report["normalized_duplicate_groups"]), 1)
+            self.assertTrue(any("possible_email_address" in item.get("warnings", [])
+                                for item in report["warnings"]))
+            self.assertNotIn("test.person@example.org", result.stdout)
+
+    def test_reports_invalid_utf8(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / "source"
+            source.mkdir()
+            (source / "broken.txt").write_bytes(b"\\xff\\xfe")
+            report_path = Path(temp) / "audit.json"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "audit_dataset.py"),
+                 "--source-dir", str(source), "--report", str(report_path)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 1)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(report["documents"][0]["status"], "invalid_utf8")
+
+
+if __name__ == "__main__":
+    unittest.main()
