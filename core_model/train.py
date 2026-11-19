@@ -145,7 +145,7 @@ def main():
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
 
-        if step == start_step + 1 or step % args.eval_interval == 0:
+        if step == start_step + 1 or step % args.eval_interval == 0 or step == start_step + args.steps:
             model.eval()
             values = []
             with torch.no_grad():
