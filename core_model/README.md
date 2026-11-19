@@ -61,6 +61,27 @@ python core_model/chat.py --checkpoint artifacts/tillbot-core.pt
 
 The terminal client is a developer tool, not a safety layer.
 
+## Import from the TILLBOT admin training center
+
+Download the approved JSONL export from the admin training center. Before importing,
+review the source rights and privacy of every example. Then convert the JSONL file into
+one UTF-8 document per example:
+
+```bash
+python core_model/import_jsonl.py --input ./tillbot-training-approved.jsonl --out-dir ./reviewed_text --confirm-licensed-data
+```
+
+The converter accepts the admin export's `messages` format and simple
+`prompt`/`completion` JSONL rows, removes exact case-insensitive duplicates,
+and refuses to overwrite a non-empty output folder. It does not verify rights or
+screen out private data. Audit the output and inspect its manifest before training:
+
+```bash
+python core_model/audit_dataset.py --source-dir ./reviewed_text --report ./prepared_data/audit-report.json --min-chars 1
+python core_model/prepare_dataset.py --source-dir ./reviewed_text --out-dir ./prepared_data --min-chars 1 --confirm-licensed-data
+python core_model/train.py --train-data ./prepared_data/train.txt --val-data ./prepared_data/val.txt --steps 2000
+```
+
 ## Corpus audit before training
 
 Before preparing a reviewed corpus, run this local screening report:
