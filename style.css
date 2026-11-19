@@ -1251,3 +1251,27 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Compact suggestion chips: override the general mobile/desktop button rules. */
+#app .welcome .suggestions{gap:6px!important;margin-top:16px!important}
+#app .welcome .suggestions button{
+  min-height:27px!important;
+  height:27px!important;
+  padding:4px 9px!important;
+  font-size:10px!important;
+  line-height:1.1!important;
+  font-weight:500!important;
+  border-radius:999px!important;
+  box-shadow:none!important;
+}
+#app .welcome .suggestions button:hover{transform:translateY(-1px)}
+@media(max-width:520px){
+  #app .welcome .suggestions{gap:5px!important;margin-top:13px!important}
+  #app .welcome .suggestions button{
+    min-height:25px!important;
+    height:25px!important;
+    padding:3px 7px!important;
+    font-size:9.5px!important;
+  }
+}
