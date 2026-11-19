@@ -111,7 +111,7 @@ class DatasetAuditTests(unittest.TestCase):
             source.mkdir()
             first = "A sufficiently long sample document. " * 12
             (source / "one.txt").write_text(first + "\nContact test.person@example.org", encoding="utf-8")
-            (source / "two.txt").write_text("  " + first + "\\nContact test.person@example.org  ", encoding="utf-8")
+            (source / "two.txt").write_text("  " + first + "\nContact test.person@example.org  ", encoding="utf-8")
             report_path = Path(temp) / "audit.json"
             result = subprocess.run(
                 [sys.executable, str(ROOT / "audit_dataset.py"),
@@ -129,7 +129,7 @@ class DatasetAuditTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             source = Path(temp) / "source"
             source.mkdir()
-            (source / "broken.txt").write_bytes(b"\\xff\\xfe")
+            (source / "broken.txt").write_bytes(b"\xff\xfe")
             report_path = Path(temp) / "audit.json"
             result = subprocess.run(
                 [sys.executable, str(ROOT / "audit_dataset.py"),
