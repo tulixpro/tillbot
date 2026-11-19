@@ -83,6 +83,21 @@ class ModelTests(unittest.TestCase):
             full_logits, _, _ = self.model(torch.cat((prompt, next_byte), dim=1))
         self.assertTrue(torch.allclose(cached_logits[:, -1], full_logits[:, -1], atol=1e-5))
 
+    def test_cached_generation_handles_context_window_rollover(self):
+        prompt = torch.tensor([[65, 66, 67, 68]], dtype=torch.long)
+        cached = self.model.generate(prompt, max_new_tokens=22, do_sample=False, use_cache=True)
+        plain = self.model.generate(prompt, max_new_tokens=22, do_sample=False, use_cache=False)
+        self.assertTrue(torch.equal(cached, plain))
+        self.assertEqual(cached.size(1), prompt.size(1) + 22)
+
+    def test_cache_rejects_multi_token_increment(self):
+        prompt = torch.tensor([[1, 2, 3]], dtype=torch.long)
+        extra = torch.tensor([[4, 5]], dtype=torch.long)
+        with torch.no_grad():
+            _, _, cache = self.model(prompt, use_cache=True)
+            with self.assertRaisesRegex(ValueError, "exactly one"):
+                self.model(extra, past_key_values=cache, use_cache=True)
+
     def test_generation_rejects_invalid_sampling_parameters(self):
         prompt = torch.tensor([[65]], dtype=torch.long)
         with self.assertRaisesRegex(ValueError, "temperature"):
