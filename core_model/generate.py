@@ -18,7 +18,7 @@ def main():
     model.load_state_dict(checkpoint["model_state"])
     prompt = torch.tensor(list(args.prompt.encode("utf-8")), dtype=torch.long, device=device)[None, :]
     result = model.generate(prompt, max_new_tokens=args.tokens)
-    print(result[0].tolist().__class__ and bytes(result[0].tolist()).decode("utf-8", errors="replace"))
+    print(bytes(result[0].tolist()).decode("utf-8", errors="replace"))
 
 
 if __name__ == "__main__":
