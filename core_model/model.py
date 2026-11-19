@@ -101,6 +101,7 @@ class TillbotCore(nn.Module):
             raise ValueError("tokens must use torch.long byte IDs")
         if torch.any((tokens < 0) | (tokens > 255)):
             raise ValueError("token IDs must be in the byte range 0..255")
+        _, length = tokens.shape
         past_length = 0
         if past_key_values is not None:
             if len(past_key_values) != len(self.blocks):
@@ -110,7 +111,6 @@ class TillbotCore(nn.Module):
                 raise ValueError("cache layers have inconsistent sequence lengths")
             if length != 1:
                 raise ValueError("cached decoding currently accepts exactly one new token at a time")
-        _, length = tokens.shape
         if past_length + length > self.context:
             raise ValueError(f"sequence length {past_length + length} exceeds context {self.context}")
         if targets is not None:
