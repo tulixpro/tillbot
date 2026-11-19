@@ -15,6 +15,7 @@ from pathlib import Path
 import torch
 
 from model import TillbotCore
+from tokenizer import ByteBPETokenizer
 
 
 def read_bytes(path: str) -> tuple[torch.Tensor, str]:
@@ -74,6 +75,7 @@ def main():
                         help="Stop after this many evaluations without validation improvement")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--tokenizer", help="Optional trained byte-BPE JSON; fit it on training data only")
     args = parser.parse_args()
 
     if args.profile == "laptop":
@@ -111,10 +113,22 @@ def main():
         combined, corpus_hash = read_bytes(args.data)
         train_data, val_data = split_documents(combined, args.validation_fraction, args.seed)
 
-    for label, data in (("training", train_data), ("validation", val_data)):
+    tokenizer = ByteBPETokenizer.load(args.tokenizer) if args.tokenizer else None
+    if tokenizer is None:
+        tokenizer_metadata = {"type": "utf8-byte-v1"}
+        vocab_size = 256
+        train_ids, val_ids = train_data, val_data
+    else:
+        tokenizer_metadata = tokenizer.to_dict()
+        vocab_size = tokenizer.vocab_size
+        train_ids = torch.tensor(tokenizer.encode(bytes(train_data.tolist()).decode("utf-8")), dtype=torch.long)
+        val_ids = torch.tensor(tokenizer.encode(bytes(val_data.tolist()).decode("utf-8")), dtype=torch.long)
+    tokenizer_hash = hashlib.sha256(json.dumps(tokenizer_metadata, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+    for label, data in (("training", train_ids), ("validation", val_ids)):
         if len(data) < args.context + 2:
             raise SystemExit(
-                f"{label.title()} corpus has {len(data)} bytes; need at least "
+                f"{label.title()} corpus has {len(data)} tokens; need at least "
                 f"{args.context + 2}. Add more licensed text or lower --context."
             )
 
@@ -125,7 +139,7 @@ def main():
         return x, y
 
     config = {"width": args.width, "heads": args.heads, "layers": args.layers,
-              "context": args.context}
+              "context": args.context, "vocab_size": vocab_size}
     model = TillbotCore(**config).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
     output = Path(args.out)
@@ -137,8 +151,16 @@ def main():
         if not output.is_file():
             raise SystemExit(f"Cannot resume: checkpoint not found: {output}")
         saved = torch.load(output, map_location=device, weights_only=True)
-        if saved.get("config") != config:
+        saved_config = dict(saved.get("config", {}))
+        saved_config.setdefault("vocab_size", 256)
+        if saved_config != config:
             raise SystemExit("Checkpoint model config differs from current training arguments.")
+        saved_tokenizer = saved.get("tokenizer_metadata", {"type": "utf8-byte-v1"})
+        saved_hash = saved.get("tokenizer_sha256", hashlib.sha256(json.dumps(
+            saved_tokenizer, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")).hexdigest())
+        if saved_hash != tokenizer_hash:
+            raise SystemExit("Checkpoint tokenizer differs from the current tokenizer; refusing unsafe resume.")
         model.load_state_dict(saved["model_state"])
         if "optimizer_state" in saved:
             optimizer.load_state_dict(saved["optimizer_state"])
@@ -186,7 +208,9 @@ def main():
                 "config": config,
                 "training_steps": step,
                 "validation_loss": best_val,
-                "tokenizer": "utf8-byte-v1",
+                "tokenizer": "byte-bpe-v1" if tokenizer is not None else "utf8-byte-v1",
+                "tokenizer_metadata": tokenizer_metadata,
+                "tokenizer_sha256": tokenizer_hash,
                 "corpus_sha256": corpus_hash,
             }
             if improved or not output.exists():
