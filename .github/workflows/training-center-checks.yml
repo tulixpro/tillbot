@@ -8,6 +8,8 @@ on:
       - "app.js"
       - "index.html"
       - "training.html"
+      - "training-import.js"
+      - "training-import.test.js"
       - "sw.js"
       - ".github/workflows/training-center-checks.yml"
 
@@ -28,7 +30,9 @@ jobs:
           node --check app.js
       - name: Check training import helper syntax
         run: node --check training-import.js
-      - name: Test training import validation\n        run: node --test training-import.test.js\n      - name: Check embedded training page JavaScript
+      - name: Test training import validation
+        run: node --test training-import.test.js
+      - name: Check embedded training page JavaScript
         run: |
           python3 - <<'PY'
           import re
