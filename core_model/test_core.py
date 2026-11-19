@@ -133,7 +133,7 @@ class JsonlImportTests(unittest.TestCase):
             root = Path(temp)
             source = root / "examples.jsonl"
             row = {"messages":[{"role":"user","content":"Was ist KI?"},{"role":"assistant","content":"KI ist ein Forschungsfeld."}]}
-            source.write_text(json.dumps(row, ensure_ascii=False)+"\\n"+json.dumps(row, ensure_ascii=False)+"\\n", encoding="utf-8")
+            source.write_text(json.dumps(row, ensure_ascii=False)+"\n"+json.dumps(row, ensure_ascii=False)+"\n", encoding="utf-8")
             output = root / "documents"
             result = subprocess.run(
                 [sys.executable, str(ROOT / "import_jsonl.py"), "--input", str(source),
@@ -181,9 +181,9 @@ class TrainingSmokeTests(unittest.TestCase):
             root = Path(temp)
             corpus = root / "corpus.txt"
             corpus.write_text(
-                "Erster Beispieldialog mit genügend Text für das Training.\\n\\n"
-                "Zweiter Beispieldialog mit genügend Text für die Validierung.\\n\\n"
-                "Dritter Beispieldialog für einen kleinen Testlauf.\\n\\n"
+                "Erster Beispieldialog mit genügend Text für das Training.\n\n"
+                "Zweiter Beispieldialog mit genügend Text für die Validierung.\n\n"
+                "Dritter Beispieldialog für einen kleinen Testlauf.\n\n"
                 "Vierter Beispieldialog zum Prüfen des Trainingsablaufs.",
                 encoding="utf-8",
             )
