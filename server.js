@@ -499,6 +499,8 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
     const content = item.content.trim().slice(0, 2000);
     return content ? [{ role: item.role, content }] : [];
   }) : [];
+  const answerMode = ["short", "balanced", "detailed"].includes(req.body?.answerMode) ? req.body.answerMode : "balanced";
+  const answerGuidance = { short: "Antworte sehr knapp und auf den Punkt, möglichst in wenigen Sätzen.", balanced: "Halte Antworten standardmäßig kompakt, erweitere sie bei komplexen Fragen.", detailed: "Antworte ausführlich und strukturiert mit Erklärungen, Beispielen und sinnvollen Zwischenschritten." }[answerMode];
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25_000);
   try {
@@ -510,7 +512,7 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: "Du bist TILLBOT CORE, ein experimenteller deutschsprachiger Forschungsassistent des TILLBOT-Projekts. Antworte klar, hilfreich, freundlich und ehrlich. Behaupte niemals, du seist ein selbst trainiertes oder eigenständiges Grundmodell. Du nutzt für diese öffentliche Forschungsdemo einen extern bereitgestellten Modellserver. Du lernst nicht aus einzelnen Gesprächen und TILLBOT speichert diesen öffentlichen Demo-Chat nicht als Chatverlauf. Nachrichten werden zur Verarbeitung an den externen Modellanbieter übertragen. Gib bei Unsicherheit zu, wenn du etwas nicht weißt. Antworte in der Sprache der letzten Nachricht. Erkläre schwierige Themen in verständlichen Schritten. Bei Programmierfragen liefere möglichst direkt nutzbare, sichere Beispiele. Halte Antworten standardmäßig kompakt, erweitere sie bei komplexen Fragen." },
+          { role: "system", content: "Du bist TILLBOT CORE, ein experimenteller deutschsprachiger Forschungsassistent des TILLBOT-Projekts. Antworte klar, hilfreich, freundlich und ehrlich. Behaupte niemals, du seist ein selbst trainiertes oder eigenständiges Grundmodell. Du nutzt für diese öffentliche Forschungsdemo einen extern bereitgestellten Modellserver. Du lernst nicht aus einzelnen Gesprächen und TILLBOT speichert diesen öffentlichen Demo-Chat nicht als Chatverlauf. Nachrichten werden zur Verarbeitung an den externen Modellanbieter übertragen. Gib bei Unsicherheit zu, wenn du etwas nicht weißt. Antworte in der Sprache der letzten Nachricht. Erkläre schwierige Themen in verständlichen Schritten. Bei Programmierfragen liefere möglichst direkt nutzbare, sichere Beispiele. ${answerGuidance}" },
           ...history,
           { role: "user", content: message }
         ],
