@@ -158,11 +158,19 @@ app.post("/api/register", rateLimit({windowMs:60*60_000,limit:5}), async (req, r
 app.get("/api/auth/verify",async(req,res)=>{
  const token=String(req.query.token||"");
  if(!/^[a-f0-9]{64}$/.test(token))return res.status(400).json({error:"Bestätigungslink ungültig oder abgelaufen."});
- const {rows}=await pool.query("SELECT id,user_id FROM email_action_tokens WHERE token_hash=$1 AND purpose='verify' AND expires_at>NOW()",[hashActionToken(token)]);
- if(!rows[0])return res.status(400).json({error:"Bestätigungslink ungültig oder abgelaufen."});
- const client=await pool.connect();
- try{await client.query("BEGIN");await client.query("UPDATE users SET email_verified=TRUE WHERE id=$1",[rows[0].user_id]);await client.query("DELETE FROM email_action_tokens WHERE user_id=$1 AND purpose='verify'",[rows[0].user_id]);await client.query("COMMIT");res.json({ok:true,message:"E-Mail bestätigt. Du kannst dich jetzt anmelden."});}
- catch(e){await client.query("ROLLBACK");throw e;}finally{client.release();}
+ const result=await pool.query("WITH consumed AS (DELETE FROM email_action_tokens WHERE token_hash=$1 AND purpose='verify' AND expires_at>NOW() RETURNING user_id) UPDATE users SET email_verified=TRUE WHERE id=(SELECT user_id FROM consumed) RETURNING id",[hashActionToken(token)]);
+ if(!result.rowCount)return res.status(400).json({error:"Bestätigungslink ungültig oder abgelaufen."});
+ await pool.query("DELETE FROM email_action_tokens WHERE user_id=$1 AND purpose='verify'",[result.rows[0].id]);
+ res.json({ok:true,message:"E-Mail bestätigt. Du kannst dich jetzt anmelden."});
+});
+app.post("/api/auth/resend-verification",rateLimit({windowMs:60*60_000,limit:3}),async(req,res)=>{
+ const email=String(req.body.email||"").trim().toLowerCase();
+ if(!validEmail(email))return res.status(400).json({error:"Bitte gib eine gültige E-Mail-Adresse ein."});
+ try{
+  const {rows}=await pool.query("SELECT id,username FROM users WHERE email=$1 AND email_verified=FALSE",[email]);
+  if(rows[0]){const token=await createEmailAction(rows[0].id,"verify"),link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"?verify="+encodeURIComponent(token);await sendAccountEmail(email,"TILLBOT – E-Mail-Adresse bestätigen","Hallo "+rows[0].username+",\n\nbitte bestätige deine E-Mail-Adresse über diesen Link (24 Stunden gültig):\n"+link);}
+  res.json({ok:true,message:"Falls ein unbestätigtes Konto zu dieser Adresse gehört, wurde eine neue Bestätigungs-E-Mail versendet."});
+ }catch(error){console.error("Verification resend failed:",error.code||error.message);res.status(503).json({error:"E-Mail-Versand momentan nicht verfügbar."})}
 });
 app.post("/api/auth/forgot-password",rateLimit({windowMs:60*60_000,limit:3}),async(req,res)=>{
  const email=String(req.body.email||"").trim().toLowerCase();
@@ -181,12 +189,11 @@ app.post("/api/auth/reset-password",rateLimit({windowMs:15*60_000,limit:5}),asyn
  const token=String(req.body.token||""),password=String(req.body.password||"");
  if(!/^[a-f0-9]{64}$/.test(token))return res.status(400).json({error:"Link ungültig oder abgelaufen."});
  if(password.length<10||password.length>128)return res.status(400).json({error:"Passwort muss 10–128 Zeichen haben."});
- const {rows}=await pool.query("SELECT user_id FROM email_action_tokens WHERE token_hash=$1 AND purpose='reset' AND expires_at>NOW()",[hashActionToken(token)]);
- if(!rows[0])return res.status(400).json({error:"Link ungültig oder abgelaufen."});
  const hash=await bcrypt.hash(password,12);
- const client=await pool.connect();
- try{await client.query("BEGIN");await client.query("UPDATE users SET password_hash=$1 WHERE id=$2",[hash,rows[0].user_id]);await client.query("DELETE FROM email_action_tokens WHERE user_id=$1",[rows[0].user_id]);await client.query("COMMIT");res.json({ok:true,message:"Passwort geändert. Bitte melde dich neu an."});}
- catch(e){await client.query("ROLLBACK");throw e;}finally{client.release();}
+ const result=await pool.query("WITH consumed AS (DELETE FROM email_action_tokens WHERE token_hash=$1 AND purpose='reset' AND expires_at>NOW() RETURNING user_id) UPDATE users SET password_hash=$2 WHERE id=(SELECT user_id FROM consumed) RETURNING id",[hashActionToken(token),hash]);
+ if(!result.rowCount)return res.status(400).json({error:"Link ungültig oder abgelaufen."});
+ await pool.query("DELETE FROM email_action_tokens WHERE user_id=$1",[result.rows[0].id]);
+ res.json({ok:true,message:"Passwort geändert. Bitte melde dich neu an."});
 });
 
 app.post("/api/login", async (req, res) => {
