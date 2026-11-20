@@ -93,3 +93,17 @@ The frontend is a static site; the API URL is currently configured in `app.js`.
 - Studio-Verwaltung für Konten/Rollen, Support-Tickets, Tageslimit, Wartungsmodus und öffentliche Ankündigungen.
 - Aggregierte Admin-Übersicht mit neuen Konten, bestätigten E-Mail-Adressen, aktiven Nutzern, Chat-Aktivität und Ticketstatus. Es werden keine Chat-Inhalte in der Übersicht ausgegeben.
 - Die Installationsfunktion setzt HTTPS, ein unterstütztes Browser-Verhalten und eine gültige Service-Worker-/Manifest-Konfiguration voraus. Auf iPhone/iPad erfolgt das Hinzufügen über Safari → Teilen → Zum Home-Bildschirm.
+
+
+## New workspace and administration features
+- User preferences: server-stored personal instructions and allow-listed Groq model selection. Configure additional models with \`GROQ_ALLOWED_MODELS=model-a,model-b\`.
+- TILLBOT Memory: user-managed notes stored per account and included as context in AI requests.
+- Workspaces: private project spaces with owner-only CRUD.
+- Admin analytics: daily user/chat/message aggregates; message history begins accumulating after the daily usage table migration.
+- Monitoring: server/chat errors are stored without chat content, credentials, or request bodies.
+- Admin activity log: records admin API paths and methods, not request payloads.
+- Feature flags: centrally stored and checked server-side for memories, workspaces, and image attachments. Image generation, web search, and public API remain disabled until their provider/service integration is configured.
+- Admin permissions: optional per-admin overrides for users, support, features, and system. Unset overrides default to allowed for compatibility.
+- Dashboard widgets can be reordered by drag-and-drop; order is stored locally in the browser.
+- Speech: browser speech recognition for dictation and speech synthesis for reading the latest answer.
+- Chat search includes saved chat history; PDF export uses the browser print dialog ("Save as PDF").
