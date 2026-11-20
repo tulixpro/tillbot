@@ -70,6 +70,7 @@ body.coreFullscreenDemo .hero p{font-size:13px}
 body.coreFullscreenDemo .notice{flex:0 0 auto;width:min(1000px,calc(100% - 32px));margin:0 auto 12px;background:#18243bd9;border-color:#7188b955}
 body.coreFullscreenDemo .chatCard{flex:1 1 auto;min-height:0;width:min(1200px,calc(100% - 32px));margin:0 auto 10px;display:flex;flex-direction:column;border-radius:20px;background:#101a2beF;box-shadow:0 24px 80px #0006;animation:coreChatIn .65s .08s both}
 body.coreFullscreenDemo .chatHead{flex:0 0 auto;padding:13px 18px}
+.chatHead>div:first-child{display:flex;flex-direction:column;gap:2px}.toolbar{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.copy-answer{display:block;margin-top:9px;padding:5px 8px;border:1px solid #555;border-radius:7px;background:#303030;color:#ddd;font-size:10px}.chatHead{flex-wrap:wrap}
 body.coreFullscreenDemo #messages{flex:1 1 auto;height:auto;min-height:0;padding:clamp(14px,2.4vw,28px);overscroll-behavior:contain}
 body.coreFullscreenDemo .quickbar{flex:0 0 auto}
 body.coreFullscreenDemo .composer{flex:0 0 auto;background:#0b1525;padding:14px 18px}
@@ -108,7 +109,7 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
 <section class="hero"><span class="eyebrow">CORE · BROWSER-PROTOTYP</span><h2>Ein eigener KI-Kern. Schritt für Schritt.</h2><p>Hier kannst du TILLBOT CORE direkt mit einem extern bereitgestellten Sprachmodell testen. CORE steuert Antworten über eine eigene, abgesicherte Schnittstelle.</p></section>
 <div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
-<div class="chatHead"><strong>CORE-Testchat</strong><span>Öffentliche KI-Demo · ohne Anmeldung</span></div>
+<div class="chatHead"><div><strong>CORE-Testchat</strong><span>Öffentliche KI-Demo · ohne Anmeldung</span></div><div class="toolbar"><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="export-chat">Chat exportieren</button></div></div>
 <div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Stelle eine Frage oder wähle ein Beispiel. Ich antworte über den CORE-Forschungsendpunkt.</div></div>
 <div class="quickbar" aria-label="Beispielfragen">
 <button type="button" data-prompt="Was kannst du?">Was kannst du?</button>
@@ -116,8 +117,8 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
 <button type="button" data-prompt="Wie geht es weiter?">Nächste Schritte</button>
 <button type="button" data-prompt="Lernst du aus meinen Nachrichten?">Lernst du mit?</button>
 </div>
-<form class="composer" id="chat-form"><textarea id="message-input" rows="1" maxlength="500" placeholder="Nachricht an TILLBOT CORE …" aria-label="Nachricht an TILLBOT CORE"></textarea><button class="send" id="send" type="submit" disabled>Senden ↑</button></form>
-<div class="chatFoot"><span>Enter senden · Shift + Enter für Zeilenumbruch</span><span id="count">0 Nachrichten</span></div>
+<form class="composer" id="chat-form"><textarea id="message-input" rows="1" maxlength="2000" placeholder="Nachricht an TILLBOT CORE …" aria-label="Nachricht an TILLBOT CORE"></textarea><button class="send" id="send" type="submit" disabled>Senden ↑</button></form>
+<div class="chatFoot"><span>Enter senden · Shift + Enter für Zeilenumbruch · max. 2.000 Zeichen</span><span id="count">0 Nachrichten</span></div>
 </section>
 <details class="tutorial">
 <summary>📘 Tutorial: Was kann CORE schon – und was noch nicht?</summary>
@@ -136,7 +137,7 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
  const params=new URLSearchParams(window.location.search);
  if(!params.has('embed'))document.body.classList.add('coreFullscreenDemo');
  if(params.has('embed'))document.querySelector('.currentAi')?.remove();
- const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count'),status=document.getElementById('demo-status');
+ const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count'),status=document.getElementById('demo-status'),newChat=document.getElementById('new-chat'),exportChat=document.getElementById('export-chat');
  let sent=0,busy=false,history=[];
  input.maxLength=2000;
  function add(text,role){
@@ -154,6 +155,7 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
    if(!response.ok)throw new Error(data.error||'CORE ist momentan nicht erreichbar.');
    const answer=String(data.answer||'Keine Antwort erhalten.');
    waiting.lastChild.textContent=answer;
+   const copy=document.createElement('button');copy.type='button';copy.className='copy-answer';copy.textContent='Antwort kopieren';copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(answer);copy.textContent='Kopiert';setTimeout(()=>copy.textContent='Antwort kopieren',1500)}catch{copy.textContent='Kopieren nicht möglich'}});waiting.append(copy);
    history.push({role:'user',content:value},{role:'assistant',content:answer});
    history=history.slice(-8);
    status.textContent='CORE ist bereit · Gesprächskontext aktiv';
@@ -164,6 +166,8 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
  input.addEventListener('input',()=>{send.disabled=busy||!input.value.trim()});
  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!send.disabled)form.requestSubmit()}});
  document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{if(!busy)submit(button.dataset.prompt)}));
+ newChat.addEventListener('click',()=>{if(busy)return;history=[];sent=0;messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');count.textContent='0 Nachrichten';status.textContent='Neuer Chat · kein vorheriger Gesprächskontext';input.value='';send.disabled=true;input.focus()});
+ exportChat.addEventListener('click',()=>{const transcript=[...messages.querySelectorAll('.msg')].map(node=>{const who=node.querySelector('.who')?.textContent||'CORE';const body=[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE||n.nodeType===Node.ELEMENT_NODE&&n.classList?.contains('who')===false&&n.tagName!=='BUTTON').map(n=>n.textContent).join('').trim();return who+'\n'+body}).join('\n\n');const blob=new Blob([transcript],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='tillbot-core-chat.txt';link.click();URL.revokeObjectURL(url)});
 })();
 </script>
 </body>
