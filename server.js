@@ -305,6 +305,22 @@ app.get("/api/admin/stats", auth, admin, async (_req, res) => { const [u,ch]=awa
 const AI_RESPONSE_STYLES={balanced:"Antworte ausgewogen: zuerst die direkte Lösung, danach eine verständliche Erklärung und bei Bedarf ein Beispiel.",concise:"Antworte möglichst knapp und direkt. Nutze kurze Absätze und Listen, bleibe aber vollständig.",detailed:"Antworte ausführlicher und strukturiert. Erkläre Hintergründe, zeige Beispiele und nenne sinnvolle nächste Schritte."};
 app.get("/api/admin/ai-settings",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT value FROM app_settings WHERE key='ai_response_style'");const style=AI_RESPONSE_STYLES[q.rows[0]?.value]?q.rows[0].value:"balanced";res.set("Cache-Control","no-store").json({style,available:Object.keys(AI_RESPONSE_STYLES)});});
 app.put("/api/admin/ai-settings",auth,admin,async(req,res)=>{const style=String(req.body.style||"");if(!AI_RESPONSE_STYLES[style])return res.status(400).json({error:"Ungültiger Antwortstil."});await pool.query("INSERT INTO app_settings(key,value) VALUES('ai_response_style',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[style]);res.json({ok:true,style});});
+// Read-only AI operations panel. Reports configuration, not provider reachability.
+app.get("/api/admin/ai-status",auth,admin,async(_req,res)=>{
+ const styleResult=await pool.query("SELECT value FROM app_settings WHERE key='ai_response_style'");
+ let databaseReady=false;try{await pool.query("SELECT 1");databaseReady=true}catch{}
+ const model=String(process.env.GROQ_MODEL||"openai/gpt-oss-120b");
+ const visionModel=String(process.env.GROQ_VISION_MODEL||"qwen/qwen3.8-27b");
+ const providerKeyConfigured=!!String(process.env.GROQ_API_KEY||"").trim();
+ res.set("Cache-Control","no-store").json({
+  provider:"Groq",providerKeyConfigured,model,visionModel,
+  visionKeyConfigured:providerKeyConfigured,
+  responseStyle:AI_RESPONSE_STYLES[styleResult.rows[0]?.value]?styleResult.rows[0].value:"balanced",
+  databaseReady,uptimeSeconds:Math.floor(process.uptime()),node:process.version,
+  checkedAt:new Date().toISOString(),
+  note:"Konfigurationsstatus; keine Live-Anfrage an den KI-Anbieter."
+ });
+});
 app.get("/api/admin/metrics", auth, admin, async (_req, res) => {
   const mem = process.memoryUsage();
   const dbInfo = Number((await pool.query("SELECT pg_database_size(current_database()) size")).rows[0].size); const [ur,cr]=await Promise.all([pool.query("SELECT COUNT(*) n FROM users"),pool.query("SELECT COUNT(*) n FROM chats")]);
