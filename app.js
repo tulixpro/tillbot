@@ -78,7 +78,20 @@ window.tillbotAuthSubmit=async()=>{
  b.disabled=true;$("authMsg").textContent=registerMode?"Dein Konto wird sicher erstellt …":"Du wirst sicher angemeldet …";
  try{
   const path=registerMode?"/api/register":"/api/login";
-  const d=await authRequest(path,{username,password,email:registerMode?email:undefined,website:$("website").value});
+  $("authMsg").textContent="Sicherheitsprüfung läuft …";
+  const challengeResponse=await fetch(API+"/api/auth/challenge",{cache:"no-store"});
+  if(!challengeResponse.ok)throw Error("Sicherheitsprüfung momentan nicht verfügbar. Bitte später erneut versuchen.");
+  const challenge=await challengeResponse.json();
+  if(!window.crypto?.subtle||!window.TextEncoder)throw Error("Dieser Browser unterstützt die Sicherheitsprüfung nicht. Bitte aktualisiere deinen Browser.");
+  const encoder=new TextEncoder(),prefix="0".repeat(Math.max(1,Math.min(5,Number(challenge.difficulty)||3)));
+  let solution=null;
+  for(let nonce=0;nonce<200000;nonce++){
+    const bytes=await crypto.subtle.digest("SHA-256",encoder.encode(challenge.nonce+":"+nonce));
+    const digest=Array.from(new Uint8Array(bytes),v=>v.toString(16).padStart(2,"0")).join("");
+    if(digest.startsWith(prefix)){solution=String(nonce);break;}
+  }
+  if(solution===null)throw Error("Sicherheitsprüfung konnte nicht abgeschlossen werden. Bitte erneut versuchen.");
+  const d=await authRequest(path,{username,password,email:registerMode?email:undefined,website:$("website").value,challengeId:challenge.id,challengeSolution:solution});
   $("website").value="";
   if(registerMode&&d.pendingVerification){$("authMsg").textContent=d.message||"Bitte bestätige deine E-Mail-Adresse.";$("resendVerification").classList.remove("hidden");return;}
   token=d.token;user=d.user;localStorage.setItem("tb-token",token);
