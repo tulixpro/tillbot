@@ -311,7 +311,7 @@ async function getMaintenance(){
 }
 app.get("/api/maintenance",async(_req,res)=>{try{res.json(await getMaintenance())}catch{res.status(503).json({enabled:false,message:"Status derzeit nicht verfügbar"})}});
 app.put("/api/admin/maintenance",auth,admin,async(req,res)=>{const enabled=!!req.body.enabled,message=typeof req.body.message==="string"?req.body.message.trim().slice(0,300):null;await pool.query("INSERT INTO app_settings(key,value) VALUES('maintenance_enabled',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[String(enabled)]);if(message!==null&&message.length>=5)await pool.query("INSERT INTO app_settings(key,value) VALUES('maintenance_message',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[message]);res.json({ok:true,enabled,message:message||"TILLBOT wird gerade gewartet. Bitte später erneut versuchen."})});
-app.get("/api/chats", auth, async (req, res) => { const { rows } = await pool.query("SELECT id,title,updated_at FROM chats WHERE user_id=$1 ORDER BY updated_at DESC", [req.user.id]); res.json(rows); });
+app.get("/api/chats", auth, async (req, res) => { const q=String(req.query.search||"").trim().slice(0,100); const { rows } = await pool.query("SELECT id,title,updated_at FROM chats WHERE user_id=$1 AND ($2='' OR title ILIKE $3 OR history ILIKE $3) ORDER BY updated_at DESC LIMIT 200", [req.user.id,q,"%"+q+"%"]); res.set("Cache-Control","no-store").json(rows); });
 app.post("/api/chats", auth, async (req, res) => {
   const title = String(req.body.title || "Neuer Chat").slice(0, 100);
   const { rows } = await pool.query("INSERT INTO chats(user_id,title) VALUES($1,$2) RETURNING id", [req.user.id, title]);
