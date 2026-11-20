@@ -1,5 +1,5 @@
-const CACHE="tillbot-pages-v101";
-const CORE=["./","./index.html","./studio.html","./studio-manifest.json?v=1","./core-demo.html","./style.css?v=73","./app.js?v=78","./manifest.json?v=10","./icons/tillbot.svg?v=8","./icons/tillbot-dark.svg"];
+const CACHE="tillbot-pages-v102";
+const CORE=["./","./index.html","./studio.html","./studio-manifest.json?v=1","./core-demo.html","./style.css?v=74","./app.js?v=79","./manifest.json?v=10","./icons/tillbot.svg?v=8","./icons/tillbot-dark.svg"];
 self.addEventListener("install",event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE);await Promise.allSettled(CORE.map(async url=>{const r=await fetch(url,{cache:"reload"});if(r.ok)await cache.put(url,r)}));await self.skipWaiting()})())});
 self.addEventListener("activate",event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith("tillbot-pages-")&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})())});
 self.addEventListener("fetch",event=>{
