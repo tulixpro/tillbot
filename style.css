@@ -2001,3 +2001,13 @@ body[data-theme="light"] #sidebar .historyEmpty{color:#58708a;border-color:#9eb5
 body[data-theme="light"] #sidebar .historyItem.active{background:#e4f1ff;border-color:#9bbfe4}
 body[data-theme="light"] #sidebar .historyItem.active .historyOpen{color:#173b5d!important}
 @media(prefers-reduced-motion:reduce){#sidebar #history{scroll-behavior:auto}}
+
+
+/* Loading and connection feedback */
+#sidebar .historyOpen.isLoading{position:relative;padding-right:30px!important}
+#sidebar .historyOpen.isLoading:after{content:"";position:absolute;right:10px;top:50%;width:13px;height:13px;margin-top:-7px;border:2px solid #a9c8e855;border-top-color:#71e5dc;border-radius:50%;animation:tbChatSpin .7s linear infinite}
+@keyframes tbChatSpin{to{transform:rotate(360deg)}}
+#chat .thinkingBubble{border:1px solid #67d8d055;box-shadow:0 8px 28px #071c2c22}
+#chat .thinkingLabel{display:flex;align-items:center;gap:9px}
+#chat .thinkingStatus{display:block;margin-top:8px;color:var(--muted,#9db2c8);font-size:.88em}
+@media(prefers-reduced-motion:reduce){#sidebar .historyOpen.isLoading:after{animation:none}}
