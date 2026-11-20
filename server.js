@@ -97,6 +97,7 @@ async function sendAccountEmail(to,subject,text){
  await transporter.sendMail({from:c.from,to,subject,text});
 }
 async function createEmailAction(userId,purpose){
+ await pool.query("DELETE FROM email_action_tokens WHERE expires_at<NOW()");
  const raw=crypto.randomBytes(32).toString("hex"),tokenHash=hashActionToken(raw);
  await pool.query("DELETE FROM email_action_tokens WHERE user_id=$1 AND purpose=$2",[userId,purpose]);
  await pool.query("INSERT INTO email_action_tokens(user_id,token_hash,purpose,expires_at) VALUES($1,$2,$3,NOW()+$4::interval)",[userId,tokenHash,purpose,purpose==="verify"?"24 hours":"1 hour"]);
