@@ -87,7 +87,7 @@ function emailTransportConfig() {
   return {host,port,from,user,pass,secure,configured:!!(host&&Number.isInteger(port)&&port>0&&port<65536&&from&&user&&pass)};
 }
 
-function validEmail(value){return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(value||""))&&String(value).length<=254}
+function validEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||""))&&String(value).length<=254}
 function hashActionToken(token){return crypto.createHash("sha256").update(token).digest("hex")}
 async function sendAccountEmail(to,subject,text){
  const c=emailTransportConfig();
