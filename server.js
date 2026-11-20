@@ -3,6 +3,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { pool, initDatabase } = require("./database");
 
 const app = express();
@@ -85,6 +86,23 @@ function emailTransportConfig() {
   const secure=String(process.env.SMTP_SECURE||"").toLowerCase()==="true"||port===465;
   return {host,port,from,user,pass,secure,configured:!!(host&&Number.isInteger(port)&&port>0&&port<65536&&from&&user&&pass)};
 }
+
+function validEmail(value){return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(value||""))&&String(value).length<=254}
+function hashActionToken(token){return crypto.createHash("sha256").update(token).digest("hex")}
+async function sendAccountEmail(to,subject,text){
+ const c=emailTransportConfig();
+ if(!c.configured)throw new Error("SMTP_NOT_CONFIGURED");
+ const nodemailer=require("nodemailer");
+ const transporter=nodemailer.createTransport({host:c.host,port:c.port,secure:c.secure,auth:{user:c.user,pass:c.pass},connectionTimeout:10000,greetingTimeout:10000,socketTimeout:15000});
+ await transporter.sendMail({from:c.from,to,subject,text});
+}
+async function createEmailAction(userId,purpose){
+ const raw=crypto.randomBytes(32).toString("hex"),tokenHash=hashActionToken(raw);
+ await pool.query("DELETE FROM email_action_tokens WHERE user_id=$1 AND purpose=$2",[userId,purpose]);
+ await pool.query("INSERT INTO email_action_tokens(user_id,token_hash,purpose,expires_at) VALUES($1,$2,$3,NOW()+$4::interval)",[userId,tokenHash,purpose,purpose==="verify"?"24 hours":"1 hour"]);
+ return raw;
+}
+
 app.get("/api/admin/email-status",auth,admin,async(_req,res)=>{
  const c=emailTransportConfig();
  res.set("Cache-Control","no-store").json({configured:c.configured,host:c.configured?c.host:null,port:c.configured?c.port:null,secure:c.configured?c.secure:null,from:c.configured?c.from:null});
@@ -118,23 +136,57 @@ app.get("/api/notifications", async (_req,res)=>{
  }catch{return res.set("Cache-Control","no-store").json({notice:"Der Systemstatus ist momentan nicht verfügbar.",level:"warning"})}
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
-app.post("/api/register", async (req, res) => {
+app.post("/api/register", rateLimit({windowMs:60*60_000,limit:5}), async (req, res) => {
   if (isBotTrapFilled(req)) return res.status(400).json({ error: "Anfrage konnte nicht verarbeitet werden." });
-  const username = normalizeUsername(req.body.username);
-  const password = String(req.body.password || "");
-  if (!/^[a-z0-9_]{3,20}$/.test(username)) return res.status(400).json({ error: "Username: 3–20 Zeichen (a-z, 0-9, _)" });
-  if (password.length < 10 || password.length > 128) return res.status(400).json({ error: "Passwort muss 10–128 Zeichen haben" });
-  try {
-    const hash = await bcrypt.hash(password, 12);
-    // Registrierungen sind immer normale Nutzer. Admin wird separat mit Setup-Code freigeschaltet.
-    const { rows } = await pool.query("INSERT INTO users (username, password_hash, role) VALUES ($1, $2, 'user') RETURNING id", [username, hash]);
-    const user = { id: Number(rows[0].id), username, role: "user" };
-    res.json({ token: makeToken(user), user });
-  } catch (error) {
-    if (error.code === "23505") return res.status(409).json({ error: "Username bereits vergeben" });
-    console.error("Register error:", error);
-    res.status(500).json({ error: "Registrierung fehlgeschlagen" });
+  const username=normalizeUsername(req.body.username),password=String(req.body.password||""),email=String(req.body.email||"").trim().toLowerCase();
+  if(!/^[a-z0-9_]{3,20}$/.test(username))return res.status(400).json({error:"Username: 3–20 Zeichen (a-z, 0-9, _)"});
+  if(password.length<10||password.length>128)return res.status(400).json({error:"Passwort muss 10–128 Zeichen haben"});
+  if(!validEmail(email))return res.status(400).json({error:"Bitte gib eine gültige E-Mail-Adresse ein."});
+  try{
+    if(!emailTransportConfig().configured)return res.status(503).json({error:"E-Mail-Versand ist noch nicht eingerichtet. Bitte später erneut versuchen."});
+    const hash=await bcrypt.hash(password,12);
+    const {rows}=await pool.query("INSERT INTO users(username,email,email_verified,password_hash,role) VALUES($1,$2,FALSE,$3,'user') RETURNING id",[username,email,hash]);
+    const userId=Number(rows[0].id),token=await createEmailAction(userId,"verify");
+    const link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"?verify="+encodeURIComponent(token);
+    await sendAccountEmail(email,"TILLBOT – E-Mail-Adresse bestätigen","Hallo "+username+",\n\nbitte bestätige deine E-Mail-Adresse über diesen Link (24 Stunden gültig):\n"+link+"\n\nFalls du kein Konto erstellt hast, kannst du diese Nachricht ignorieren.");
+    res.status(202).json({pendingVerification:true,message:"Konto erstellt. Bitte öffne den Bestätigungslink in deiner E-Mail, bevor du dich anmeldest."});
+  }catch(error){
+    if(error.code==="23505")return res.status(409).json({error:"Benutzername oder E-Mail-Adresse ist bereits registriert."});
+    console.error("Register error:",error.code||error.message);res.status(500).json({error:"Registrierung fehlgeschlagen. Bitte später erneut versuchen."});
   }
+});
+app.get("/api/auth/verify",async(req,res)=>{
+ const token=String(req.query.token||"");
+ if(!/^[a-f0-9]{64}$/.test(token))return res.status(400).json({error:"Bestätigungslink ungültig oder abgelaufen."});
+ const {rows}=await pool.query("SELECT id,user_id FROM email_action_tokens WHERE token_hash=$1 AND purpose='verify' AND expires_at>NOW()",[hashActionToken(token)]);
+ if(!rows[0])return res.status(400).json({error:"Bestätigungslink ungültig oder abgelaufen."});
+ await pool.query("BEGIN");
+ try{await pool.query("UPDATE users SET email_verified=TRUE WHERE id=$1",[rows[0].user_id]);await pool.query("DELETE FROM email_action_tokens WHERE user_id=$1 AND purpose='verify'",[rows[0].user_id]);await pool.query("COMMIT");res.json({ok:true,message:"E-Mail bestätigt. Du kannst dich jetzt anmelden."});}
+ catch(e){await pool.query("ROLLBACK");throw e;}
+});
+app.post("/api/auth/forgot-password",rateLimit({windowMs:60*60_000,limit:3}),async(req,res)=>{
+ const email=String(req.body.email||"").trim().toLowerCase();
+ if(!validEmail(email))return res.status(400).json({error:"Bitte gib eine gültige E-Mail-Adresse ein."});
+ try{
+  const {rows}=await pool.query("SELECT id,username,email_verified FROM users WHERE email=$1",[email]);
+  if(rows[0]?.email_verified){
+   const token=await createEmailAction(rows[0].id,"reset");
+   const link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"?reset="+encodeURIComponent(token);
+   await sendAccountEmail(email,"TILLBOT – Passwort zurücksetzen","Hallo "+rows[0].username+",\n\nüber diesen Link kannst du innerhalb einer Stunde ein neues Passwort festlegen:\n"+link+"\n\nFalls du das nicht angefordert hast, ignoriere diese Nachricht.");
+  }
+  res.json({ok:true,message:"Falls ein bestätigtes Konto zu dieser Adresse gehört, wurde eine E-Mail mit weiteren Schritten versendet."});
+ }catch(error){console.error("Password reset request failed:",error.code||error.message);res.status(503).json({error:"E-Mail-Versand momentan nicht verfügbar. Bitte später erneut versuchen."})}
+});
+app.post("/api/auth/reset-password",rateLimit({windowMs:15*60_000,limit:5}),async(req,res)=>{
+ const token=String(req.body.token||""),password=String(req.body.password||"");
+ if(!/^[a-f0-9]{64}$/.test(token))return res.status(400).json({error:"Link ungültig oder abgelaufen."});
+ if(password.length<10||password.length>128)return res.status(400).json({error:"Passwort muss 10–128 Zeichen haben."});
+ const {rows}=await pool.query("SELECT user_id FROM email_action_tokens WHERE token_hash=$1 AND purpose='reset' AND expires_at>NOW()",[hashActionToken(token)]);
+ if(!rows[0])return res.status(400).json({error:"Link ungültig oder abgelaufen."});
+ const hash=await bcrypt.hash(password,12);
+ await pool.query("BEGIN");
+ try{await pool.query("UPDATE users SET password_hash=$1 WHERE id=$2",[hash,rows[0].user_id]);await pool.query("DELETE FROM email_action_tokens WHERE user_id=$1",[rows[0].user_id]);await pool.query("COMMIT");res.json({ok:true,message:"Passwort geändert. Bitte melde dich neu an."});}
+ catch(e){await pool.query("ROLLBACK");throw e;}
 });
 
 app.post("/api/login", async (req, res) => {
@@ -144,6 +196,7 @@ app.post("/api/login", async (req, res) => {
     if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
       return res.status(401).json({ error: "Login falsch" });
     }
+    if(user.email && !user.email_verified)return res.status(403).json({error:"Bitte bestätige zuerst deine E-Mail-Adresse."});
     res.json({ token: makeToken(user), user: { id: user.id, username: user.username, role: user.role } });
   } catch (error) {
     console.error("Login error:", error);
