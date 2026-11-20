@@ -168,7 +168,7 @@ app.post("/api/auth/resend-verification",rateLimit({windowMs:60*60_000,limit:3})
  if(!validEmail(email))return res.status(400).json({error:"Bitte gib eine gültige E-Mail-Adresse ein."});
  try{
   const {rows}=await pool.query("SELECT id,username FROM users WHERE email=$1 AND email_verified=FALSE",[email]);
-  if(rows[0]){const token=await createEmailAction(rows[0].id,"verify"),link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"?verify="+encodeURIComponent(token);await sendAccountEmail(email,"TILLBOT – E-Mail-Adresse bestätigen","Hallo "+rows[0].username+",\n\nbitte bestätige deine E-Mail-Adresse über diesen Link (24 Stunden gültig):\n"+link);}
+  if(rows[0]){const token=await createEmailAction(rows[0].id,"verify"),link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"#verify="+encodeURIComponent(token);await sendAccountEmail(email,"TILLBOT – E-Mail-Adresse bestätigen","Hallo "+rows[0].username+",\n\nbitte bestätige deine E-Mail-Adresse über diesen Link (24 Stunden gültig):\n"+link);}
   res.json({ok:true,message:"Falls ein unbestätigtes Konto zu dieser Adresse gehört, wurde eine neue Bestätigungs-E-Mail versendet."});
  }catch(error){console.error("Verification resend failed:",error.code||error.message);res.status(503).json({error:"E-Mail-Versand momentan nicht verfügbar."})}
 });
