@@ -483,6 +483,51 @@ async function incrementDailyQuota(userId){await pool.query("UPDATE user_message
 app.get("/api/admin/quota",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT value FROM app_settings WHERE key=$1",["daily_message_limit"]);res.json({limit:Number(q.rows[0]?.value)||30})});
 app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Math.max(1,Math.min(500,Math.floor(Number(req.body.limit)||30)));await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["daily_message_limit",String(limit)]);res.json({ok:true,limit})});
 app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.json({unlimited:true});const q=await checkDailyQuota(req.user.id);res.json({unlimited:false,count:q.count||0,remaining:q.remaining||0,limit:q.limit||30,blocked:q.blocked||false,until:q.until||null})});
+
+/**
+ * Public TILLBOT CORE research endpoint.
+ * Uses the configured hosted model as an inference engine; this is not a separately trained foundation model.
+ * Requests are rate-limited and never written to chat history or the database.
+ */
+app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { error: "CORE ist gerade stark ausgelastet. Bitte eine Minute warten." } }), async (req, res) => {
+  const message = String(req.body?.message || "").trim();
+  if (!message || message.length > 2000) return res.status(400).json({ error: "Bitte gib eine Nachricht mit maximal 2.000 Zeichen ein." });
+  if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: "CORE ist momentan nicht verfügbar. Der Modellserver ist nicht konfiguriert." });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
+  try {
+    const model = String(process.env.CORE_MODEL || "openai/gpt-oss-20b");
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      signal: controller.signal,
+      headers: { Authorization: "Bearer " + process.env.GROQ_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: "Du bist TILLBOT CORE, ein experimenteller deutschsprachiger Forschungsassistent des TILLBOT-Projekts. Antworte klar, hilfreich und ehrlich. Behaupte niemals, du seist ein selbst trainiertes oder eigenständiges Grundmodell. Du nutzt für diese öffentliche Forschungsdemo einen extern bereitgestellten Modellserver. Du lernst nicht aus einzelnen Gesprächen und speicherst keine Nachrichten. Gib bei Unsicherheit zu, wenn du etwas nicht weißt. Antworte auf Deutsch, sofern die Person keine andere Sprache verwendet. Halte Antworten standardmäßig kompakt und verständlich." },
+          { role: "user", content: message }
+        ],
+        max_completion_tokens: 450,
+        temperature: 0.6,
+        stream: false
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error("CORE provider error:", response.status, data.error?.code || "provider_error");
+      return res.status(502).json({ error: "CORE konnte gerade keine Antwort erzeugen. Bitte versuche es später erneut." });
+    }
+    const answer = data.choices?.[0]?.message?.content;
+    if (typeof answer !== "string" || !answer.trim()) return res.status(502).json({ error: "CORE hat keine Antwort geliefert. Bitte versuche es erneut." });
+    res.set("Cache-Control", "no-store").json({ answer: answer.trim(), model: "TILLBOT CORE · Forschungsdemo", stored: false });
+  } catch (error) {
+    console.error("CORE request failed:", error.name || "request_error");
+    res.status(504).json({ error: error.name === "AbortError" ? "CORE braucht gerade zu lange. Bitte versuche es erneut." : "CORE ist momentan nicht erreichbar." });
+  } finally {
+    clearTimeout(timeout);
+  }
+});
+
 app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
   if(req.user.role!=="admin"){const q=await checkDailyQuota(req.user.id);if(q.blocked)return res.status(429).json({error:"Dein Tagesbudget ist aufgebraucht. Du kannst ab "+new Date(q.until).toLocaleString("de-DE")+" Uhr wieder schreiben.",quota:{blocked:true,until:q.until,remaining:0}});req.dailyQuota=q}
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "GROQ_API_KEY fehlt in Render" });
