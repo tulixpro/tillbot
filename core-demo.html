@@ -58,6 +58,48 @@ body{background:#212121!important;color:#ededed!important}
 .msg.user{background:#383838!important;border-color:#4a4a4a!important}
 .tutorialGrid article{background:#303030!important;border-color:#414141!important}
 @media(max-width:620px){.topbar{background:#262626!important}}
+
+/* Fullscreen CORE experience: use the entire iframe viewport, not a centered page */
+body.coreFullscreenDemo{min-height:100dvh;height:100dvh;overflow:hidden;background:radial-gradient(ellipse at 12% 0%,#293b70 0,transparent 42%),radial-gradient(ellipse at 95% 10%,#174b4b 0,transparent 38%),#080d18!important}
+body.coreFullscreenDemo .shell{width:100%;height:100dvh;min-height:0;margin:0;padding:0 0 max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:0}
+body.coreFullscreenDemo .topbar{flex:0 0 auto;border:0;border-bottom:1px solid #7188b944;border-radius:0;padding:14px clamp(16px,3vw,38px);background:linear-gradient(100deg,#111c35f5,#172c42f5);box-shadow:0 12px 36px #0004}
+body.coreFullscreenDemo .mark{width:48px;height:48px;box-shadow:0 0 28px #8f86ff66;animation:coreMarkFloat 4s ease-in-out infinite}
+body.coreFullscreenDemo .hero{flex:0 0 auto;padding:clamp(12px,2.3vh,26px) 18px 14px;animation:coreHeroIn .55s both}
+body.coreFullscreenDemo .hero h2{font-size:clamp(23px,3vw,36px);background:linear-gradient(90deg,#c4b4ff,#79e2c2);background-clip:text;color:transparent}
+body.coreFullscreenDemo .hero p{font-size:13px}
+body.coreFullscreenDemo .notice{flex:0 0 auto;width:min(1000px,calc(100% - 32px));margin:0 auto 12px;background:#18243bd9;border-color:#7188b955}
+body.coreFullscreenDemo .chatCard{flex:1 1 auto;min-height:0;width:min(1200px,calc(100% - 32px));margin:0 auto 10px;display:flex;flex-direction:column;border-radius:20px;background:#101a2beF;box-shadow:0 24px 80px #0006;animation:coreChatIn .65s .08s both}
+body.coreFullscreenDemo .chatHead{flex:0 0 auto;padding:13px 18px}
+body.coreFullscreenDemo #messages{flex:1 1 auto;height:auto;min-height:0;padding:clamp(14px,2.4vw,28px);overscroll-behavior:contain}
+body.coreFullscreenDemo .quickbar{flex:0 0 auto}
+body.coreFullscreenDemo .composer{flex:0 0 auto;background:#0b1525;padding:14px 18px}
+body.coreFullscreenDemo .composer textarea{min-height:54px;max-height:22vh}
+body.coreFullscreenDemo .send{min-width:112px;box-shadow:0 7px 24px #76c9ff33;transition:transform .2s,box-shadow .2s}
+body.coreFullscreenDemo .send:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 10px 30px #76c9ff66}
+body.coreFullscreenDemo .chatFoot{flex:0 0 auto;padding-bottom:12px}
+body.coreFullscreenDemo details.tutorial{flex:0 0 auto;width:min(1200px,calc(100% - 32px));margin:0 auto 8px}
+body.coreFullscreenDemo .footer{flex:0 0 auto;width:min(1200px,calc(100% - 32px));margin:0 auto;padding-bottom:2px}
+body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
+@keyframes coreMarkFloat{50%{transform:translateY(-3px) rotate(3deg);box-shadow:0 0 38px #8f86ff99}}
+@keyframes coreHeroIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes coreChatIn{from{opacity:0;transform:translateY(15px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes coreMessageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){
+ body.coreFullscreenDemo .topbar{padding:10px 13px}
+ body.coreFullscreenDemo .mark{width:40px;height:40px}
+ body.coreFullscreenDemo .hero{padding:10px 14px}
+ body.coreFullscreenDemo .hero p{font-size:11px}
+ body.coreFullscreenDemo .notice{font-size:11px;padding:9px 11px;margin-bottom:8px}
+ body.coreFullscreenDemo .chatCard{width:100%;margin:0;border-radius:16px 16px 0 0;border-left:0;border-right:0}
+ body.coreFullscreenDemo #messages{padding:12px;gap:9px}
+ body.coreFullscreenDemo .composer{padding:9px;gap:7px}
+ body.coreFullscreenDemo .send{min-width:74px;padding:0 10px}
+ body.coreFullscreenDemo .quickbar{padding:0 10px 9px}
+ body.coreFullscreenDemo .quickbar button{font-size:10px}
+ body.coreFullscreenDemo details.tutorial,body.coreFullscreenDemo .footer{display:none}
+}
+@media(prefers-reduced-motion:reduce){body.coreFullscreenDemo *,body.coreFullscreenDemo *:before,body.coreFullscreenDemo *:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -90,7 +132,9 @@ body{background:#212121!important;color:#ededed!important}
 </main>
 <script>
 (()=>{
- if(new URLSearchParams(window.location.search).has('embed'))document.querySelector('.currentAi')?.remove();
+ const params=new URLSearchParams(window.location.search);
+ if(!params.has('embed'))document.body.classList.add('coreFullscreenDemo');
+ if(params.has('embed'))document.querySelector('.currentAi')?.remove();
  const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count');
  let sent=0;
  const answer=text=>{
