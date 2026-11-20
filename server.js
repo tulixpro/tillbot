@@ -160,9 +160,9 @@ app.get("/api/auth/verify",async(req,res)=>{
  if(!/^[a-f0-9]{64}$/.test(token))return res.status(400).json({error:"Bestätigungslink ungültig oder abgelaufen."});
  const {rows}=await pool.query("SELECT id,user_id FROM email_action_tokens WHERE token_hash=$1 AND purpose='verify' AND expires_at>NOW()",[hashActionToken(token)]);
  if(!rows[0])return res.status(400).json({error:"Bestätigungslink ungültig oder abgelaufen."});
- await pool.query("BEGIN");
- try{await pool.query("UPDATE users SET email_verified=TRUE WHERE id=$1",[rows[0].user_id]);await pool.query("DELETE FROM email_action_tokens WHERE user_id=$1 AND purpose='verify'",[rows[0].user_id]);await pool.query("COMMIT");res.json({ok:true,message:"E-Mail bestätigt. Du kannst dich jetzt anmelden."});}
- catch(e){await pool.query("ROLLBACK");throw e;}
+ const client=await pool.connect();
+ try{await client.query("BEGIN");await client.query("UPDATE users SET email_verified=TRUE WHERE id=$1",[rows[0].user_id]);await client.query("DELETE FROM email_action_tokens WHERE user_id=$1 AND purpose='verify'",[rows[0].user_id]);await client.query("COMMIT");res.json({ok:true,message:"E-Mail bestätigt. Du kannst dich jetzt anmelden."});}
+ catch(e){await client.query("ROLLBACK");throw e;}finally{client.release();}
 });
 app.post("/api/auth/forgot-password",rateLimit({windowMs:60*60_000,limit:3}),async(req,res)=>{
  const email=String(req.body.email||"").trim().toLowerCase();
@@ -184,9 +184,9 @@ app.post("/api/auth/reset-password",rateLimit({windowMs:15*60_000,limit:5}),asyn
  const {rows}=await pool.query("SELECT user_id FROM email_action_tokens WHERE token_hash=$1 AND purpose='reset' AND expires_at>NOW()",[hashActionToken(token)]);
  if(!rows[0])return res.status(400).json({error:"Link ungültig oder abgelaufen."});
  const hash=await bcrypt.hash(password,12);
- await pool.query("BEGIN");
- try{await pool.query("UPDATE users SET password_hash=$1 WHERE id=$2",[hash,rows[0].user_id]);await pool.query("DELETE FROM email_action_tokens WHERE user_id=$1",[rows[0].user_id]);await pool.query("COMMIT");res.json({ok:true,message:"Passwort geändert. Bitte melde dich neu an."});}
- catch(e){await pool.query("ROLLBACK");throw e;}
+ const client=await pool.connect();
+ try{await client.query("BEGIN");await client.query("UPDATE users SET password_hash=$1 WHERE id=$2",[hash,rows[0].user_id]);await client.query("DELETE FROM email_action_tokens WHERE user_id=$1",[rows[0].user_id]);await client.query("COMMIT");res.json({ok:true,message:"Passwort geändert. Bitte melde dich neu an."});}
+ catch(e){await client.query("ROLLBACK");throw e;}finally{client.release();}
 });
 
 app.post("/api/login", async (req, res) => {
