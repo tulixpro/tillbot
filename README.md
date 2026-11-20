@@ -85,3 +85,11 @@ The frontend is a static site; the API URL is currently configured in `app.js`.
 - The Studio is a separate responsive PWA with aggregate server metrics, AI configuration status, global AI response-style control, configuration security checks, local appearance settings, module visibility, and JSON settings backup/restore.
 - Install on Chrome/Edge from the browser's install control. On iOS, open in Safari and use Share → Add to Home Screen. Installation does not bypass authentication; an admin session and internet connection are still required.
 - Studio preferences are stored locally in the browser. API secrets are never displayed. AI status reports configuration only and does not run a provider health/billing test.
+
+
+### TILLBOT Studio 4.0
+- Eigenständige Admin-PWA unter `/studio.html` mit eigenem hellen Workspace-Design; die öffentliche Chat-Oberfläche bleibt unverändert.
+- Installationsdiagnose, eigenständige Manifest-Icons und browserabhängige Installationshinweise.
+- Studio-Verwaltung für Konten/Rollen, Support-Tickets, Tageslimit, Wartungsmodus und öffentliche Ankündigungen.
+- Aggregierte Admin-Übersicht mit neuen Konten, bestätigten E-Mail-Adressen, aktiven Nutzern, Chat-Aktivität und Ticketstatus. Es werden keine Chat-Inhalte in der Übersicht ausgegeben.
+- Die Installationsfunktion setzt HTTPS, ein unterstütztes Browser-Verhalten und eine gültige Service-Worker-/Manifest-Konfiguration voraus. Auf iPhone/iPad erfolgt das Hinzufügen über Safari → Teilen → Zum Home-Bildschirm.
