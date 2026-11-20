@@ -1,5 +1,5 @@
-const CACHE="tillbot-pages-v120";
-const CORE=["./","./index.html","./studio.html","./studio-manifest.json?v=3","./core-demo.html?v=7","./style.css?v=92","./app.js?v=90","./manifest.json?v=10","./icons/tillbot.svg?v=9","./icons/tillbot-dark.svg","./icons/studio-192.svg","./icons/studio-512.svg"];
+const CACHE="tillbot-pages-v121";
+const CORE=["./","./index.html","./studio.html","./studio-manifest.json?v=3","./core-demo.html?v=7","./style.css?v=93","./clean-theme.css?v=1","./app.js?v=90","./manifest.json?v=10","./icons/tillbot.svg?v=9","./icons/tillbot-dark.svg","./icons/studio-192.svg","./icons/studio-512.svg"];
 self.addEventListener("install",event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE);await Promise.allSettled(CORE.map(async url=>{const r=await fetch(url,{cache:"reload"});if(r.ok)await cache.put(url,r)}));await self.skipWaiting()})())});
 self.addEventListener("activate",event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith("tillbot-pages-")&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})())});
 self.addEventListener("fetch",event=>{
