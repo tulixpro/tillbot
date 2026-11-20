@@ -2207,3 +2207,10 @@ button:active{transform:translateY(0) scale(.985)}
  .settingsGroup,.adminActions{padding:14px!important}
 }
 @media(prefers-reduced-motion:reduce){body:after{animation:none}}
+
+/* Admin 3.3: searchable support inbox */
+.adminTicketTools{display:grid;grid-template-columns:minmax(180px,1fr) minmax(150px,.55fr) auto;gap:9px;align-items:center;margin:12px 0}
+.adminTicketTools input,.adminTicketTools select{min-width:0;width:100%}
+.ticketCard{transition:border-color .18s,transform .18s}
+.ticketCard:hover{border-color:rgba(80,205,205,.42);transform:translateY(-1px)}
+@media(max-width:620px){.adminTicketTools{grid-template-columns:1fr}.adminTicketTools button{width:100%}}
