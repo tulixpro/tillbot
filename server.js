@@ -240,6 +240,7 @@ app.put("/api/preferences",auth,async(req,res)=>{
  await pool.query("INSERT INTO user_preferences(user_id,instructions,model) VALUES($1,$2,$3) ON CONFLICT(user_id) DO UPDATE SET instructions=EXCLUDED.instructions,model=EXCLUDED.model,updated_at=NOW()",[req.user.id,instructions,model]);
  res.json({ok:true,instructions,model});
 });
+async function featureEnabled(key){const {rows}=await pool.query("SELECT enabled FROM feature_flags WHERE key=$1",[key]);return rows[0]?.enabled===true}
 app.get("/api/features",async(_req,res)=>{
  const {rows}=await pool.query("SELECT key,enabled FROM feature_flags ORDER BY key");
  res.set("Cache-Control","no-store").json(Object.fromEntries(rows.map(x=>[x.key,x.enabled])));
@@ -249,6 +250,7 @@ app.get("/api/admin/features",auth,admin,async(_req,res)=>{
  res.set("Cache-Control","no-store").json(rows);
 });
 app.put("/api/admin/features/:key",auth,admin,async(req,res)=>{
+ const key=String(req.params.key);const providerKeys={image_generation:"IMAGE_API_KEY",web_search:"TAVILY_API_KEY",public_api:"PUBLIC_API_ENABLED"};if(req.body.enabled===true&&providerKeys[key]&&!process.env[providerKeys[key]])return res.status(409).json({error:"Diese Funktion kann erst aktiviert werden, wenn "+providerKeys[key]+" in der Serverumgebung konfiguriert ist."});
  const enabled=typeof req.body.enabled==="boolean"?req.body.enabled:null;
  if(enabled===null)return res.status(400).json({error:"enabled muss true oder false sein."});
  const {rows}=await pool.query("UPDATE feature_flags SET enabled=$1,updated_at=NOW() WHERE key=$2 RETURNING key,enabled,description,updated_at",[enabled,String(req.params.key)]);
@@ -260,24 +262,29 @@ app.get("/api/admin/activity",auth,admin,async(_req,res)=>{
  res.set("Cache-Control","no-store").json(rows);
 });
 app.get("/api/memories",auth,async(req,res)=>{
+ if(!await featureEnabled("memory"))return res.status(403).json({error:"TILLBOT Memory ist deaktiviert."});
  const {rows}=await pool.query("SELECT id,title,content,created_at,updated_at FROM user_memories WHERE user_id=$1 ORDER BY updated_at DESC LIMIT 100",[req.user.id]);
  res.set("Cache-Control","no-store").json(rows);
 });
 app.post("/api/memories",auth,rateLimit({windowMs:60000,limit:20}),async(req,res)=>{
+ if(!await featureEnabled("memory"))return res.status(403).json({error:"TILLBOT Memory ist deaktiviert."});
  const title=String(req.body.title||"Erinnerung").trim().slice(0,80),content=String(req.body.content||"").trim().slice(0,1000);
  if(content.length<2)return res.status(400).json({error:"Bitte einen Erinnerungstext eingeben."});
  const {rows}=await pool.query("INSERT INTO user_memories(user_id,title,content) VALUES($1,$2,$3) RETURNING id,title,content,created_at,updated_at",[req.user.id,title||"Erinnerung",content]);
  res.status(201).json(rows[0]);
 });
 app.delete("/api/memories/:id",auth,async(req,res)=>{
+ if(!await featureEnabled("memory"))return res.status(403).json({error:"TILLBOT Memory ist deaktiviert."});
  const {rowCount}=await pool.query("DELETE FROM user_memories WHERE id=$1 AND user_id=$2",[Number(req.params.id),req.user.id]);
  res.json({ok:rowCount>0});
 });
 app.get("/api/workspaces",auth,async(req,res)=>{
+ if(!await featureEnabled("workspaces"))return res.status(403).json({error:"Workspaces sind deaktiviert."});
  const {rows}=await pool.query("SELECT w.id,w.title,w.description,w.created_at,w.updated_at,wm.role FROM workspaces w JOIN workspace_members wm ON wm.workspace_id=w.id WHERE wm.user_id=$1 ORDER BY w.updated_at DESC LIMIT 100",[req.user.id]);
  res.set("Cache-Control","no-store").json(rows);
 });
 app.post("/api/workspaces",auth,rateLimit({windowMs:60000,limit:12}),async(req,res)=>{
+ if(!await featureEnabled("workspaces"))return res.status(403).json({error:"Workspaces sind deaktiviert."});
  const title=String(req.body.title||"").trim().slice(0,100),description=String(req.body.description||"").trim().slice(0,500);
  if(title.length<2)return res.status(400).json({error:"Projektname muss mindestens 2 Zeichen haben."});
  const client=await pool.connect();
@@ -285,6 +292,7 @@ app.post("/api/workspaces",auth,rateLimit({windowMs:60000,limit:12}),async(req,r
  catch(e){await client.query("ROLLBACK");throw e}finally{client.release()}
 });
 app.put("/api/workspaces/:id",auth,async(req,res)=>{
+ if(!await featureEnabled("workspaces"))return res.status(403).json({error:"Workspaces sind deaktiviert."});
  const title=String(req.body.title||"").trim().slice(0,100),description=String(req.body.description||"").trim().slice(0,500);
  if(title.length<2)return res.status(400).json({error:"Projektname muss mindestens 2 Zeichen haben."});
  const {rows}=await pool.query("UPDATE workspaces SET title=$1,description=$2,updated_at=NOW() WHERE id=$3 AND owner_id=$4 RETURNING id,title,description,created_at,updated_at",[title,description,Number(req.params.id),req.user.id]);
@@ -292,6 +300,7 @@ app.put("/api/workspaces/:id",auth,async(req,res)=>{
  res.json(rows[0]);
 });
 app.delete("/api/workspaces/:id",auth,async(req,res)=>{
+ if(!await featureEnabled("workspaces"))return res.status(403).json({error:"Workspaces sind deaktiviert."});
  const {rowCount}=await pool.query("DELETE FROM workspaces WHERE id=$1 AND owner_id=$2",[Number(req.params.id),req.user.id]);
  res.json({ok:rowCount>0});
 });
@@ -474,6 +483,7 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
       .map(m => ({ role: m.role, content: m.content.slice(0, 8000) }))];
   const userText = String(req.body.message || "").slice(0, 8000);
   const image = req.body.image;
+  if(image&&typeof image.data==="string"&&!await featureEnabled("file_analysis"))return res.status(403).json({answer:"Datei- und Bildanalyse ist derzeit deaktiviert."});
   if (image && typeof image.data === "string") {
     if (!["image/jpeg", "image/png", "image/webp"].includes(image.mime) || image.data.length > 2_500_000) {
       return res.status(400).json({ answer: "Fotoformat nicht erlaubt oder Bild zu groß (bitte kleineres Foto verwenden)." });
