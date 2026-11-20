@@ -568,10 +568,17 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
   }
 });
 
-app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), async (req, res) => {
+const chatAccountLimit = rateLimit({ windowMs: 60_000, limit: 8, keyGenerator: req => "account:" + String(req.user.id), standardHeaders: true, legacyHeaders: false, message: { error: "Für dieses Konto wurden gerade zu viele KI-Anfragen gesendet. Bitte kurz warten." } });
+
+app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintenance();if(m.enabled)return res.status(503).json({error:m.message});next()}catch{return res.status(503).json({error:"Wartungsstatus konnte nicht geprüft werden."})}}, rateLimit({ windowMs: 60_000, limit: 12, message: { error: "Zu viele Nachrichten. Bitte kurz warten." } }), chatAccountLimit, async (req, res) => {
   if(req.user.role!=="admin"){const q=await checkDailyQuota(req.user.id);if(q.blocked)return res.status(429).json({error:"Dein Tagesbudget ist aufgebraucht. Du kannst ab "+new Date(q.until).toLocaleString("de-DE")+" Uhr wieder schreiben.",quota:{blocked:true,until:q.until,remaining:0}});req.dailyQuota=q}
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ answer: "GROQ_API_KEY fehlt in Render" });
-  const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
+  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) return res.status(400).json({ error: "Ungültige Anfrage." });
+  const userText = typeof req.body.message === "string" ? req.body.message.trim() : "";
+  const image = req.body.image;
+  if (userText.length > 8000) return res.status(400).json({ error: "Deine Nachricht ist zu lang (maximal 8.000 Zeichen)." });
+  if (!userText && !(image && typeof image.data === "string")) return res.status(400).json({ error: "Bitte gib eine Nachricht ein oder füge ein Bild hinzu." });
+  const history = Array.isArray(req.body.history) ? req.body.history.slice(-12).filter(m => m && ["user","assistant"].includes(m.role) && typeof m.content === "string").map(m => ({ role:m.role, content:m.content.slice(0,8000) })) : [];
   const aiStyleResult=await pool.query("SELECT value FROM app_settings WHERE key='ai_response_style'");
   const aiStyle=AI_RESPONSE_STYLES[aiStyleResult.rows[0]?.value]||AI_RESPONSE_STYLES.balanced;
   const prefResult=await pool.query("SELECT instructions,model FROM user_preferences WHERE user_id=$1",[req.user.id]);
@@ -589,7 +596,7 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
   const image = req.body.image;
   if(image&&typeof image.data==="string"&&!await featureEnabled("file_analysis"))return res.status(403).json({answer:"Datei- und Bildanalyse ist derzeit deaktiviert."});
   if (image && typeof image.data === "string") {
-    if (!["image/jpeg", "image/png", "image/webp"].includes(image.mime) || image.data.length > 2_500_000) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(image.mime) || image.data.length > 2_500_000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(image.data)) {
       return res.status(400).json({ answer: "Fotoformat nicht erlaubt oder Bild zu groß (bitte kleineres Foto verwenden)." });
     }
     messages.push({ role: "user", content: [
