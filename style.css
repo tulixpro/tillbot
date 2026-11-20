@@ -2535,3 +2535,30 @@ input,textarea,select{accent-color:#d8dde4}
   .composerTools{gap:5px!important}
   .composerTools button{padding-inline:8px!important;font-size:10px!important}
 }
+
+
+/* TILLBOT mobile layout correction — authoritative overrides */
+@media screen and (max-width: 820px) {
+  html, body { width:100% !important; min-width:0 !important; max-width:100% !important; overflow-x:hidden !important; }
+  body { margin:0 !important; }
+  #app.layout { display:block; width:100% !important; min-width:0 !important; max-width:100% !important; height:auto !important; min-height:100svh !important; overflow:clip !important; }
+  #sidebar { display:flex !important; position:fixed !important; top:0 !important; bottom:0 !important; left:0 !important; width:min(310px,86vw) !important; max-width:86vw !important; height:100svh !important; z-index:100 !important; transform:translateX(-110%) !important; visibility:hidden !important; }
+  #sidebar.open { display:flex !important; transform:translateX(0) !important; visibility:visible !important; }
+  #sidebar:not(.open) { pointer-events:none !important; }
+  #app.layout > main { display:flex !important; width:100% !important; min-width:0 !important; max-width:100% !important; min-height:100svh !important; margin:0 !important; }
+  #app.layout > main > header { display:flex !important; width:100% !important; min-width:0 !important; max-width:100% !important; flex:0 0 60px !important; height:60px !important; min-height:60px !important; padding:0 12px !important; gap:9px !important; overflow:visible !important; }
+  #app.layout > main > header #menu { display:block !important; flex:0 0 38px !important; width:38px !important; min-width:38px !important; }
+  #app.layout > main > header .headTitle { flex:0 1 auto !important; min-width:0 !important; }
+  #app.layout > main > header #who, #app.layout > main > header .modelPickerBtn { display:none !important; }
+  #app.layout > main > header .topMenuWrap { flex:0 0 42px !important; width:42px !important; margin-left:auto !important; }
+  #app.layout > main > .chat { flex:1 1 auto !important; width:100% !important; min-width:0 !important; max-width:100% !important; min-height:0 !important; padding:18px 12px !important; }
+  #app.layout .welcome { width:100% !important; max-width:650px !important; min-width:0 !important; margin:auto !important; padding:32px 0 !important; }
+  #app.layout .welcome h1 { overflow-wrap:anywhere !important; }
+  #app.layout .suggestions { display:flex !important; flex-wrap:wrap !important; justify-content:center !important; }
+  #app.layout .composerArea { position:sticky !important; bottom:0 !important; width:100% !important; min-width:0 !important; max-width:100% !important; padding:8px 10px max(10px,env(safe-area-inset-bottom)) !important; }
+  #app.layout .composer { display:flex !important; flex-direction:column !important; align-items:stretch !important; width:100% !important; min-width:0 !important; max-width:100% !important; margin:0 !important; }
+  #app.layout .composer > textarea { display:block !important; width:100% !important; min-width:0 !important; }
+  #app.layout .composerTools { display:flex !important; flex-flow:row nowrap !important; justify-content:flex-start !important; align-items:center !important; width:100% !important; min-width:0 !important; max-width:100% !important; overflow-x:auto !important; overflow-y:hidden !important; }
+  #app.layout .composerTools > button { display:inline-flex !important; flex:0 0 auto !important; min-width:max-content !important; white-space:nowrap !important; word-break:normal !important; }
+  #app.layout .composerTools > #send { flex:0 0 40px !important; min-width:40px !important; width:40px !important; margin-left:auto !important; }
+}
