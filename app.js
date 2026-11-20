@@ -105,7 +105,7 @@ $("forgotPassword").onclick=async()=>{
  finally{b.disabled=false}
 };
 async function handleAccountEmailLink(){
- const params=new URLSearchParams(location.search),verify=params.get("verify"),reset=params.get("reset");
+ const params=new URLSearchParams(location.hash.slice(1)),verify=params.get("verify"),reset=params.get("reset");
  if(verify){
   try{const r=await fetch(API+"/api/auth/verify?token="+encodeURIComponent(verify),{cache:"no-store"}),d=await r.json();$("authMsg").textContent=d.message||d.error||"E-Mail-Bestätigung abgeschlossen.";}
   catch{$("authMsg").textContent="Bestätigungslink konnte nicht geprüft werden.";}
