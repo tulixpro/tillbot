@@ -2015,3 +2015,22 @@ body[data-theme="light"] #sidebar .historyItem.active .historyOpen{color:#173b5d
 /* Keep the conversation anchored while messages stream and render */
 #chat{overflow-anchor:auto;scroll-behavior:smooth;overscroll-behavior:contain}
 #chat .thinkingBubble{min-height:48px}
+
+
+/* Cleaner composer and camera attachment controls */
+.composerArea{width:min(100%,980px);margin-inline:auto;padding:12px clamp(12px,3vw,28px) calc(12px + env(safe-area-inset-bottom))}
+.composer{border:1px solid color-mix(in srgb,var(--border,#8aa4c5) 65%,transparent);border-radius:22px;background:color-mix(in srgb,var(--panel,#101d32) 92%,transparent);box-shadow:0 14px 42px #02081735;backdrop-filter:blur(18px);padding:12px;transition:border-color .2s,box-shadow .2s}
+.composer:focus-within{border-color:#69cfc9;box-shadow:0 0 0 3px #49c8bd20,0 16px 42px #02081740}
+.composer textarea{display:block;width:100%;min-height:48px;max-height:180px;resize:none;border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;padding:10px 12px!important;font:inherit;line-height:1.55}
+.composerTools{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;padding-top:8px;border-top:1px solid #8da9c51c}
+.composerTools button{min-height:40px;padding:8px 13px;border:1px solid #91aac52b;border-radius:12px;background:#ffffff0b;color:inherit;font-weight:650;cursor:pointer;transition:transform .18s,background .18s,border-color .18s}
+.composerTools button:hover{transform:translateY(-1px);background:#6b9fc526;border-color:#75c9d7}
+#composerTools #send,.composerTools #send{min-width:44px;width:44px;height:44px;border:0;border-radius:14px;background:linear-gradient(135deg,#4779e8,#13a89b);color:#fff;font-size:22px;font-weight:850;box-shadow:0 6px 18px #2478b944}
+#cameraBtn{border-color:#5ccfc65c;background:#1b93851c}
+.photoPreview{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px;padding:10px 12px;border:1px solid #6fcfc65c;border-radius:16px;background:#0d9c8a12;color:inherit;font-size:12px}
+.photoPreview img{width:76px;height:76px;object-fit:cover;border-radius:11px;border:1px solid #ffffff35}
+.photoPreview span{flex:1;min-width:120px}
+.photoPreview button{padding:8px 11px;border:1px solid #d78a8a55;border-radius:10px;background:#c94c4c18;color:inherit;cursor:pointer}
+.composer>small{display:block;padding:8px 10px 0;color:var(--muted,#9aadc4);font-size:11px}
+@media(max-width:620px){.composerArea{padding-inline:10px}.composer{padding:9px;border-radius:18px}.composerTools{justify-content:space-between;gap:6px}.composerTools button{flex:1 1 auto;padding:8px 9px;font-size:12px}.composerTools #send{flex:0 0 44px}.photoPreview{gap:8px}.photoPreview img{width:64px;height:64px}}
+@media(prefers-reduced-motion:reduce){.composer,.composerTools button{transition:none}}
