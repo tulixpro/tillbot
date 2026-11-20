@@ -2034,3 +2034,21 @@ body[data-theme="light"] #sidebar .historyItem.active .historyOpen{color:#173b5d
 .composer>small{display:block;padding:8px 10px 0;color:var(--muted,#9aadc4);font-size:11px}
 @media(max-width:620px){.composerArea{padding-inline:10px}.composer{padding:9px;border-radius:18px}.composerTools{justify-content:space-between;gap:6px}.composerTools button{flex:1 1 auto;padding:8px 9px;font-size:12px}.composerTools #send{flex:0 0 44px}.photoPreview{gap:8px}.photoPreview img{width:64px;height:64px}}
 @media(prefers-reduced-motion:reduce){.composer,.composerTools button{transition:none}}
+
+
+/* TILLBOT workspace navigation refresh: collapsible desktop rail + accessible mobile drawer */
+#menu{display:inline-flex;align-items:center;justify-content:center;flex:0 0 42px;width:42px;height:42px;padding:0;border:1px solid var(--line,#ffffff24);border-radius:13px;background:var(--panel,#ffffff0b);color:inherit;font-size:20px;line-height:1}
+#menu:focus-visible,#closeMenu:focus-visible,.sidebarScrim:focus-visible{outline:3px solid #58d9c7;outline-offset:3px}
+.sidebarScrim{display:none}
+@media(min-width:761px){
+ body.sidebar-collapsed aside{width:0;min-width:0;padding-left:0;padding-right:0;gap:0;overflow:hidden;border:0;opacity:0;pointer-events:none}
+ body.sidebar-collapsed main{width:100%}
+ aside{transition:width .22s ease,padding .22s ease,opacity .18s ease}
+}
+@media(max-width:760px){
+ .sidebarScrim{display:block;position:fixed;inset:0;z-index:39;border:0;border-radius:0;padding:0;background:rgba(2,9,20,.58);opacity:0;pointer-events:none;transition:opacity .2s ease}
+ #sidebar.open + .sidebarScrim{opacity:1;pointer-events:auto}
+ #sidebar{z-index:40}
+ #menu{display:inline-flex}
+}
+@media(prefers-reduced-motion:reduce){aside,.sidebarScrim{transition:none!important}}
