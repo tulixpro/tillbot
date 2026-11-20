@@ -128,7 +128,12 @@ async function send(){
  let statusTimer=setInterval(()=>{const s=wait.querySelector(".thinkingStatus");if(!s)return;const stages=["Nachricht wird analysiert …","Kontext wird geprüft …","Antwort wird formuliert …","Antwort wird verfeinert …"];s.textContent=stages[(Number(wait.dataset.stage||0)+1)%stages.length];wait.dataset.stage=String(Number(wait.dataset.stage||0)+1)},1800);
  try{
   if(!activeId){const created=await api("/api/chats",{method:"POST",body:JSON.stringify({title:text.slice(0,70)||"Neuer Chat"})});if(!created||!created.id)throw new Error("Der neue Chat konnte nicht angelegt werden.");activeId=created.id}
-  const response=await fetch(API+"/api/chat",{method:"POST",headers:headers(),body:JSON.stringify({message:text,history:history.slice(0,-1),image:photoData?{data:photoData,mime:photoMime}:null,stream:true})});
+  const streamController=new AbortController();
+  const streamTimeout=setTimeout(()=>streamController.abort(),90000);
+  let response;
+  try{response=await fetch(API+"/api/chat",{method:"POST",headers:headers(),signal:streamController.signal,body:JSON.stringify({message:text,history:history.slice(0,-1),image:photoData?{data:photoData,mime:photoMime}:null,stream:true})})}
+  catch(streamError){if(streamError.name==="AbortError")throw new Error("Die Antwort dauert zu lange. Bitte prüfe deine Verbindung und versuche es erneut.");throw streamError}
+  finally{clearTimeout(streamTimeout)}
   if(!response.ok){let er={};try{er=await response.json()}catch{}throw Error(er.error||er.answer||"HTTP "+response.status)}
   if(!response.body)throw Error("Streaming wird vom Browser nicht unterstützt.");
   const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",answer="";
