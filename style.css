@@ -2217,3 +2217,19 @@ button:active{transform:translateY(0) scale(.985)}
 
 /* Admin 3.4: global AI controls */
 .aiAdmin{border:1px solid rgba(94,190,210,.24);background:linear-gradient(135deg,rgba(49,128,160,.09),rgba(117,91,190,.07))}.aiAdmin select{width:100%;max-width:420px;margin:8px 0 12px}
+
+/* Admin 3.5 — AI operations lab and clearer control center */
+.aiLab{border:1px solid rgba(93,210,197,.3);background:radial-gradient(ellipse at 0 0,rgba(41,184,164,.12),transparent 55%),linear-gradient(130deg,rgba(29,69,101,.22),rgba(83,67,130,.12))}
+.aiLabHead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.aiLabHead h3{margin:5px 0 0;font-size:20px;letter-spacing:-.45px}
+.aiLabKicker{font-size:10px;font-weight:850;letter-spacing:1.7px;color:#72dcca}
+.aiLabHead button{border:1px solid rgba(111,212,205,.32);border-radius:11px;padding:9px 13px;background:rgba(91,198,189,.1);color:inherit;font-weight:700}
+.aiLabHead button:disabled{opacity:.55;cursor:wait}
+.aiStatusGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px;margin:15px 0}
+.aiStatusGrid article{display:flex;flex-direction:column;gap:7px;min-width:0;padding:13px;border:1px solid var(--tb-border,rgba(158,205,232,.16));border-radius:13px;background:rgba(4,19,35,.35)}
+.aiStatusGrid small{font-size:9px;letter-spacing:1.15px;font-weight:850;color:#8faac2}
+.aiStatusGrid strong{font-size:13px;overflow-wrap:anywhere;color:#e6f5ff}
+.aiLab .metricsNote{line-height:1.55}
+#adminDialog{scrollbar-gutter:stable}
+#adminDialog .adminActions{scroll-margin-top:12px}
+@media(max-width:600px){.aiLabHead{align-items:flex-start}.aiLabHead button{width:100%}.aiStatusGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.aiStatusGrid article{padding:11px}.aiStatusGrid strong{font-size:12px}}
