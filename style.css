@@ -1852,3 +1852,86 @@ body[data-theme="light"] #sidebar .drawerDemos .demoPickerCopy p{color:#49627b}
 body[data-theme="light"] #sidebar .drawerDemos .demoPicker>label{color:#176f78}
 body[data-theme="light"] #sidebar .drawerDemos .demoFrameWrap{background:#ffffffc9;border-color:#c4dfe3}
 body[data-theme="light"] #sidebar .drawerDemos .demoFrameHead{color:#18324d}
+
+
+/* Complete accessible drawer redesign v3 */
+#sidebar{
+  box-sizing:border-box;display:flex;flex-direction:column;gap:9px;
+  width:min(430px,94vw);padding:22px 20px 26px;
+  overflow-x:hidden;overflow-y:auto;
+  color:#f7f9ff;
+  background:
+    radial-gradient(ellipse at 15% 0%,#6855dc55,transparent 38%),
+    radial-gradient(ellipse at 100% 65%,#0ea5a455,transparent 42%),
+    linear-gradient(155deg,#10172e 0%,#17213d 52%,#102c3b 100%);
+  border-left:1px solid #a7b5ff45;
+  box-shadow:-24px 0 80px #050b1c99;
+  scrollbar-color:#6575a8 transparent;
+}
+#sidebar.open{animation:tbDrawerEnter .42s cubic-bezier(.2,.85,.25,1) both}
+@keyframes tbDrawerEnter{from{opacity:.65;filter:blur(5px);transform:translateX(105%)}to{opacity:1;filter:blur(0);transform:translateX(0)}}
+#sidebar>*{flex-shrink:0}
+#sidebar .brand{display:flex;align-items:center;gap:13px;padding:16px;border-radius:19px;background:linear-gradient(110deg,#ffffff17,#ffffff06);border:1px solid #ffffff20;box-shadow:inset 0 1px #ffffff12}
+#sidebar .brand .logo{color:#fff;font-weight:900;letter-spacing:1.5px}
+#sidebar .brand small{color:#80e5df;letter-spacing:2px}
+#sidebar #closeMenu{align-self:flex-end;display:flex;align-items:center;gap:9px;padding:9px 13px;color:#f8faff;background:#293653;border:1px solid #8fa4d344;border-radius:12px;cursor:pointer;transition:transform .2s,background .2s}
+#sidebar #closeMenu:hover{background:#40547b;transform:rotate(-3deg)}
+#sidebar .sideSectionLabel,#sidebar .drawerSectionLabel,#sidebar .label{display:block;margin:15px 4px 6px;color:#7fe3d9;font-size:10px;font-weight:900;letter-spacing:2px}
+#sidebar button{font:inherit;cursor:pointer}
+#sidebar #newChat,#sidebar #learnModeBtn,#sidebar .sidebottom>button,#sidebar #history button{
+  width:100%;min-height:47px;display:flex;align-items:center;gap:12px;
+  padding:12px 14px;text-align:left;color:#f5f7ff;
+  background:#263552;border:1px solid #9db4e638;border-radius:14px;
+  box-shadow:0 5px 14px #03091638;
+  transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+#sidebar #newChat{background:linear-gradient(105deg,#6556d9,#386ed0);border-color:#a9a2ff88;font-weight:800}
+#sidebar #learnModeBtn{background:linear-gradient(105deg,#146f83,#168e83);border-color:#79e1d477;font-weight:750}
+#sidebar #newChat:hover,#sidebar #learnModeBtn:hover,#sidebar .sidebottom>button:hover,#sidebar #history button:hover{
+  transform:translateY(-2px);border-color:#b5d8ff;box-shadow:0 10px 22px #03091666
+}
+#sidebar .drawerTools{padding:12px;background:#0b1429aa;border:1px solid #9eb3e638;border-radius:18px}
+#sidebar .drawerTools .toolsToggle{width:100%;min-height:46px;padding:12px 14px;text-align:left;color:#fff;font-weight:850;background:linear-gradient(100deg,#5547c5,#286d9c);border:1px solid #b4b2ff55;border-radius:12px;cursor:pointer;transition:filter .2s,transform .2s}
+#sidebar .drawerTools .toolsToggle:hover{filter:brightness(1.2);transform:translateY(-1px)}
+#sidebar .drawerTools .powerTools{grid-template-columns:1fr 1fr;gap:8px}
+#sidebar .drawerTools .powerTools button{
+  min-width:0;min-height:48px;padding:10px 9px;text-align:left;
+  color:#f5f8ff;background:#293b5d;border:1px solid #9bb9e64a;border-radius:12px;
+  font-size:12px;font-weight:700;overflow-wrap:anywhere;
+  transition:background .18s,transform .18s,border-color .18s
+}
+#sidebar .drawerTools .powerTools button:hover{background:#405d91;border-color:#b9d2ff;transform:translateY(-2px)}
+#sidebar .drawerDemos{padding:17px;margin-top:2px;border-radius:21px;background:linear-gradient(145deg,#3b3a8e,#126c79 90%);border:1px solid #9be7e4a1;box-shadow:0 14px 35px #02081766;animation:tbDemoGlow 5s ease-in-out infinite alternate}
+@keyframes tbDemoGlow{from{box-shadow:0 12px 28px #050d2555,0 0 0 #4dd9d000}to{box-shadow:0 15px 38px #050d2577,0 0 22px #4dd9d02c}}
+#sidebar .drawerDemos .demoPickerCopy .eyebrow{color:#a9fff0;font-weight:900;letter-spacing:2px}
+#sidebar .drawerDemos .demoPickerCopy h2{font-size:28px;line-height:1.12;color:#fff;margin:8px 0}
+#sidebar .drawerDemos .demoPickerCopy p{font-size:13px;line-height:1.6;color:#e0efff}
+#sidebar .drawerDemos .demoPicker>label{display:block;color:#c7fff5;font-size:12px;font-weight:850;margin:16px 0 7px}
+#sidebar .drawerDemos .demoPicker select{width:100%;min-height:52px;padding:12px 14px;color:#fff;background:#111e3b;border:2px solid #8fe8df;border-radius:13px;font-size:14px;font-weight:800;outline-offset:3px}
+#sidebar .drawerDemos .demoFrameWrap{margin-top:14px;padding:10px;background:#101b35;border:1px solid #9fece277;border-radius:15px}
+#sidebar .drawerDemos .demoFrameHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;color:#fff}
+#sidebar .drawerDemos .demoFrameHead button{padding:8px 11px;color:#fff;background:#35476b;border:1px solid #a9c2e855;border-radius:9px}
+#sidebar .drawerDemos iframe{display:block;width:100%;height:min(66vh,720px);min-height:460px;background:#fff;border:1px solid #b5e9e8;border-radius:11px}
+#sidebar .sidebottom{display:grid;gap:8px;margin-top:12px;padding-top:14px;border-top:1px solid #ffffff20}
+#sidebar .sideProfile{display:flex;align-items:center;gap:11px;margin-top:5px;padding:13px;background:#ffffff12;border:1px solid #ffffff20;border-radius:14px;color:#fff}
+#sidebar .sideProfile small{display:block;color:#c1cde2}
+#sidebar .sideProfile .onlineDot{margin-left:auto}
+#sidebar button:focus-visible,#sidebar select:focus-visible{outline:3px solid #8dece2;outline-offset:3px}
+body[data-theme="light"] #sidebar{
+ color:#172c47;background:radial-gradient(ellipse at 15% 0%,#c9c5ff,transparent 40%),radial-gradient(ellipse at 100% 65%,#b6eee7,transparent 42%),linear-gradient(155deg,#f7f8ff,#eaf2ff 55%,#e4f8f5);
+ border-left-color:#bdcce4
+}
+body[data-theme="light"] #sidebar .brand{background:#ffffffd9;border-color:#cbd8ec}
+body[data-theme="light"] #sidebar .brand .logo{color:#182b4a}
+body[data-theme="light"] #sidebar .brand small{color:#167d83}
+body[data-theme="light"] #sidebar #closeMenu{color:#243b5c;background:#fff;border-color:#c7d5e9}
+body[data-theme="light"] #sidebar .sideSectionLabel,body[data-theme="light"] #sidebar .drawerSectionLabel,body[data-theme="light"] #sidebar .label{color:#176f79}
+body[data-theme="light"] #sidebar #newChat,body[data-theme="light"] #sidebar #learnModeBtn{color:#fff}
+body[data-theme="light"] #sidebar .drawerTools{background:#ffffffc9;border-color:#c7d6e8}
+body[data-theme="light"] #sidebar .drawerTools .powerTools button{color:#1b3555;background:#e7eefb;border-color:#b9cbe2}
+body[data-theme="light"] #sidebar .drawerTools .powerTools button:hover{background:#d1e2ff}
+body[data-theme="light"] #sidebar .sidebottom>button,body[data-theme="light"] #sidebar #history button{color:#1c3554;background:#fff;border-color:#c8d7e9}
+body[data-theme="light"] #sidebar .sideProfile{color:#1c3554;background:#ffffffd9;border-color:#cbd8e9}
+body[data-theme="light"] #sidebar .sideProfile small{color:#526b84}
+@media(max-width:600px){#sidebar{width:100vw;padding:16px 14px calc(22px + env(safe-area-inset-bottom))}#sidebar .drawerDemos iframe{height:62vh;min-height:420px}}
+@media(prefers-reduced-motion:reduce){#sidebar.open,#sidebar .drawerDemos{animation:none!important}#sidebar *{transition:none!important}}
