@@ -7,18 +7,18 @@
 <meta name="description" content="TILLBOT CORE – transparente deutsche Browser-Demo.">
 <title>TILLBOT CORE – Deutsche KI-KI-Forschungsdemo</title>
 <style>
-:root{color-scheme:dark;--bg:#171717;--surface:#202020;--surface-2:#292929;--border:#3d3d3d;--text:#f3f3f3;--muted:#a7a7a7;--accent:#e5e5e5;--danger:#9b5555}
+:root{color-scheme:dark;--bg:#11111b;--surface:#191927;--surface-2:#222235;--border:#38384f;--text:#f4f2ff;--muted:#aaa8bd;--accent:#b7a2ff;--danger:#b96b79}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 button,input,textarea,select{font:inherit}
-button{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 12px;border:1px solid #4a4a4a;border-radius:9px;background:#303030;color:#eee;font-weight:600;font-size:12px;line-height:1.2;cursor:pointer;touch-action:manipulation;user-select:none;transition:background .15s,border-color .15s,color .15s}
+button{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 12px;border:1px solid #4a4a4a;border-radius:9px;background:#29283b;color:#eee;font-weight:650;font-size:12px;line-height:1.2;cursor:pointer;touch-action:manipulation;user-select:none;transition:background .15s,border-color .15s,color .15s}
 button:hover:not(:disabled){background:#3a3a3a;border-color:#777}
 button:active:not(:disabled){background:#454545}
 button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #ddd;outline-offset:2px}
 button:disabled{opacity:.42;cursor:not-allowed;filter:saturate(.4)}
 .shell{width:min(1160px,calc(100% - 32px));min-height:100vh;margin:0 auto;padding:18px 0 14px;display:flex;flex-direction:column;gap:12px}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:14px}
-.brand{display:flex;align-items:center;gap:11px}.mark{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#eee;color:#171717;font-weight:900}.brand h1{margin:0;font-size:15px;letter-spacing:.02em}.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;background:linear-gradient(115deg,#201d31,#191927);border:1px solid #45405e;border-radius:16px;box-shadow:0 12px 38px #05050d55}
+.brand{display:flex;align-items:center;gap:11px}.mark{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:transparent;color:#171717;font-weight:900}.brand h1{margin:0;font-size:15px;letter-spacing:.02em}.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
 .status{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #4a4a4a;border-radius:99px;background:#2b2b2b;color:#ddd;font-size:11px;white-space:nowrap}.status i{width:7px;height:7px;border-radius:50%;background:#aaa}
 .hero{text-align:center;padding:13px 12px 7px}.eyebrow{font-size:10px;letter-spacing:1.8px;color:#aaa;font-weight:750}.hero h2{margin:7px 0;font-size:clamp(22px,3vw,30px);letter-spacing:-.7px}.hero p{max-width:700px;margin:0 auto;color:var(--muted);font-size:12px}
 .notice{display:flex;gap:10px;align-items:flex-start;padding:10px 13px;border:1px solid #514a3c;border-radius:11px;background:#292720;color:#d7d1c4;font-size:11px}.notice strong{color:#f2ead8}.noticeIcon{font-size:16px}
@@ -26,10 +26,10 @@ button:disabled{opacity:.42;cursor:not-allowed;filter:saturate(.4)}
 .chatHead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:10px 13px;border-bottom:1px solid var(--border)}.chatHead>div:first-child{display:flex;flex-direction:column;gap:2px}.chatHead strong{font-size:13px}.chatHead span{color:var(--muted);font-size:10px}
 .toolbar{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px}.toolbar button{min-height:32px;padding:6px 9px;font-size:11px}.answer-setting{display:flex;align-items:center;gap:6px;color:#bbb;font-size:11px}.answer-setting select{min-height:32px;max-width:130px;padding:5px 8px;border:1px solid #4a4a4a;border-radius:8px;background:#303030;color:#eee;font-size:11px}
 #messages{flex:1;min-height:250px;max-height:60vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:16px;overscroll-behavior:contain;scroll-behavior:smooth}
-.msg{max-width:min(84%,760px);padding:11px 13px;border:1px solid #414141;border-radius:12px;background:var(--surface-2);overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.6}.msg.user{align-self:flex-end;background:#383838;border-color:#505050}.msg.bot{align-self:flex-start}.who{margin-bottom:4px;color:#aaa;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.msg{max-width:min(84%,760px);padding:11px 13px;border:1px solid #414141;border-radius:12px;background:var(--surface-2);overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.6}.msg.user{align-self:flex-end;background:#37334c;border-color:#6d6097}.msg.bot{align-self:flex-start}.who{margin-bottom:4px;color:#aaa;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
 .copy-answer{display:flex;margin-top:9px;min-height:29px;padding:5px 8px;font-size:10px}
 .quickbar{display:flex;flex-wrap:wrap;gap:6px;padding:0 13px 10px}.quickbar button{min-height:31px;padding:6px 9px;font-size:11px}
-.composer{display:flex;align-items:flex-end;gap:8px;padding:10px 13px;border-top:1px solid var(--border);background:#222}.composer textarea{flex:1;min-width:0;min-height:44px;max-height:150px;resize:vertical;padding:10px 12px;border:1px solid #494949;border-radius:10px;background:#2c2c2c;color:var(--text);outline:none}.composer textarea:focus{border-color:#999}.send{min-width:78px;min-height:42px;background:#eee;color:#171717;border-color:#eee}.send:hover:not(:disabled){background:#d6d6d6;border-color:#d6d6d6}
+.composer{display:flex;align-items:flex-end;gap:8px;padding:10px 13px;border-top:1px solid var(--border);background:#222}.composer textarea{flex:1;min-width:0;min-height:44px;max-height:150px;resize:vertical;padding:10px 12px;border:1px solid #494949;border-radius:10px;background:#2c2c2c;color:var(--text);outline:none}.composer textarea:focus{border-color:#999}.send{min-width:78px;min-height:42px;background:linear-gradient(135deg,#b7a2ff,#83d5e8);color:#161421;border-color:transparent}.send:hover:not(:disabled){background:#c9baff;border-color:transparent}
 #stop-chat{border-color:#674747;background:#382929;color:#f0dada}
 .chatFoot{display:flex;justify-content:space-between;gap:10px;padding:0 13px 9px;color:#999;font-size:10px}
 details.tutorial{padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}details summary{cursor:pointer;font-size:12px;font-weight:700}.tutorialGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.tutorialGrid article{padding:10px;border:1px solid var(--border);border-radius:9px;background:#292929}.tutorialGrid p,.tutorial>p{margin:5px 0 0;color:var(--muted);font-size:11px}
@@ -43,7 +43,7 @@ body.coreFullscreenDemo #messages{max-height:none}
 @media(max-width:680px){
  .shell,body.coreFullscreenDemo .shell{width:100%;padding:0 0 max(6px,env(safe-area-inset-bottom));gap:7px}
  .topbar{padding:9px 11px;border-radius:0;border-left:0;border-right:0}
- .brand h1{font-size:14px}.brand p{font-size:10px}.mark{width:34px;height:34px}.status{padding:5px 8px;font-size:10px}
+ .brand h1{font-size:14px}.brand p{font-size:10px}.mark{width:36px;height:36px}.status{padding:5px 8px;font-size:10px}
  .hero{padding:5px 12px}.hero h2{font-size:20px;margin:4px 0}.hero p{font-size:10px}
  .notice{width:calc(100% - 18px);padding:8px 9px;font-size:10px}
  .chatCard,body.coreFullscreenDemo .chatCard{width:100%;border-left:0;border-right:0;border-radius:12px 12px 0 0}
@@ -60,7 +60,7 @@ body.coreFullscreenDemo #messages{max-height:none}
 </head>
 <body>
 <main class="shell">
-<header class="topbar"><div class="brand"><div class="mark" aria-hidden="true">TC</div><div><h1>TILLBOT CORE</h1><p>Deutsch zuerst · Eigenständige KI-Forschung</p></div></div><div class="status"><i></i> Forschungsdemo</div></header>
+<header class="topbar"><div class="brand"><div class="mark"><img src="./icons/tillbot.svg?v=9" alt="TILLBOT Cloud"></div><div><h1>TILLBOT CORE</h1><p>Deutsch zuerst · Eigenständige KI-Forschung</p></div></div><div class="status"><i></i> Forschungsdemo</div></header>
 <section class="hero"><span class="eyebrow">CORE · BROWSER-PROTOTYP</span><h2>Ein eigener KI-Kern. Schritt für Schritt.</h2><p>Hier kannst du TILLBOT CORE direkt mit einem extern bereitgestellten Sprachmodell testen. CORE steuert Antworten über eine eigene, abgesicherte Schnittstelle.</p></section>
 <div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
