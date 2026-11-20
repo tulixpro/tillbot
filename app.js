@@ -44,6 +44,9 @@ function authMode(reg){
  $("passwordHint").textContent=reg?"Mindestens 10 Zeichen":"Dein Kontopasswort";
  $("confirmPasswordRow").classList.toggle("hidden",!reg);
  $("confirmPassword").required=reg;
+ $("emailAuthRow").classList.toggle("hidden",!reg);
+ $("authEmail").required=reg;
+ $("forgotPassword").classList.toggle("hidden",reg);
  $("usernameHint").textContent=reg?"3–20 Zeichen: Kleinbuchstaben, Zahlen und Unterstrich.":"Gib deinen Benutzernamen ein.";
  $("authMsg").textContent="";
 }
@@ -64,17 +67,19 @@ async function checkAuthStatus(){
 }
 checkAuthStatus();
 window.tillbotAuthSubmit=async()=>{
- const b=$("authSubmit"),username=$("username").value.trim().toLowerCase(),password=$("password").value;
+ const b=$("authSubmit"),username=$("username").value.trim().toLowerCase(),password=$("password").value,email=$("authEmail").value.trim().toLowerCase();
  if(!/^[a-z0-9_]{3,20}$/.test(username)){ $("authMsg").textContent="Benutzername: 3–20 Zeichen (a–z, 0–9, _).";$("username").focus();return; }
  if(registerMode){
+  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)||email.length>254){$("authMsg").textContent="Bitte gib eine gültige E-Mail-Adresse ein.";$("authEmail").focus();return;}
   if(password.length<10||password.length>128){$("authMsg").textContent="Das Passwort muss 10–128 Zeichen haben.";$("password").focus();return;}
   if(password!==$("confirmPassword").value){$("authMsg").textContent="Die Passwörter stimmen nicht überein.";$("confirmPassword").focus();return;}
  }else if(!password){$("authMsg").textContent="Bitte gib dein Passwort ein.";$("password").focus();return;}
  b.disabled=true;$("authMsg").textContent=registerMode?"Dein Konto wird sicher erstellt …":"Du wirst sicher angemeldet …";
  try{
   const path=registerMode?"/api/register":"/api/login";
-  const d=await authRequest(path,{username,password,website:$("website").value});
+  const d=await authRequest(path,{username,password,email:registerMode?email:undefined,website:$("website").value});
   $("website").value="";
+  if(registerMode&&d.pendingVerification){$("authMsg").textContent=d.message||"Bitte bestätige deine E-Mail-Adresse.";return;}
   token=d.token;user=d.user;localStorage.setItem("tb-token",token);
   $("authMsg").textContent="Erfolgreich! Dein Workspace wird geöffnet …";await start();
  }catch(e){
@@ -82,6 +87,32 @@ window.tillbotAuthSubmit=async()=>{
  }finally{$("website").value="";b.disabled=false}
 };
 $("authSubmit").onclick=window.tillbotAuthSubmit;
+$("forgotPassword").onclick=async()=>{
+ const email=prompt("Gib die E-Mail-Adresse deines TILLBOT-Kontos ein:");
+ if(!email)return;
+ const b=$("forgotPassword");b.disabled=true;$("authMsg").textContent="Anfrage wird verarbeitet …";
+ try{const d=await authRequest("/api/auth/forgot-password",{email});$("authMsg").textContent=d.message||"Falls ein Konto existiert, erhältst du eine E-Mail.";}
+ catch(e){$("authMsg").textContent=e.message||"Anfrage momentan nicht möglich.";}
+ finally{b.disabled=false}
+};
+async function handleAccountEmailLink(){
+ const params=new URLSearchParams(location.search),verify=params.get("verify"),reset=params.get("reset");
+ if(verify){
+  try{const r=await fetch(API+"/api/auth/verify?token="+encodeURIComponent(verify),{cache:"no-store"}),d=await r.json();$("authMsg").textContent=d.message||d.error||"E-Mail-Bestätigung abgeschlossen.";}
+  catch{$("authMsg").textContent="Bestätigungslink konnte nicht geprüft werden.";}
+  history.replaceState(null,"",location.pathname);
+ }
+ if(reset){
+  const password=prompt("Neues Passwort eingeben (mindestens 10 Zeichen):");
+  if(password){
+   try{const r=await fetch(API+"/api/auth/reset-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:reset,password})}),d=await r.json();$("authMsg").textContent=d.message||d.error||"Passwort-Anfrage abgeschlossen.";}
+   catch{$("authMsg").textContent="Passwort konnte nicht geändert werden.";}
+  }
+  history.replaceState(null,"",location.pathname);
+ }
+}
+handleAccountEmailLink();
+
 $("password").onkeydown=e=>{if(e.key==="Enter")$("authSubmit").click()};
 $("confirmPassword").onkeydown=e=>{if(e.key==="Enter")$("authSubmit").click()};
 const passwordToggle=$("togglePassword");passwordToggle.onclick=()=>{const visible=$("password").type==="text";$("password").type=visible?"password":"text";passwordToggle.textContent=visible?"Anzeigen":"Verbergen";passwordToggle.setAttribute("aria-pressed",String(!visible));passwordToggle.setAttribute("aria-label",visible?"Passwort anzeigen":"Passwort verbergen")};
