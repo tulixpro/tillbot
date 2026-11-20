@@ -234,7 +234,7 @@ app.post("/api/admin/bootstrap", auth, rateLimit({ windowMs: 15 * 60_000, limit:
 
 app.get("/api/me", auth, (req, res) => res.json({ user: req.user }));
 
-const availableGroqModels=()=>[...new Set((process.env.GROQ_ALLOWED_MODELS||"openai/gpt-oss-120b,llama-3.3-70b-versatile").split(",").map(x=>x.trim()).filter(Boolean))].slice(0,12);
+const availableGroqModels=()=>[...new Set(["openai/gpt-oss-120b","openai/gpt-oss-20b","qwen/qwen3.8-27b",...(process.env.GROQ_ALLOWED_MODELS||"").split(",").map(x=>x.trim()).filter(Boolean)])].filter(x=>x&&x!=="llama-3.3-70b-versatile").slice(0,12);
 app.get("/api/preferences",auth,async(req,res)=>{
  const {rows}=await pool.query("SELECT instructions,model FROM user_preferences WHERE user_id=$1",[req.user.id]);
  const p=rows[0]||{instructions:"",model:process.env.GROQ_MODEL||"openai/gpt-oss-120b"};
