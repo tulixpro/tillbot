@@ -77,3 +77,11 @@ npm run desktop
 ```
 
 The frontend is a static site; the API URL is currently configured in `app.js`.
+
+
+## TILLBOT Studio (separate installierbare Admin-App)
+
+- Open `https://tulixpro.github.io/tillbot/studio.html` after signing in to TILLBOT with an administrator account.
+- The Studio is a separate responsive PWA with aggregate server metrics, AI configuration status, global AI response-style control, configuration security checks, local appearance settings, module visibility, and JSON settings backup/restore.
+- Install on Chrome/Edge from the browser's install control. On iOS, open in Safari and use Share → Add to Home Screen. Installation does not bypass authentication; an admin session and internet connection are still required.
+- Studio preferences are stored locally in the browser. API secrets are never displayed. AI status reports configuration only and does not run a provider health/billing test.
