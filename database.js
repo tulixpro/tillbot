@@ -47,10 +47,67 @@ async function initDatabase() {
     CREATE INDEX IF NOT EXISTS chats_user_updated ON chats(user_id, updated_at);
     CREATE TABLE IF NOT EXISTS support_tickets(id BIGSERIAL PRIMARY KEY,user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,subject TEXT NOT NULL,message TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'open',admin_reply TEXT NOT NULL DEFAULT '',created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP);
     CREATE INDEX IF NOT EXISTS tickets_user_updated ON support_tickets(user_id,updated_at);
-    CREATE TABLE IF NOT EXISTS user_message_usage (user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, usage_date DATE NOT NULL DEFAULT CURRENT_DATE, message_count INTEGER NOT NULL DEFAULT 0, blocked_until TIMESTAMPTZ);\n    CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS user_message_usage (user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, usage_date DATE NOT NULL DEFAULT CURRENT_DATE, message_count INTEGER NOT NULL DEFAULT 0, blocked_until TIMESTAMPTZ);
+    CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     INSERT INTO app_settings(key,value) VALUES ('maintenance_enabled','false') ON CONFLICT(key) DO NOTHING;
     INSERT INTO app_settings(key,value) VALUES ('daily_message_limit','30') ON CONFLICT(key) DO NOTHING;
     INSERT INTO app_settings(key,value) VALUES ('maintenance_message','TILLBOT wird gerade gewartet. Bitte später erneut versuchen.') ON CONFLICT(key) DO NOTHING;
+    CREATE TABLE IF NOT EXISTS user_preferences (
+      user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      instructions TEXT NOT NULL DEFAULT '',
+      model TEXT NOT NULL DEFAULT 'openai/gpt-oss-120b',
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS feature_flags (
+      key TEXT PRIMARY KEY,
+      enabled BOOLEAN NOT NULL DEFAULT FALSE,
+      description TEXT NOT NULL DEFAULT '',
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    INSERT INTO feature_flags(key,enabled,description) VALUES
+      ('voice_mode',TRUE,'Browser-Sprachsteuerung'),
+      ('code_mode',TRUE,'Programmiermodus'),
+      ('file_analysis',TRUE,'Datei- und Bildanalyse'),
+      ('image_generation',FALSE,'Bildgenerierung – externer Anbieter erforderlich'),
+      ('web_search',FALSE,'Websuche – Suchanbieter erforderlich'),
+      ('workspaces',TRUE,'Projekt-Workspaces'),
+      ('memory',TRUE,'Persönliche Erinnerungen'),
+      ('public_api',FALSE,'Externe API – Schlüsselverwaltung erforderlich')
+    ON CONFLICT(key) DO NOTHING;
+    CREATE TABLE IF NOT EXISTS admin_activity_log (
+      id BIGSERIAL PRIMARY KEY,
+      actor_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+      action TEXT NOT NULL,
+      method TEXT NOT NULL,
+      path TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS admin_activity_recent ON admin_activity_log(created_at DESC);
+    CREATE TABLE IF NOT EXISTS user_memories (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title TEXT NOT NULL DEFAULT 'Erinnerung',
+      content TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS user_memories_user ON user_memories(user_id,updated_at DESC);
+    CREATE TABLE IF NOT EXISTS workspaces (
+      id BIGSERIAL PRIMARY KEY,
+      owner_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS workspace_members (
+      workspace_id BIGINT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      role TEXT NOT NULL DEFAULT 'member' CHECK(role IN ('owner','member')),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY(workspace_id,user_id)
+    );
+    CREATE INDEX IF NOT EXISTS workspace_members_user ON workspace_members(user_id);
   `);
 }
 
