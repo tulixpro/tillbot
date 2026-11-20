@@ -21,7 +21,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}button:focus-visible,in
 details.tutorial{margin:16px 0;border:1px solid var(--line);border-radius:15px;background:#0e1c2d;padding:14px 16px}details summary{cursor:pointer;font-weight:700;font-size:13px} .tutorialGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.tutorialGrid article{padding:13px;border:1px solid #263a50;border-radius:12px;background:#14263a}.tutorialGrid article p,.tutorial>p{margin:6px 0 0;color:var(--muted);font-size:12px}
 .currentAi{margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:18px;background:#0e1c2d}.currentAi h2{margin:0 0 5px;font-size:17px}.currentAi p{margin:0 0 14px;color:var(--muted);font-size:12px}.currentAi iframe{display:block;width:100%;height:720px;border:1px solid var(--line);border-radius:12px;background:#fff}
 .footer{display:flex;justify-content:space-between;gap:12px;margin-top:15px;color:#8195aa;font-size:11px}
-@media(max-width:620px){.shell{width:100%;margin:0 auto 24px}#messages{height:62vh;min-height:420px}.quickbar{gap:5px;padding:0 12px 12px}.quickbar button{padding:5px 7px;font-size:9px}.shell{width:100%;margin:0 auto 24px}.topbar{border-radius:0;padding:15px 16px}.hero{padding:25px 16px 18px}.notice{margin:0 12px 12px}.chatCard{border-left:0;border-right:0;border-radius:0}#messages{height:48vh;min-height:260px;padding:14px}.msg{max-width:94%}.composer{padding:12px;gap:7px}.send{padding:0 13px}.tutorialGrid{grid-template-columns:1fr}details.tutorial{margin:12px}.currentAi{margin:16px 12px;padding:13px}.currentAi iframe{height:680px}.footer{padding:0 12px;flex-direction:column}}
+@media(max-width:620px){.shell{width:100%;margin:0 auto 24px}#messages{height:62vh;min-height:420px}.quickbar{gap:5px;padding:0 12px 12px}.quickbar button{padding:5px 7px;font-size:9px}.shell{width:100%;margin:0 auto 24px}.topbar{border-radius:0;padding:15px 16px}.hero{padding:25px 16px 18px}.notice{margin:0 12px 12px}.chatCard{border-left:0;border-right:0;border-radius:0}#messages{height:48vh;min-height:260px;padding:14px}.msg{max-width:94%}.composer{padding:12px;gap:7px}.send{padding:0 13px}#stop-chat{padding:0 12px;background:#3a2028;border:1px solid #75404b;color:#ffdce2}.tutorialGrid{grid-template-columns:1fr}details.tutorial{margin:12px}.currentAi{margin:16px 12px;padding:13px}.currentAi iframe{height:680px}.footer{padding:0 12px;flex-direction:column}}
 
 /* Matching refreshed TILLBOT palette */
 :root{color-scheme:dark;--bg:#100f1b;--panel:#211d32;--panel2:#29233d;--line:#51436d;--text:#f5f0ff;--muted:#b7accd;--blue:#c1a8ff;--mint:#f09aaa;--user:#49365f}
@@ -109,7 +109,7 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
 <section class="hero"><span class="eyebrow">CORE · BROWSER-PROTOTYP</span><h2>Ein eigener KI-Kern. Schritt für Schritt.</h2><p>Hier kannst du TILLBOT CORE direkt mit einem extern bereitgestellten Sprachmodell testen. CORE steuert Antworten über eine eigene, abgesicherte Schnittstelle.</p></section>
 <div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
-<div class="chatHead"><div><strong>CORE-Testchat</strong><span>Öffentliche KI-Demo · ohne Anmeldung</span></div><div class="toolbar"><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="export-chat">Chat exportieren</button></div></div>
+<div class="chatHead"><div><strong>CORE-Testchat</strong><span>Öffentliche KI-Demo · ohne Anmeldung</span></div><div class="toolbar"><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="export-chat">Chat exportieren</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
 <div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Stelle eine Frage oder wähle ein Beispiel. Ich antworte über den CORE-Forschungsendpunkt.</div></div>
 <div class="quickbar" aria-label="Beispielfragen">
 <button type="button" data-prompt="Was kannst du?">Was kannst du?</button>
@@ -124,7 +124,7 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
 <summary>📘 Tutorial: Was kann CORE schon – und was noch nicht?</summary>
 <div class="tutorialGrid">
 <article><strong>✓ Bereits testbar</strong><p>Chat-Oberfläche, Beispiel-Fragen und vorbereitete Antworten über CORE, den Entwicklungsstand, Deutsch als Zielsprache und die nächsten Schritte.</p></article>
-<article><strong>⌛ Noch in Entwicklung</strong><p>Freie Wissensfragen, echte Recherche, Bildverständnis, dauerhaftes Gedächtnis und selbstständiges Lernen. Dafür braucht CORE ein trainiertes Modell und weitere geprüfte Funktionen.</p></article>
+<article><strong>⌛ Noch in Entwicklung</strong><p>Integrierte Websuche, Bildverständnis, dauerhaftes Gedächtnis und selbstständiges Lernen. Diese Funktionen sind noch nicht freigeschaltet und werden nicht vorgetäuscht.</p></article>
 </div>
 <p><strong>Hinweis:</strong> Bitte keine vertraulichen Informationen eingeben. TILLBOT speichert diesen öffentlichen Demo-Chat nicht dauerhaft. Nachrichten werden zur Verarbeitung an den externen Modellanbieter übertragen.</p>
 </details>
@@ -138,7 +138,9 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
  if(!params.has('embed'))document.body.classList.add('coreFullscreenDemo');
  if(params.has('embed'))document.querySelector('.currentAi')?.remove();
  const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count'),status=document.getElementById('demo-status'),newChat=document.getElementById('new-chat'),exportChat=document.getElementById('export-chat'),answerMode=document.getElementById('answer-mode');
- let sent=0,busy=false,history=[];
+ let sent=0,busy=false,history=[],activeController=null;
+ const stopButton=document.getElementById('stop-chat');
+ stopButton.disabled=true;
  input.maxLength=2000;
  function add(text,role){
   const item=document.createElement('div');item.className='msg '+role;
@@ -148,9 +150,10 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
  async function submit(text){
   const value=String(text||'').trim();if(!value||busy)return;
   add(value,'user');sent++;count.textContent=sent+(sent===1?' Nachricht':' Nachrichten');
-  const waiting=add('CORE denkt nach …','bot');busy=true;send.disabled=true;input.disabled=true;status.textContent='CORE verarbeitet deine Nachricht …';
+  const waiting=add('CORE denkt nach …','bot');busy=true;send.disabled=true;input.disabled=true;stopButton.disabled=false;status.textContent='CORE verarbeitet deine Nachricht …';
   try{
-   const response=await fetch(API+'/api/core/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:value,history:history.slice(-8),answerMode:answerMode.value})});
+   activeController=new AbortController();
+   const response=await fetch(API+'/api/core/chat',{method:'POST',signal:activeController.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({message:value,history:history.slice(-8),answerMode:answerMode.value})});
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.error||'CORE ist momentan nicht erreichbar.');
    const answer=String(data.answer||'Keine Antwort erhalten.');
@@ -159,16 +162,22 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
    history.push({role:'user',content:value},{role:'assistant',content:answer});
    history=history.slice(-8);
    status.textContent='CORE ist bereit · Gesprächskontext aktiv';
-  }catch(error){waiting.lastChild.textContent=error.message||'Verbindung zu CORE fehlgeschlagen.';status.textContent='Modellserver momentan nicht erreichbar';}
-  finally{busy=false;input.disabled=false;send.disabled=!input.value.trim();input.focus();}
+  }catch(error){
+   const cancelled=error.name==='AbortError';
+   waiting.lastChild.textContent=cancelled?'Antwort abgebrochen.':(error.message||'Verbindung zu CORE fehlgeschlagen.');
+   status.textContent=cancelled?'Anfrage gestoppt':'Modellserver momentan nicht erreichbar';
+  }
+  finally{activeController=null;busy=false;stopButton.disabled=true;input.disabled=false;send.disabled=!input.value.trim();input.focus();}
  }
  form.addEventListener('submit',e=>{e.preventDefault();const value=input.value;input.value='';send.disabled=true;submit(value)});
  input.addEventListener('input',()=>{send.disabled=busy||!input.value.trim()});
  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!send.disabled)form.requestSubmit()}});
  document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{if(!busy)submit(button.dataset.prompt)}));
+ stopButton.addEventListener('click',()=>{if(activeController)activeController.abort()});
  newChat.addEventListener('click',()=>{if(busy)return;history=[];sent=0;messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');count.textContent='0 Nachrichten';status.textContent='Neuer Chat · kein vorheriger Gesprächskontext';input.value='';send.disabled=true;input.focus()});
  exportChat.addEventListener('click',()=>{const transcript=[...messages.querySelectorAll('.msg')].map(node=>{const who=node.querySelector('.who')?.textContent||'CORE';const body=[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE||n.nodeType===Node.ELEMENT_NODE&&n.classList?.contains('who')===false&&n.tagName!=='BUTTON').map(n=>n.textContent).join('').trim();return who+'\n'+body}).join('\n\n');const blob=new Blob([transcript],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='tillbot-core-chat.txt';link.click();URL.revokeObjectURL(url)});
 })();
+ fetch(API+'/api/core/status',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(s=>{status.textContent=s.available?'CORE bereit · Modellserver konfiguriert':'CORE nicht verfügbar · Modellserver nicht konfiguriert'}).catch(()=>{status.textContent='CORE-Status momentan nicht verfügbar'});
 </script>
 </body>
 </html>
