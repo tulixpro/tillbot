@@ -20,7 +20,7 @@ TILLBOT is a browser-based AI workspace with a static GitHub Pages frontend and 
 
 ## Public CORE demo
 
-The standalone TILLBOT CORE browser prototype is available at `https://tulixpro.github.io/tillbot/core-demo.html`. It is public and can be tested without an account. It runs locally in the browser with prepared rule-based responses; it is not a trained language model, does not call an AI API, and does not send or persist chat messages. The regular TILLBOT assistant remains behind account login.
+The public TILLBOT CORE research demo is available at `https://tulixpro.github.io/tillbot/core-demo.html` without an account. It calls the backend's rate-limited `/api/core/chat` endpoint and uses the configured Groq-hosted model (default `openai/gpt-oss-20b`) as its inference engine. CORE is not a separately trained foundation model. Public demo prompts are not stored as chat history by TILLBOT, but are transmitted to the external model provider for inference. Set `CORE_MODEL` optionally to choose a supported Groq model.
 
 ## Backend deployment
 
