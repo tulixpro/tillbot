@@ -2506,3 +2506,32 @@ main>header{background:#0b0d11!important;border-color:#282d35!important}
 dialog::backdrop{background:#000c!important;backdrop-filter:blur(8px)}
 input,textarea,select{accent-color:#d8dde4}
 @media(max-width:600px){#auth{padding:14px 12px 24px!important}.authCard{padding:23px 19px!important;border-radius:17px!important}.authBrand{margin-bottom:28px}.authIntro h1{font-size:29px!important}.authTrust{flex-direction:column;gap:6px}.publicDemoEmbed{padding:17px!important}}
+
+
+/* TILLBOT mobile hotfix — prevent header/composer overflow on phones */
+@media (max-width:820px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden!important}
+  #app.layout{width:100%!important;max-width:100%!important;overflow-x:clip!important}
+  #sidebar:not(.open){left:0!important;visibility:hidden!important;transform:translate3d(-110%,0,0)!important}
+  main{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important}
+  main>header{width:100%!important;min-width:0!important;display:flex!important;gap:9px!important;padding-inline:12px!important;overflow:visible!important}
+  main>header #menu{flex:0 0 38px!important;width:38px!important;min-width:38px!important}
+  main>header .headTitle{flex:0 1 auto!important;min-width:0!important}
+  main>header #who,.modelPickerBtn{display:none!important}
+  main>header .topMenuWrap{margin-left:auto!important;flex:0 0 42px!important}
+  main>header .moreMenuBtn{width:42px!important;min-width:42px!important}
+  .chat,.composerArea{width:100%!important;min-width:0!important;max-width:100%!important}
+  .composerArea{padding-left:10px!important;padding-right:10px!important}
+  .composer{width:100%!important;min-width:0!important;max-width:100%!important}
+  .composerTools{display:flex!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto!important;overflow-y:hidden!important;gap:6px!important;min-width:0!important;max-width:100%!important;scroll-snap-type:x proximity!important;-webkit-overflow-scrolling:touch}
+  .composerTools button{flex:0 0 auto!important;white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;min-width:max-content!important;padding-inline:10px!important}
+  #clearPrompt{min-width:39px!important;width:39px!important}
+  #send{flex:0 0 40px!important;min-width:40px!important;width:40px!important;margin-left:auto!important}
+}
+@media(max-width:390px){
+  main>header{gap:7px!important;padding-inline:9px!important}
+  .composerArea{padding-inline:7px!important}
+  .composer{padding:9px!important}
+  .composerTools{gap:5px!important}
+  .composerTools button{padding-inline:8px!important;font-size:10px!important}
+}
