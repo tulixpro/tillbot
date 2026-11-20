@@ -126,19 +126,21 @@ async function send(){
  wait.innerHTML='<span class="thinkingLabel"><span class="thinkingOrb"></span><strong>TILLBOT denkt nach</strong></span><span class="thinkingStatus">Nachricht wird vorbereitet …</span><span class="thinkingDots" aria-hidden="true"><i></i><i></i><i></i></span>';
  chatPane.append(wait);chatPane.scrollTop=chatPane.scrollHeight;
  let statusTimer=setInterval(()=>{const s=wait.querySelector(".thinkingStatus");if(!s)return;const stages=["Nachricht wird analysiert …","Kontext wird geprüft …","Antwort wird formuliert …","Antwort wird verfeinert …"];s.textContent=stages[(Number(wait.dataset.stage||0)+1)%stages.length];wait.dataset.stage=String(Number(wait.dataset.stage||0)+1)},1800);
+ let streamTimeout=null;
  try{
   if(!activeId){const created=await api("/api/chats",{method:"POST",body:JSON.stringify({title:text.slice(0,70)||"Neuer Chat"})});if(!created||!created.id)throw new Error("Der neue Chat konnte nicht angelegt werden.");activeId=created.id}
   const streamController=new AbortController();
-  const streamTimeout=setTimeout(()=>streamController.abort(),90000);
+  streamTimeout=setTimeout(()=>streamController.abort(),90000);
   let response;
   try{response=await fetch(API+"/api/chat",{method:"POST",headers:headers(),signal:streamController.signal,body:JSON.stringify({message:text,history:history.slice(0,-1),image:photoData?{data:photoData,mime:photoMime}:null,stream:true})})}
   catch(streamError){if(streamError.name==="AbortError")throw new Error("Die Antwort dauert zu lange. Bitte prüfe deine Verbindung und versuche es erneut.");throw streamError}
-  finally{clearTimeout(streamTimeout)}
+
   if(!response.ok){let er={};try{er=await response.json()}catch{}throw Error(er.error||er.answer||"HTTP "+response.status)}
   if(!response.body)throw Error("Streaming wird vom Browser nicht unterstützt.");
   const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",answer="";
   const statusEl=wait.querySelector(".thinkingStatus");if(statusEl)statusEl.textContent="Antwort wird generiert …";wait.querySelector(".thinkingDots")?.remove();
   while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const events=pending.split("\n\n");pending=events.pop()||"";for(const event of events){const line=event.split("\n").find(x=>x.startsWith("data:"));if(!line)continue;try{const data=JSON.parse(line.slice(5).trim());if(data.delta){answer+=data.delta;wait.textContent=answer}}catch{}}}
+  clearTimeout(streamTimeout);streamTimeout=null;
   if(!answer)throw Error("Die KI hat keine Antwort geliefert.");
   history.push({role:"assistant",content:answer});photoData=null;$("photoPreview").classList.add("hidden");$("photoPreview").innerHTML="";
   // Persist without calling loadChats(), which reopens the active chat and resets the view.
@@ -149,7 +151,7 @@ async function send(){
   history.push({role:"assistant",content:"Die Nachricht konnte nicht vollständig verarbeitet werden: "+e.message});
   try{await loadQuota()}catch{}
  }finally{
-  clearInterval(statusTimer);busy=false;if(!$("quotaStatus").classList.contains("quotaBlocked"))sendButton.disabled=false;
+  clearInterval(statusTimer);if(streamTimeout)clearTimeout(streamTimeout);busy=false;if(!$("quotaStatus").classList.contains("quotaBlocked"))sendButton.disabled=false;
   render();input.focus();chatPane.scrollTop=chatPane.scrollHeight;
  }
 }
