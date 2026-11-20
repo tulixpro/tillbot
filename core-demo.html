@@ -56,6 +56,37 @@ body.coreFullscreenDemo #messages{max-height:none}
 }
 @media(max-height:620px) and (min-width:681px){.hero{padding:2px}.notice{padding:6px 9px}.shell,body.coreFullscreenDemo .shell{gap:5px}.topbar{padding:7px 12px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+
+/* CORE visual alignment with the main TILLBOT workspace */
+:root{--bg:#0a0b10;--surface:#11141b;--surface-2:#191d27;--border:#303545;--text:#f4f3fb;--muted:#a4a5b7;--accent:#b7a2ff;--danger:#d58b9a}
+body{background:radial-gradient(ellipse at 50% -15%,rgba(142,116,221,.17),transparent 48%),var(--bg);color:var(--text)}
+button{border-color:#383c4c;background:#1a1e29;color:#e9e7f5;border-radius:10px;transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
+button:hover:not(:disabled){background:#28263a;border-color:#8877bd;box-shadow:0 5px 18px rgba(133,112,206,.14);transform:translateY(-1px)}
+button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #b7a2ff;outline-offset:3px}
+.topbar{background:linear-gradient(115deg,rgba(34,29,54,.97),rgba(18,22,32,.97));border-color:#49415f;box-shadow:0 16px 48px rgba(0,0,0,.3)}
+.mark{background:transparent;color:inherit}
+.status{border-color:#514969;background:#211e30;color:#d6cef3}
+.status i{background:#9be1cf;box-shadow:0 0 10px rgba(155,225,207,.55)}
+.eyebrow{color:#b7a2ff}
+.notice{border-color:#514a68;background:rgba(38,34,54,.78);color:#d6d0e8}
+.notice strong{color:#f1eaff}
+.chatCard{background:rgba(17,20,27,.96);border-color:#34394a;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.chatHead{border-color:#303545}
+.msg{background:#1b202b;border-color:#363d50}
+.msg.user{background:linear-gradient(130deg,#302b46,#263442);border-color:#716393}
+.who{color:#b7a2ff}
+.composer{background:#141821;border-color:#34394a}
+.composer textarea{background:#0c1017;border-color:#3a4051;color:#f4f3fb}
+.composer textarea:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.1)}
+.send{background:linear-gradient(120deg,#c7b5ff,#8ce1ec);color:#171522;border:0}
+.send:hover:not(:disabled){background:linear-gradient(120deg,#d8cbff,#a6eff6)}
+#stop-chat{border-color:#674858;background:#382633;color:#f5dce8}
+.quickbar button{background:#171b25;border-color:#34394a;color:#d7d6e4}
+.tutorialGrid article,.currentAi{background:#151923;border-color:#34394a}
+.footer,.chatFoot{color:#9698aa}
+details.tutorial,.currentAi{background:#11141b;border-color:#303545}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+
 </style>
 </head>
 <body>
