@@ -85,6 +85,7 @@ window.tillbotAuthSubmit=async()=>{
   $("authMsg").textContent="Erfolgreich! Dein Workspace wird geöffnet …";await start();
  }catch(e){
   $("authMsg").textContent=e.message||"Das hat nicht geklappt. Bitte versuche es erneut.";
+  if(registerMode)$("resendVerification").classList.remove("hidden");
  }finally{$("website").value="";b.disabled=false}
 };
 $("authSubmit").onclick=window.tillbotAuthSubmit;
