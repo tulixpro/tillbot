@@ -1795,3 +1795,60 @@ body[data-theme="light"] .authFields label,body[data-theme="light"] .authFieldHe
 body[data-theme="light"] .authProtection{background:#f6f9fd;border-color:#e4ebf4}
 body[data-theme="light"] .authProtection small,body[data-theme="light"] .authIntro p{color:#61758c}
 @media(max-width:520px){.auth{padding:14px}.authTrust{flex-direction:column}.publicDemoEmbed{padding:12px}.publicDemoEmbed iframe{height:380px}}
+
+
+/* TILLBOT drawer palette v2: richer blue-violet with teal accents */
+#sidebar{
+  width:min(500px,96vw);
+  padding:24px 22px 30px;
+  background:
+    radial-gradient(ellipse at 85% 8%,#526de83b,transparent 38%),
+    radial-gradient(ellipse at 8% 58%,#22b8ad22,transparent 42%),
+    linear-gradient(155deg,#111d36 0%,#172744 48%,#102b3b 100%);
+  border-left:1px solid #8ba8ff35;
+  box-shadow:-28px 0 90px #02081799;
+  color:#f1f6ff;
+}
+#sidebar .brand{padding:15px 14px;margin:4px 0 22px;border-radius:18px;background:linear-gradient(110deg,#ffffff12,#ffffff04);border:1px solid #ffffff16}
+#sidebar .brand .logo{color:#f4f8ff}
+#sidebar .brand small{color:#82d9df;letter-spacing:2px}
+#sidebar .sideSectionLabel,#sidebar .drawerSectionLabel{color:#77e0d4;font-size:10px;letter-spacing:2px;font-weight:850;margin:18px 3px 9px}
+#sidebar button:not(.toolsToggle):not(#closeMenu){transition:background .18s,border-color .18s,transform .18s}
+#sidebar button:not(.toolsToggle):not(#closeMenu):hover{background:#6684f02b;border-color:#8fa9ff55;transform:translateX(-2px)}
+#sidebar #closeMenu{color:#eaf1ff;background:#ffffff10;border:1px solid #ffffff20;border-radius:12px}
+#sidebar .drawerTools{padding:13px;border:1px solid #8ba8ff26;border-radius:18px;background:#08162b75}
+#sidebar .drawerTools .toolsToggle{background:linear-gradient(105deg,#536ce8,#268eaa);border:0;color:#fff;font-weight:750;border-radius:12px;box-shadow:0 8px 24px #2d69c84a}
+#sidebar .drawerTools .powerTools{grid-template-columns:1fr 1fr;gap:9px}
+#sidebar .drawerTools .powerTools button{min-height:48px;background:linear-gradient(135deg,#20395b,#183b4b);border:1px solid #8db7e52a;color:#edf7ff;border-radius:12px;font-weight:650}
+#sidebar .drawerTools .powerTools button:hover{background:linear-gradient(135deg,#405ac0,#187f83)}
+#sidebar .drawerDemos{margin-top:4px;padding:17px;border-radius:22px;background:linear-gradient(145deg,#243e70 0%,#174d5b 100%);border:1px solid #a6e5ed55;box-shadow:0 16px 42px #02081766}
+#sidebar .drawerDemos .demoPickerCopy .eyebrow{color:#8df0df;font-weight:850;letter-spacing:2px}
+#sidebar .drawerDemos .demoPickerCopy h2{font-size:clamp(24px,5vw,31px);line-height:1.12;color:#fff;margin:9px 0}
+#sidebar .drawerDemos .demoPickerCopy p{font-size:13px;line-height:1.65;color:#d1e4f5;max-width:38ch}
+#sidebar .drawerDemos .demoPicker>label{font-size:12px;color:#c4f5ee;font-weight:750;margin:17px 0 8px}
+#sidebar .drawerDemos .demoPicker select{width:100%;min-height:52px;padding:13px 15px;border-radius:14px;background:#0c2038;color:#fff;border:1px solid #8fe1dc77;font-size:15px;font-weight:700;box-shadow:inset 0 1px 0 #ffffff12}
+#sidebar .drawerDemos .demoFrameWrap{margin-top:16px;padding:10px;border-radius:17px;background:#07182bd9;border:1px solid #9ce7e044}
+#sidebar .drawerDemos .demoFrameHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;color:#e9ffff}
+#sidebar .drawerDemos .demoFrameHead strong{font-size:15px;letter-spacing:.4px}
+#sidebar .drawerDemos .demoFrameHead button{border-radius:9px;padding:8px 11px;background:#ffffff16;color:#fff;border:1px solid #ffffff25}
+#sidebar .drawerDemos iframe{display:block;width:100%;height:min(68vh,760px);min-height:520px;border:1px solid #9ee9e455;border-radius:12px;background:#fff}
+@media(max-width:600px){
+ #sidebar{width:100vw;padding:18px 16px calc(24px + env(safe-area-inset-bottom))}
+ #sidebar .drawerDemos{padding:15px}
+ #sidebar .drawerDemos iframe{height:65vh;min-height:440px}
+}
+body[data-theme="light"] #sidebar{
+ background:radial-gradient(ellipse at 90% 0%,#a9c4ff55,transparent 40%),linear-gradient(155deg,#f7faff,#eaf4fa 58%,#e4f6f3);
+ color:#18324d;border-left-color:#b7cce8;
+}
+body[data-theme="light"] #sidebar .brand{background:#ffffffb8;border-color:#d7e3f2}
+body[data-theme="light"] #sidebar .brand .logo{color:#18324d}
+body[data-theme="light"] #sidebar .sideSectionLabel,body[data-theme="light"] #sidebar .drawerSectionLabel{color:#167e83}
+body[data-theme="light"] #sidebar .drawerTools{background:#ffffffad;border-color:#cddcf0}
+body[data-theme="light"] #sidebar .drawerTools .powerTools button{background:linear-gradient(135deg,#e8efff,#e4f7f5);color:#203d59;border-color:#c6d9eb}
+body[data-theme="light"] #sidebar .drawerDemos{background:linear-gradient(145deg,#dce8ff,#d9f4ef);border-color:#b8d9df;box-shadow:0 14px 35px #7897b522}
+body[data-theme="light"] #sidebar .drawerDemos .demoPickerCopy h2{color:#18324d}
+body[data-theme="light"] #sidebar .drawerDemos .demoPickerCopy p{color:#49627b}
+body[data-theme="light"] #sidebar .drawerDemos .demoPicker>label{color:#176f78}
+body[data-theme="light"] #sidebar .drawerDemos .demoFrameWrap{background:#ffffffc9;border-color:#c4dfe3}
+body[data-theme="light"] #sidebar .drawerDemos .demoFrameHead{color:#18324d}
