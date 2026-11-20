@@ -2052,3 +2052,106 @@ body[data-theme="light"] #sidebar .historyItem.active .historyOpen{color:#173b5d
  #menu{display:inline-flex}
 }
 @media(prefers-reduced-motion:reduce){aside,.sidebarScrim{transition:none!important}}
+
+
+/* TILLBOT 3.1 — unified visual system */
+:root{
+  --tb-accent:#55d9c3;--tb-accent-2:#65a9ff;--tb-border:rgba(158,205,232,.16);
+  --tb-glass:rgba(8,27,48,.78);--tb-shadow:0 22px 70px rgba(0,8,24,.28);
+  color-scheme:dark;
+}
+body{
+  background:
+    radial-gradient(ellipse at 8% 5%,rgba(39,190,170,.17),transparent 34%),
+    radial-gradient(ellipse at 94% 4%,rgba(66,133,230,.19),transparent 36%),
+    radial-gradient(ellipse at 60% 100%,rgba(25,130,145,.12),transparent 38%),
+    #071321;
+}
+body:before{opacity:.12;filter:blur(2px)}
+.layout{background:linear-gradient(120deg,rgba(5,17,31,.92),rgba(8,27,47,.88))}
+#sidebar{
+  width:286px;padding:22px 17px;background:rgba(7,20,36,.88);
+  border-right:1px solid var(--tb-border);backdrop-filter:blur(24px);
+}
+.brand{padding:5px 7px 17px;margin:0 0 4px;border-bottom:1px solid var(--tb-border)}
+.brandIcon,.authIcon{border-radius:15px;box-shadow:0 8px 28px rgba(45,202,183,.2)}
+.sideSectionLabel,.drawerSectionLabel,.label{
+  color:#7f9bb6;font-size:10px;font-weight:800;letter-spacing:1.45px
+}
+.newChat{min-height:48px;border-radius:14px;background:linear-gradient(115deg,#18b994,#388ef0);box-shadow:0 9px 26px rgba(28,166,174,.18)}
+.learnModeBtn,.coreLaunchBtn{border-radius:13px!important}
+#sidebar .sidebottom button{border-radius:11px;background:rgba(255,255,255,.035);border-color:var(--tb-border)}
+#sidebar .sideProfile{padding:14px 5px 4px;border-color:var(--tb-border)}
+main{background:transparent}
+main>header{
+  height:74px;padding-inline:clamp(16px,3vw,34px);background:rgba(7,20,35,.62);
+  border-bottom:1px solid var(--tb-border);backdrop-filter:blur(22px)
+}
+#menu{border-color:var(--tb-border);background:rgba(255,255,255,.045)}
+.chat{padding:clamp(22px,4vw,58px);gap:18px}
+.welcome{max-width:720px}
+.welcome .cloud{width:82px;height:82px;margin:0 auto 18px;display:grid;place-items:center;
+  border:1px solid rgba(103,226,206,.22);border-radius:27px;
+  background:linear-gradient(145deg,rgba(63,202,177,.14),rgba(76,142,234,.12));
+  box-shadow:0 15px 55px rgba(0,0,0,.16);font-size:48px}
+.welcome h1{font-size:clamp(34px,5vw,54px);letter-spacing:-2.2px;line-height:1.05}
+.welcome .muted{max-width:560px;margin-inline:auto;line-height:1.7;font-size:15px}
+.suggestions{gap:10px;margin-top:28px}
+.suggestions button{
+  padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.045);
+  border:1px solid var(--tb-border);color:#d7e9f8;font-weight:650
+}
+.suggestions button:hover{background:rgba(74,183,188,.12);border-color:rgba(93,219,203,.42)}
+.bubble{max-width:min(78%,850px);padding:16px 19px;line-height:1.7;border-radius:18px}
+.bubble.bot{background:rgba(16,39,62,.88);border:1px solid var(--tb-border);box-shadow:0 8px 26px rgba(0,0,0,.1)}
+.bubble.user{background:linear-gradient(125deg,#177fba,#168e82);box-shadow:0 8px 25px rgba(12,119,145,.17)}
+.composerArea{max-width:1050px;padding:12px clamp(14px,3vw,30px) calc(16px + env(safe-area-inset-bottom))}
+.composer{border:1px solid rgba(132,190,220,.22);background:rgba(12,31,51,.94);border-radius:21px;box-shadow:0 18px 54px rgba(0,0,0,.24)}
+.composerTools{border-top-color:rgba(153,192,218,.13)}
+.composerTools button{background:rgba(255,255,255,.045);border-color:var(--tb-border);border-radius:11px}
+.composerArea>small,.composer>small{color:#829bb4}
+.auth{position:relative;isolation:isolate;background:transparent}
+.authbox{
+  background:rgba(8,26,46,.91);border:1px solid rgba(151,206,229,.2);
+  border-radius:26px;box-shadow:0 30px 100px rgba(0,0,0,.35);padding:clamp(24px,4vw,36px)
+}
+.authIntro h1{font-size:clamp(30px,5vw,38px);letter-spacing:-1.5px}
+.authInputWrap{border:1px solid rgba(148,190,216,.19);border-radius:13px;background:rgba(2,14,27,.42)}
+.authInputWrap:focus-within{border-color:var(--tb-accent);box-shadow:0 0 0 3px rgba(85,217,195,.1)}
+.authInputWrap input{background:transparent!important;border:0!important;box-shadow:none!important}
+.authTabs{padding:4px;border:1px solid var(--tb-border);border-radius:14px;background:rgba(0,0,0,.15)}
+.authTabs button{border:0;border-radius:10px;background:transparent}
+.authTabs button.selected{background:rgba(69,165,190,.2);box-shadow:inset 0 0 0 1px rgba(93,208,207,.25)}
+.authSubmit{min-height:50px;border-radius:13px}
+.authProtection,.authTrust{border-color:var(--tb-border)}
+.publicDemo{border-color:rgba(105,174,240,.2);background:rgba(76,142,198,.07)}
+dialog{
+  background:#0b1c30;border:1px solid rgba(145,196,221,.22);border-radius:22px;
+  box-shadow:0 30px 110px rgba(0,0,0,.52);padding:clamp(18px,3vw,28px)
+}
+dialog h2{letter-spacing:-.8px}
+dialog input,dialog textarea,dialog select{
+  border:1px solid rgba(148,190,216,.2);border-radius:11px;background:#08182a;color:#edf7ff
+}
+.adminActions,.settingsGroup,.metrics article{
+  border:1px solid var(--tb-border);border-radius:15px;background:rgba(255,255,255,.025)
+}
+.adminActions{padding:17px;margin:14px 0}
+.adminActions h3,.settingsGroup h3{letter-spacing:-.25px}
+.metricGrid article{background:rgba(75,158,191,.075);border-color:var(--tb-border);border-radius:14px;padding:15px}
+.systemNotice{border:1px solid var(--tb-border);border-radius:13px;box-shadow:var(--tb-shadow)}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid #67e2d0;outline-offset:3px
+}
+@media(max-width:760px){
+  #sidebar{width:min(88vw,310px);padding:18px 15px}
+  .chat{padding:20px 14px}
+  .bubble{max-width:92%;padding:14px 15px;font-size:15px}
+  main>header{height:64px}
+  .welcome h1{font-size:36px}
+  .welcome .cloud{width:70px;height:70px;font-size:40px}
+  .composerArea{padding-inline:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
