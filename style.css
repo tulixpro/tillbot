@@ -1988,3 +1988,16 @@ body[data-theme="light"] #sidebar .historyItem{background:#ffffffb5;border-color
 body[data-theme="light"] #sidebar .historyOpen{color:#1c3858!important}
 body[data-theme="light"] #sidebar .historyActions button{background:#edf3fb!important;color:#254365!important;border-color:#cfdaea!important}
 @media(max-width:600px){#sidebar #history{max-height:38vh;min-height:110px}#sidebar .historyOpen{min-height:46px!important}}
+
+
+/* Final pass: clear empty states, selected chats and keyboard navigation */
+#sidebar .historyEmpty{margin:8px 4px;padding:14px 12px;border:1px dashed #9bb9d044;border-radius:12px;color:#a9bfd7;font-size:12px;line-height:1.5;text-align:center}
+#sidebar .historyItem.active{background:linear-gradient(100deg,#3b76a52b,#3b5a9120);border-color:#75c9df55}
+#sidebar .historyItem.active .historyOpen{color:#fff!important;font-weight:700}
+#sidebar .historyOpen:focus-visible,#sidebar .historyActions button:focus-visible,#sidebar #chatSearch:focus-visible{outline:2px solid #6ee7df;outline-offset:2px}
+#sidebar .historyItem button:disabled{opacity:.6;cursor:wait}
+#sidebar #history{scroll-behavior:smooth}
+body[data-theme="light"] #sidebar .historyEmpty{color:#58708a;border-color:#9eb5cf}
+body[data-theme="light"] #sidebar .historyItem.active{background:#e4f1ff;border-color:#9bbfe4}
+body[data-theme="light"] #sidebar .historyItem.active .historyOpen{color:#173b5d!important}
+@media(prefers-reduced-motion:reduce){#sidebar #history{scroll-behavior:auto}}
