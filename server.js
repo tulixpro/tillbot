@@ -537,7 +537,8 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
 });
 
 app.use((error, _req, res, _next) => {
-  console.error("Express error:", error);\n  pool.query("INSERT INTO system_error_logs(level,source,message) VALUES($1,$2,$3)",["error","express",String(error.message||"Serverfehler").slice(0,500)]).catch(()=>{});
+  console.error("Express error:", error);
+  pool.query("INSERT INTO system_error_logs(level,source,message) VALUES($1,$2,$3)",["error","express",String(error.message||"Serverfehler").slice(0,500)]).catch(()=>{});
   res.status(500).json({ error: "Interner Serverfehler" });
 });
 
