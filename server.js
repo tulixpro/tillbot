@@ -44,6 +44,29 @@ function isBotTrapFilled(req) {
   return typeof req.body?.website === "string" && req.body.website.trim().length > 0;
 }
 
+const authChallenges = new Map();
+const AUTH_POW_DIFFICULTY = 3;
+function issueAuthChallenge(req, res) {
+  const now = Date.now();
+  for (const [id, item] of authChallenges) if (item.expiresAt <= now) authChallenges.delete(id);
+  while (authChallenges.size >= 5000) authChallenges.delete(authChallenges.keys().next().value);
+  const id = crypto.randomBytes(18).toString("hex");
+  const nonce = crypto.randomBytes(24).toString("hex");
+  authChallenges.set(id, { nonce, ip: req.ip, expiresAt: now + 120000 });
+  res.set("Cache-Control", "no-store").json({ id, nonce, difficulty: AUTH_POW_DIFFICULTY, expiresIn: 120 });
+}
+function consumeAuthChallenge(req) {
+  const id = String(req.body?.challengeId || "");
+  const solution = String(req.body?.challengeSolution || "");
+  const item = authChallenges.get(id);
+  if (!item) return false;
+  authChallenges.delete(id);
+  if (item.expiresAt <= Date.now() || item.ip !== req.ip || !/^[0-9]{1,12}$/.test(solution)) return false;
+  const digest = crypto.createHash("sha256").update(item.nonce + ":" + solution).digest("hex");
+  return digest.startsWith("0".repeat(AUTH_POW_DIFFICULTY));
+}
+app.get("/api/auth/challenge", rateLimit({ windowMs: 60000, limit: 20, standardHeaders: true, legacyHeaders: false }), issueAuthChallenge);
+
 app.get("/api/auth/status", async (_req,res) => {
   let databaseReady=false;
   try { await pool.query("SELECT 1"); databaseReady=true; } catch {}
@@ -146,7 +169,7 @@ app.get("/api/notifications", async (_req,res)=>{
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
 app.post("/api/register", async (req, res) => {
-  if (isBotTrapFilled(req)) return res.status(400).json({ error: "Anfrage konnte nicht verarbeitet werden." });
+  if (isBotTrapFilled(req) || !consumeAuthChallenge(req)) return res.status(400).json({ error: "Sicherheitsprüfung fehlgeschlagen. Bitte lade die Anmeldung neu und versuche es erneut." });
   const username=normalizeUsername(req.body.username),password=String(req.body.password||""),email=String(req.body.email||"").trim().toLowerCase();
   if(!/^[a-z0-9_]{3,20}$/.test(username))return res.status(400).json({error:"Username: 3–20 Zeichen (a-z, 0-9, _)"});
   if(password.length<10||password.length>128)return res.status(400).json({error:"Passwort muss 10–128 Zeichen haben"});
