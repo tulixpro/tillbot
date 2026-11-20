@@ -33,6 +33,8 @@ Required environment variables (set in the hosting provider's secret/environment
 - `GROQ_API_KEY` – key for the AI API.
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_FROM`, `SMTP_USER`, `SMTP_PASS` – optional SMTP configuration for the admin test-mail tool. Keep credentials in Render environment variables, never in GitHub. Port 465 normally uses `SMTP_SECURE=true`; port 587 normally uses `false`.
 - `FRONTEND_ORIGIN` – allowed frontend origin, e.g. `https://tulixpro.github.io`.
+- `FRONTEND_URL` – full frontend base URL used to build verification/reset links, e.g. `https://tulixpro.github.io/tillbot/`.
+- SMTP must be configured for new registrations, verification emails and password recovery. New accounts can sign in only after verifying their address. Existing legacy accounts without an email remain able to sign in.
 - `ADMIN_USERNAME` and `ADMIN_SETUP_SECRET` – one-time admin bootstrap configuration. Use a strong setup secret and remove/rotate it after setup where operationally possible.
 
 Optional:
@@ -44,7 +46,7 @@ Optional:
 
 ## Current features
 
-- Login and registration with server-side rate limits and a honeypot anti-bot check; account/session handling.
+- Login with server-side rate limits and a honeypot anti-bot check; new registration requires email verification. Single-use, expiring email tokens support verification and password recovery.
 - Persistent chat history, rename/delete chats, streaming AI responses.
 - 14 prompt shortcuts (Lerncoach, Text verbessern, Zusammenfassen, Kreativmodus, Codehilfe, Quiz, Übersetzen, Planer, Einfach erklären, Brainstorm, Story, Prüfungstraining, E-Mail, Debugger). These are prompt templates, not separate AI models.
 - Image attachment for **image analysis** (not image generation).
