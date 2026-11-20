@@ -31,6 +31,7 @@ Required environment variables (set in the hosting provider's secret/environment
 - `DATABASE_URL` – PostgreSQL connection URL.
 - `JWT_SECRET` – stable random secret, at least 32 characters. Changing it invalidates existing sessions.
 - `GROQ_API_KEY` – key for the AI API.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_FROM`, `SMTP_USER`, `SMTP_PASS` – optional SMTP configuration for the admin test-mail tool. Keep credentials in Render environment variables, never in GitHub. Port 465 normally uses `SMTP_SECURE=true`; port 587 normally uses `false`.
 - `FRONTEND_ORIGIN` – allowed frontend origin, e.g. `https://tulixpro.github.io`.
 - `ADMIN_USERNAME` and `ADMIN_SETUP_SECRET` – one-time admin bootstrap configuration. Use a strong setup secret and remove/rotate it after setup where operationally possible.
 
@@ -49,7 +50,7 @@ Optional:
 - Image attachment for **image analysis** (not image generation).
 - Browser speech recognition for dictation where supported, and speech synthesis for reading responses.
 - Chat export, PWA install prompt, themes, workspace preferences and customizable home screen.
-- Support tickets, admin dashboard, quota/maintenance controls and a configuration security audit.
+- Support tickets, admin dashboard, quota/maintenance controls, configuration security audit and an admin-only SMTP connection/test-mail tool.
 
 ## Limits & privacy
 
