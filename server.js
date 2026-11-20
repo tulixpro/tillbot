@@ -493,8 +493,14 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
   const message = String(req.body?.message || "").trim();
   if (!message || message.length > 2000) return res.status(400).json({ error: "Bitte gib eine Nachricht mit maximal 2.000 Zeichen ein." });
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: "CORE ist momentan nicht verfügbar. Der Modellserver ist nicht konfiguriert." });
+  // Accept only short, plain-text conversational context. Never trust client-supplied system messages.
+  const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8).flatMap(item => {
+    if (!item || !["user", "assistant"].includes(item.role) || typeof item.content !== "string") return [];
+    const content = item.content.trim().slice(0, 2000);
+    return content ? [{ role: item.role, content }] : [];
+  }) : [];
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20_000);
+  const timeout = setTimeout(() => controller.abort(), 25_000);
   try {
     const model = String(process.env.CORE_MODEL || "openai/gpt-oss-20b");
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -504,11 +510,12 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: "Du bist TILLBOT CORE, ein experimenteller deutschsprachiger Forschungsassistent des TILLBOT-Projekts. Antworte klar, hilfreich und ehrlich. Behaupte niemals, du seist ein selbst trainiertes oder eigenständiges Grundmodell. Du nutzt für diese öffentliche Forschungsdemo einen extern bereitgestellten Modellserver. Du lernst nicht aus einzelnen Gesprächen und speicherst keine Nachrichten. Gib bei Unsicherheit zu, wenn du etwas nicht weißt. Antworte auf Deutsch, sofern die Person keine andere Sprache verwendet. Halte Antworten standardmäßig kompakt und verständlich." },
+          { role: "system", content: "Du bist TILLBOT CORE, ein experimenteller deutschsprachiger Forschungsassistent des TILLBOT-Projekts. Antworte klar, hilfreich, freundlich und ehrlich. Behaupte niemals, du seist ein selbst trainiertes oder eigenständiges Grundmodell. Du nutzt für diese öffentliche Forschungsdemo einen extern bereitgestellten Modellserver. Du lernst nicht aus einzelnen Gesprächen und TILLBOT speichert diesen öffentlichen Demo-Chat nicht als Chatverlauf. Nachrichten werden zur Verarbeitung an den externen Modellanbieter übertragen. Gib bei Unsicherheit zu, wenn du etwas nicht weißt. Antworte in der Sprache der letzten Nachricht. Erkläre schwierige Themen in verständlichen Schritten. Bei Programmierfragen liefere möglichst direkt nutzbare, sichere Beispiele. Halte Antworten standardmäßig kompakt, erweitere sie bei komplexen Fragen." },
+          ...history,
           { role: "user", content: message }
         ],
-        max_completion_tokens: 450,
-        temperature: 0.6,
+        max_completion_tokens: 700,
+        temperature: 0.55,
         stream: false
       })
     });
