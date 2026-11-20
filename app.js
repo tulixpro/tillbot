@@ -49,6 +49,7 @@ function authMode(reg){
  $("forgotPassword").classList.toggle("hidden",reg);
  $("usernameHint").textContent=reg?"3–20 Zeichen: Kleinbuchstaben, Zahlen und Unterstrich.":"Gib deinen Benutzernamen ein.";
  $("authMsg").textContent="";
+ if(!reg)$("resendVerification").classList.add("hidden");
 }
 window.tillbotAuthMode=authMode;$("tabLogin").onclick=()=>authMode(false);$("tabRegister").onclick=()=>authMode(true);
 async function authRequest(path,body){let last;for(let attempt=0;attempt<2;attempt++){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);try{const response=await fetch(API+path,{method:"POST",headers:headers(),body:JSON.stringify(body),signal:controller.signal});const raw=await response.text();let data={};try{data=raw?JSON.parse(raw):{}}catch{}if(response.ok)return data;const err=Error(data.error||data.answer||"HTTP "+response.status);err.status=response.status;if(attempt===0&&[502,503,504].includes(response.status)){last=err;await new Promise(r=>setTimeout(r,1800));continue}throw err}catch(e){last=e;if(attempt===0&&(!e.status||e.name==="AbortError")){await new Promise(r=>setTimeout(r,1800));continue}if(e.name==="AbortError")throw Error("Der Server braucht zu lange zum Aufwachen. Bitte 1 Minute warten und erneut anmelden.");throw e}finally{clearTimeout(timer)}}throw last||Error("Anmeldung fehlgeschlagen")}
@@ -79,7 +80,7 @@ window.tillbotAuthSubmit=async()=>{
   const path=registerMode?"/api/register":"/api/login";
   const d=await authRequest(path,{username,password,email:registerMode?email:undefined,website:$("website").value});
   $("website").value="";
-  if(registerMode&&d.pendingVerification){$("authMsg").textContent=d.message||"Bitte bestätige deine E-Mail-Adresse.";return;}
+  if(registerMode&&d.pendingVerification){$("authMsg").textContent=d.message||"Bitte bestätige deine E-Mail-Adresse.";$("resendVerification").classList.remove("hidden");return;}
   token=d.token;user=d.user;localStorage.setItem("tb-token",token);
   $("authMsg").textContent="Erfolgreich! Dein Workspace wird geöffnet …";await start();
  }catch(e){
@@ -87,6 +88,14 @@ window.tillbotAuthSubmit=async()=>{
  }finally{$("website").value="";b.disabled=false}
 };
 $("authSubmit").onclick=window.tillbotAuthSubmit;
+$("resendVerification").onclick=async()=>{
+ const email=$("authEmail").value.trim().toLowerCase()||prompt("E-Mail-Adresse des Kontos:");
+ if(!email)return;
+ const b=$("resendVerification");b.disabled=true;
+ try{const d=await authRequest("/api/auth/resend-verification",{email});$("authMsg").textContent=d.message||"Bitte prüfe dein E-Mail-Postfach.";}
+ catch(e){$("authMsg").textContent=e.message||"E-Mail konnte nicht erneut gesendet werden.";}
+ finally{b.disabled=false}
+};
 $("forgotPassword").onclick=async()=>{
  const email=prompt("Gib die E-Mail-Adresse deines TILLBOT-Kontos ein:");
  if(!email)return;
