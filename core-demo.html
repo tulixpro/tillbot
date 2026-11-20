@@ -7,162 +7,55 @@
 <meta name="description" content="TILLBOT CORE – transparente deutsche Browser-Demo.">
 <title>TILLBOT CORE – Deutsche KI-KI-Forschungsdemo</title>
 <style>
-:root{color-scheme:dark;--bg:#100d1c;--panel:#1b172b;--panel2:#241d38;--line:#51436d;--text:#f4efff;--muted:#b2a9c8;--blue:#ad91ff;--mint:#79e2c2;--user:#43326f}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#3b2865 0,transparent 48%),var(--bg);color:var(--text);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
-button,input,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-.shell{width:min(1440px,calc(100% - 36px));margin:28px auto 42px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;border:1px solid var(--line);border-radius:20px;background:#19152aef;box-shadow:0 18px 55px #0003}
-.brand{display:flex;align-items:center;gap:13px}.mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(140deg,#a78bfa,#f19aaa);color:#fff;font-weight:900;letter-spacing:-1px;font-size:17px}.brand h1{font-size:18px;letter-spacing:-.4px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.status{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid #315d52;border-radius:99px;background:#102b2a;color:#b9f2df;font-size:11px;white-space:nowrap}.status i{width:7px;height:7px;border-radius:50%;background:var(--mint)}
-.hero{text-align:center;padding:30px 18px 22px}.eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#88b9e8;font-weight:750}.hero h2{font-size:clamp(27px,4vw,38px);letter-spacing:-1.2px;line-height:1.12;margin:10px 0}.hero p{max-width:650px;margin:0 auto;color:var(--muted);font-size:14px}
-.notice{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;margin:0 auto 16px;border:1px solid #705a31;background:#292518;border-radius:14px;color:#f0dfb8;font-size:13px}.notice strong{color:#fff0c9}.noticeIcon{font-size:18px;line-height:1}
-.chatCard{border:1px solid var(--line);border-radius:20px;background:rgba(27,23,43,.96);overflow:hidden;box-shadow:0 22px 65px #0004}.chatHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)}.chatHead strong{font-size:13px}.chatHead span{font-size:11px;color:var(--muted)}
-#messages{height:min(64vh,680px);min-height:440px;overflow:auto;display:flex;flex-direction:column;gap:13px;padding:20px}.msg{max-width:min(82%,720px);padding:13px 15px;border:1px solid var(--line);border-radius:15px;background:var(--panel2);overflow-wrap:anywhere;white-space:pre-wrap}.msg.user{align-self:flex-end;background:var(--user);border-color:#31577a;border-bottom-right-radius:5px}.msg.bot{align-self:flex-start;border-bottom-left-radius:5px}.who{margin-bottom:5px;color:#9db2c9;font-size:10px;font-weight:750;letter-spacing:1px;text-transform:uppercase}.msg.user .who{color:#b9d7f6}
-.quickbar{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 15px}.quickbar button,.toolbar button{border:1px solid #314963;background:#14283e;color:#d9e8f8;border-radius:8px;padding:6px 8px;font-size:10px;line-height:1.15;font-weight:600;transition:.15s}.quickbar button:hover,.toolbar button:hover{border-color:#5a9bd0;background:#1b3853}
-.composer{display:flex;align-items:flex-end;gap:10px;padding:15px 18px;border-top:1px solid var(--line);background:#0b1929}.composer textarea{flex:1;min-width:0;min-height:48px;max-height:130px;resize:vertical;border:1px solid #344b65;border-radius:13px;padding:12px 14px;background:#101f31;color:var(--text);outline:none}.composer textarea:focus{border-color:#69aef0}.send{min-height:46px;padding:0 19px;border:0;border-radius:12px;background:linear-gradient(135deg,#5bdfbf,#75b7ff);color:#071726;font-weight:800}.send:disabled{opacity:.45;cursor:not-allowed}.chatFoot{display:flex;justify-content:space-between;gap:12px;padding:0 18px 14px;color:#8198b0;font-size:11px}
-details.tutorial{margin:16px 0;border:1px solid var(--line);border-radius:15px;background:#0e1c2d;padding:14px 16px}details summary{cursor:pointer;font-weight:700;font-size:13px} .tutorialGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.tutorialGrid article{padding:13px;border:1px solid #263a50;border-radius:12px;background:#14263a}.tutorialGrid article p,.tutorial>p{margin:6px 0 0;color:var(--muted);font-size:12px}
-.currentAi{margin-top:24px;padding:18px;border:1px solid var(--line);border-radius:18px;background:#0e1c2d}.currentAi h2{margin:0 0 5px;font-size:17px}.currentAi p{margin:0 0 14px;color:var(--muted);font-size:12px}.currentAi iframe{display:block;width:100%;height:720px;border:1px solid var(--line);border-radius:12px;background:#fff}
-.footer{display:flex;justify-content:space-between;gap:12px;margin-top:15px;color:#8195aa;font-size:11px}
-@media(max-width:620px){.shell{width:100%;margin:0 auto 24px}#messages{height:62vh;min-height:420px}.quickbar{gap:5px;padding:0 12px 12px}.quickbar button{padding:5px 7px;font-size:9px}.shell{width:100%;margin:0 auto 24px}.topbar{border-radius:0;padding:15px 16px}.hero{padding:25px 16px 18px}.notice{margin:0 12px 12px}.chatCard{border-left:0;border-right:0;border-radius:0}#messages{height:48vh;min-height:260px;padding:14px}.msg{max-width:94%}.composer{padding:12px;gap:7px}.send{padding:0 13px}#stop-chat{padding:0 12px;background:#3a2028;border:1px solid #75404b;color:#ffdce2}.tutorialGrid{grid-template-columns:1fr}details.tutorial{margin:12px}.currentAi{margin:16px 12px;padding:13px}.currentAi iframe{height:680px}.footer{padding:0 12px;flex-direction:column}}
-
-/* Matching refreshed TILLBOT palette */
-:root{color-scheme:dark;--bg:#100f1b;--panel:#211d32;--panel2:#29233d;--line:#51436d;--text:#f5f0ff;--muted:#b7accd;--blue:#c1a8ff;--mint:#f09aaa;--user:#49365f}
-body{background:radial-gradient(ellipse at 12% -10%,rgba(130,91,190,.34),transparent 48%),radial-gradient(ellipse at 95% 12%,rgba(231,119,145,.16),transparent 35%),var(--bg)}
-.topbar,.chatCard,details.tutorial,.currentAi{background:rgba(29,25,46,.96);border-color:var(--line)}
-.mark{background:linear-gradient(140deg,#a78bfa,#f08b9b);color:#171126}
-.status{border-color:#624b72;background:#2a2035;color:#f3d7e4}.status i{background:var(--mint)}
-.eyebrow{color:#c4a9ff}
-.notice{border-color:#70516a;background:#2b202e;color:#f4dce8}.notice strong{color:#fff0f5}
-.quickbar button,.toolbar button{border-color:#51436d;background:#29233d;color:#eee5ff}
-.quickbar button:hover,.toolbar button:hover{border-color:#c1a8ff;background:#352b4d}
-.composer{background:#191627;border-color:#51436d}
-.composer textarea{background:#211d32;border-color:#51436d}
-.composer textarea:focus{border-color:#c1a8ff}
-.send{background:linear-gradient(135deg,#a78bfa,#f08b9b);color:#171126}
-.msg.user{background:#49365f;border-color:#76558a}
-.tutorialGrid article{background:#29233d;border-color:#51436d}
-@media(max-width:620px){.topbar{background:rgba(29,25,46,.98)}}
-
-/* Professional neutral CORE demo theme */
-:root{color-scheme:dark;--bg:#212121;--panel:#292929;--panel2:#303030;--line:#414141;--text:#ededed;--muted:#a3a3a3;--blue:#d4d4d4;--mint:#bdbdbd;--user:#383838}
-body{background:#212121!important;color:#ededed!important}
-.topbar,.chatCard,.currentAi,details.tutorial{background:#262626!important;border-color:#414141!important;box-shadow:none!important}
-.mark{background:#f1f1f1!important;color:#202020!important;border-radius:12px!important;font-size:16px!important}
-.status{background:#303030!important;border-color:#4a4a4a!important;color:#ddd!important}.status i{background:#bdbdbd!important}
-.eyebrow{color:#c4c4c4!important}
-.notice{background:#302f2b!important;border-color:#5a5549!important;color:#e2ddd1!important}
-.quickbar button,.toolbar button{background:#303030!important;border-color:#484848!important;color:#ddd!important;border-radius:10px!important}
-.quickbar button:hover,.toolbar button:hover{background:#3a3a3a!important;border-color:#666!important}
-.composer{background:#252525!important;border-color:#414141!important}
-.composer textarea{background:#303030!important;border-color:#4a4a4a!important}
-.composer textarea:focus{border-color:#888!important}
-.send{background:#f1f1f1!important;color:#171717!important}
-.msg.user{background:#383838!important;border-color:#4a4a4a!important}
-.tutorialGrid article{background:#303030!important;border-color:#414141!important}
-@media(max-width:620px){.topbar{background:#262626!important}}
-
-/* Fullscreen CORE experience: use the entire iframe viewport, not a centered page */
-body.coreFullscreenDemo{min-height:100dvh;height:100dvh;overflow:hidden;background:radial-gradient(ellipse at 12% 0%,#293b70 0,transparent 42%),radial-gradient(ellipse at 95% 10%,#174b4b 0,transparent 38%),#080d18!important}
-body.coreFullscreenDemo .shell{width:100%;height:100dvh;min-height:0;margin:0;padding:0 0 max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:0}
-body.coreFullscreenDemo .topbar{flex:0 0 auto;border:0;border-bottom:1px solid #7188b944;border-radius:0;padding:14px clamp(16px,3vw,38px);background:linear-gradient(100deg,#111c35f5,#172c42f5);box-shadow:0 12px 36px #0004}
-body.coreFullscreenDemo .mark{width:48px;height:48px;box-shadow:0 0 28px #8f86ff66;animation:coreMarkFloat 4s ease-in-out infinite}
-body.coreFullscreenDemo .hero{flex:0 0 auto;padding:clamp(12px,2.3vh,26px) 18px 14px;animation:coreHeroIn .55s both}
-body.coreFullscreenDemo .hero h2{font-size:clamp(23px,3vw,36px);background:linear-gradient(90deg,#c4b4ff,#79e2c2);background-clip:text;color:transparent}
-body.coreFullscreenDemo .hero p{font-size:13px}
-body.coreFullscreenDemo .notice{flex:0 0 auto;width:min(1000px,calc(100% - 32px));margin:0 auto 12px;background:#18243bd9;border-color:#7188b955}
-body.coreFullscreenDemo .chatCard{flex:1 1 auto;min-height:0;width:min(1200px,calc(100% - 32px));margin:0 auto 10px;display:flex;flex-direction:column;border-radius:20px;background:#101a2beF;box-shadow:0 24px 80px #0006;animation:coreChatIn .65s .08s both}
-body.coreFullscreenDemo .chatHead{flex:0 0 auto;padding:13px 18px}
-.chatHead>div:first-child{display:flex;flex-direction:column;gap:2px}.toolbar{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.copy-answer{display:block;margin-top:9px;padding:5px 8px;border:1px solid #555;border-radius:7px;background:#303030;color:#ddd;font-size:10px} .chatHead{flex-wrap:wrap}.answer-setting{display:flex;align-items:center;gap:6px;color:#b8c9dc;font-size:10px}.answer-setting select{border:1px solid #314963;background:#14283e;color:#e2edf8;border-radius:7px;padding:6px;font-size:10px;max-width:125px}
-body.coreFullscreenDemo #messages{flex:1 1 auto;height:auto;min-height:0;padding:clamp(14px,2.4vw,28px);overscroll-behavior:contain}
-body.coreFullscreenDemo .quickbar{flex:0 0 auto}
-body.coreFullscreenDemo .composer{flex:0 0 auto;background:#0b1525;padding:14px 18px}
-body.coreFullscreenDemo .composer textarea{min-height:54px;max-height:22vh}
-body.coreFullscreenDemo .send{min-width:112px;box-shadow:0 7px 24px #76c9ff33;transition:transform .2s,box-shadow .2s}
-body.coreFullscreenDemo .send:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 10px 30px #76c9ff66}
-body.coreFullscreenDemo .chatFoot{flex:0 0 auto;padding-bottom:12px}
-body.coreFullscreenDemo details.tutorial{flex:0 0 auto;width:min(1200px,calc(100% - 32px));margin:0 auto 8px}
-body.coreFullscreenDemo .footer{flex:0 0 auto;width:min(1200px,calc(100% - 32px));margin:0 auto;padding-bottom:2px}
-body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
-@keyframes coreMarkFloat{50%{transform:translateY(-3px) rotate(3deg);box-shadow:0 0 38px #8f86ff99}}
-@keyframes coreHeroIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes coreChatIn{from{opacity:0;transform:translateY(15px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes coreMessageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:700px){
- body.coreFullscreenDemo .topbar{padding:10px 13px}
- body.coreFullscreenDemo .mark{width:40px;height:40px}
- body.coreFullscreenDemo .hero{padding:10px 14px}
- body.coreFullscreenDemo .hero p{font-size:11px}
- body.coreFullscreenDemo .notice{font-size:11px;padding:9px 11px;margin-bottom:8px}
- body.coreFullscreenDemo .chatCard{width:100%;margin:0;border-radius:16px 16px 0 0;border-left:0;border-right:0}
- body.coreFullscreenDemo #messages{padding:12px;gap:9px}
- body.coreFullscreenDemo .composer{padding:9px;gap:7px}
- body.coreFullscreenDemo .send{min-width:74px;padding:0 10px}
- body.coreFullscreenDemo .quickbar{padding:0 10px 9px}
- body.coreFullscreenDemo .quickbar button{font-size:10px}
- body.coreFullscreenDemo details.tutorial,body.coreFullscreenDemo .footer{display:none}
+:root{color-scheme:dark;--bg:#171717;--surface:#202020;--surface-2:#292929;--border:#3d3d3d;--text:#f3f3f3;--muted:#a7a7a7;--accent:#e5e5e5;--danger:#9b5555}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,textarea,select{font:inherit}
+button{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 12px;border:1px solid #4a4a4a;border-radius:9px;background:#303030;color:#eee;font-weight:600;font-size:12px;line-height:1.2;cursor:pointer;touch-action:manipulation;user-select:none;transition:background .15s,border-color .15s,color .15s}
+button:hover:not(:disabled){background:#3a3a3a;border-color:#777}
+button:active:not(:disabled){background:#454545}
+button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #ddd;outline-offset:2px}
+button:disabled{opacity:.42;cursor:not-allowed;filter:saturate(.4)}
+.shell{width:min(1160px,calc(100% - 32px));min-height:100vh;margin:0 auto;padding:18px 0 14px;display:flex;flex-direction:column;gap:12px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:14px}
+.brand{display:flex;align-items:center;gap:11px}.mark{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#eee;color:#171717;font-weight:900}.brand h1{margin:0;font-size:15px;letter-spacing:.02em}.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
+.status{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #4a4a4a;border-radius:99px;background:#2b2b2b;color:#ddd;font-size:11px;white-space:nowrap}.status i{width:7px;height:7px;border-radius:50%;background:#aaa}
+.hero{text-align:center;padding:13px 12px 7px}.eyebrow{font-size:10px;letter-spacing:1.8px;color:#aaa;font-weight:750}.hero h2{margin:7px 0;font-size:clamp(22px,3vw,30px);letter-spacing:-.7px}.hero p{max-width:700px;margin:0 auto;color:var(--muted);font-size:12px}
+.notice{display:flex;gap:10px;align-items:flex-start;padding:10px 13px;border:1px solid #514a3c;border-radius:11px;background:#292720;color:#d7d1c4;font-size:11px}.notice strong{color:#f2ead8}.noticeIcon{font-size:16px}
+.chatCard{flex:1;min-height:420px;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border);border-radius:15px;background:var(--surface)}
+.chatHead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:10px 13px;border-bottom:1px solid var(--border)}.chatHead>div:first-child{display:flex;flex-direction:column;gap:2px}.chatHead strong{font-size:13px}.chatHead span{color:var(--muted);font-size:10px}
+.toolbar{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px}.toolbar button{min-height:32px;padding:6px 9px;font-size:11px}.answer-setting{display:flex;align-items:center;gap:6px;color:#bbb;font-size:11px}.answer-setting select{min-height:32px;max-width:130px;padding:5px 8px;border:1px solid #4a4a4a;border-radius:8px;background:#303030;color:#eee;font-size:11px}
+#messages{flex:1;min-height:250px;max-height:60vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:16px;overscroll-behavior:contain;scroll-behavior:smooth}
+.msg{max-width:min(84%,760px);padding:11px 13px;border:1px solid #414141;border-radius:12px;background:var(--surface-2);overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.6}.msg.user{align-self:flex-end;background:#383838;border-color:#505050}.msg.bot{align-self:flex-start}.who{margin-bottom:4px;color:#aaa;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.copy-answer{display:flex;margin-top:9px;min-height:29px;padding:5px 8px;font-size:10px}
+.quickbar{display:flex;flex-wrap:wrap;gap:6px;padding:0 13px 10px}.quickbar button{min-height:31px;padding:6px 9px;font-size:11px}
+.composer{display:flex;align-items:flex-end;gap:8px;padding:10px 13px;border-top:1px solid var(--border);background:#222}.composer textarea{flex:1;min-width:0;min-height:44px;max-height:150px;resize:vertical;padding:10px 12px;border:1px solid #494949;border-radius:10px;background:#2c2c2c;color:var(--text);outline:none}.composer textarea:focus{border-color:#999}.send{min-width:78px;min-height:42px;background:#eee;color:#171717;border-color:#eee}.send:hover:not(:disabled){background:#d6d6d6;border-color:#d6d6d6}
+#stop-chat{border-color:#674747;background:#382929;color:#f0dada}
+.chatFoot{display:flex;justify-content:space-between;gap:10px;padding:0 13px 9px;color:#999;font-size:10px}
+details.tutorial{padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}details summary{cursor:pointer;font-size:12px;font-weight:700}.tutorialGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.tutorialGrid article{padding:10px;border:1px solid var(--border);border-radius:9px;background:#292929}.tutorialGrid p,.tutorial>p{margin:5px 0 0;color:var(--muted);font-size:11px}
+.footer{display:flex;justify-content:space-between;gap:10px;color:#999;font-size:10px}.currentAi{margin-top:20px;padding:14px;border:1px solid var(--border);border-radius:12px}.currentAi h2{margin:0 0 6px;font-size:16px}.currentAi p{color:var(--muted);font-size:12px}.currentAi iframe{width:100%;height:650px;border:1px solid var(--border);border-radius:10px}
+body.coreFullscreenDemo{height:100dvh;min-height:100dvh;overflow:hidden}
+body.coreFullscreenDemo .shell{width:min(1180px,calc(100% - 28px));height:100dvh;min-height:0;padding:10px 0;gap:8px}
+body.coreFullscreenDemo .hero{padding:6px 10px 4px}
+body.coreFullscreenDemo .notice{width:min(1040px,100%);align-self:center}
+body.coreFullscreenDemo .chatCard{width:100%;min-height:0;flex:1}
+body.coreFullscreenDemo #messages{max-height:none}
+@media(max-width:680px){
+ .shell,body.coreFullscreenDemo .shell{width:100%;padding:0 0 max(6px,env(safe-area-inset-bottom));gap:7px}
+ .topbar{padding:9px 11px;border-radius:0;border-left:0;border-right:0}
+ .brand h1{font-size:14px}.brand p{font-size:10px}.mark{width:34px;height:34px}.status{padding:5px 8px;font-size:10px}
+ .hero{padding:5px 12px}.hero h2{font-size:20px;margin:4px 0}.hero p{font-size:10px}
+ .notice{width:calc(100% - 18px);padding:8px 9px;font-size:10px}
+ .chatCard,body.coreFullscreenDemo .chatCard{width:100%;border-left:0;border-right:0;border-radius:12px 12px 0 0}
+ .chatHead{align-items:flex-start;padding:8px 9px}.toolbar{justify-content:flex-start;gap:5px}.toolbar button{min-height:31px;padding:5px 7px;font-size:10px}.answer-setting{font-size:10px}.answer-setting select{min-height:31px;font-size:10px}
+ #messages,body.coreFullscreenDemo #messages{padding:10px;gap:8px}.msg{max-width:96%;padding:9px 10px;font-size:13px}
+ .quickbar{flex-wrap:nowrap;overflow-x:auto;padding:0 9px 8px}.quickbar button{flex:0 0 auto;font-size:10px}
+ .composer{padding:8px;gap:6px}.composer textarea{min-height:41px;padding:8px 9px;font-size:14px}.send{min-width:64px;min-height:39px;padding:0 8px;font-size:11px}
+ .chatFoot{padding:0 9px 7px;font-size:9px}.tutorialGrid{grid-template-columns:1fr}
+ body.coreFullscreenDemo .tutorial,body.coreFullscreenDemo .footer{display:none}
 }
-@media(prefers-reduced-motion:reduce){body.coreFullscreenDemo *,body.coreFullscreenDemo *:before,body.coreFullscreenDemo *:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
-
-
-/* CORE beta finish: consistent compact, accessible layout */
-:root{--bg:#171717;--panel:#202020;--panel2:#292929;--line:#3d3d3d;--text:#f3f3f3;--muted:#a7a7a7;--blue:#d4d4d4;--mint:#c9c9c9;--user:#353535}
-body.coreFullscreenDemo{background:#171717!important}
-body.coreFullscreenDemo .shell{padding:0 0 max(8px,env(safe-area-inset-bottom));gap:0}
-body.coreFullscreenDemo .topbar{background:#202020!important;border-bottom:1px solid #3d3d3d;padding:11px clamp(14px,2.5vw,28px);box-shadow:none}
-body.coreFullscreenDemo .mark{width:40px;height:40px;animation:none;box-shadow:none!important;background:#ededed!important;color:#171717!important}
-body.coreFullscreenDemo .hero{padding:clamp(8px,1.6vh,16px) 16px 10px;animation:none}
-body.coreFullscreenDemo .hero h2{background:none;color:#f2f2f2;font-size:clamp(21px,2.8vw,30px);letter-spacing:-.7px}
-body.coreFullscreenDemo .hero p{color:#aaa;font-size:12px}
-body.coreFullscreenDemo .eyebrow{color:#bdbdbd}
-body.coreFullscreenDemo .notice{width:min(1040px,calc(100% - 28px));margin:0 auto 9px;padding:10px 13px;background:#292929;border-color:#444;color:#c9c9c9;border-radius:12px;font-size:12px}
-body.coreFullscreenDemo .chatCard{width:min(1180px,calc(100% - 28px));background:#202020!important;border-color:#3e3e3e!important;border-radius:16px;box-shadow:none;animation:none}
-body.coreFullscreenDemo .chatHead{padding:11px 14px;border-color:#3e3e3e}
-body.coreFullscreenDemo .chatHead strong{font-size:13px}
-body.coreFullscreenDemo .chatHead span{font-size:10px;color:#999}
-body.coreFullscreenDemo .toolbar{gap:6px}
-body.coreFullscreenDemo .toolbar button,body.coreFullscreenDemo .answer-setting select{min-height:32px;padding:6px 9px;background:#303030!important;border:1px solid #4a4a4a!important;border-radius:8px;color:#eee!important;font-size:11px}
-body.coreFullscreenDemo .answer-setting{font-size:11px;color:#bbb}
-body.coreFullscreenDemo #messages{padding:clamp(12px,2vw,22px);gap:11px}
-body.coreFullscreenDemo .msg{max-width:min(84%,760px);padding:12px 14px;background:#292929;border-color:#414141;border-radius:13px;font-size:14px;line-height:1.6;animation:none}
-body.coreFullscreenDemo .msg.user{background:#353535;border-color:#505050}
-body.coreFullscreenDemo .who{color:#aaa}
-body.coreFullscreenDemo .quickbar{padding:0 14px 11px;gap:7px}
-body.coreFullscreenDemo .quickbar button{min-height:31px;padding:6px 10px;background:#2d2d2d!important;border-color:#484848!important;color:#ddd!important;font-size:11px}
-body.coreFullscreenDemo .composer{padding:11px 14px;background:#202020!important;border-color:#3e3e3e!important}
-body.coreFullscreenDemo .composer textarea{min-height:46px;max-height:20vh;background:#292929!important;border-color:#484848!important;border-radius:11px;color:#f3f3f3}
-body.coreFullscreenDemo .send{min-width:86px;min-height:42px;background:#ededed!important;color:#171717!important;box-shadow:none!important}
-body.coreFullscreenDemo .send:hover{transform:none!important}
-body.coreFullscreenDemo .chatFoot{padding:0 14px 10px;color:#999;font-size:10px}
-.copy-answer{background:#303030!important;border-color:#505050!important;color:#ddd!important}
-#stop-chat{min-height:32px;padding:6px 10px;background:#3a2929!important;border:1px solid #654848!important;color:#f0dada!important;border-radius:8px;font-size:11px}
-#stop-chat:disabled{opacity:.35}
-@media(max-width:700px){
- body.coreFullscreenDemo .topbar{padding:8px 12px}
- body.coreFullscreenDemo .brand h1{font-size:15px}
- body.coreFullscreenDemo .brand p{font-size:10px}
- body.coreFullscreenDemo .mark{width:36px;height:36px}
- body.coreFullscreenDemo .status{padding:5px 8px;font-size:10px}
- body.coreFullscreenDemo .hero{padding:8px 12px}
- body.coreFullscreenDemo .hero h2{font-size:21px;margin:5px 0}
- body.coreFullscreenDemo .hero p{font-size:11px}
- body.coreFullscreenDemo .notice{width:calc(100% - 20px);padding:8px 10px;margin-bottom:7px;font-size:10px}
- body.coreFullscreenDemo .chatCard{width:100%;border-radius:14px 14px 0 0}
- body.coreFullscreenDemo .chatHead{align-items:flex-start;padding:9px 10px;gap:8px}
- body.coreFullscreenDemo .toolbar{justify-content:flex-start;max-width:100%;gap:5px}
- body.coreFullscreenDemo .toolbar button,body.coreFullscreenDemo .answer-setting select{min-height:30px;padding:5px 7px;font-size:10px}
- body.coreFullscreenDemo .answer-setting{gap:4px;font-size:10px}
- body.coreFullscreenDemo #messages{padding:10px;gap:8px}
- body.coreFullscreenDemo .msg{max-width:96%;padding:10px 11px;font-size:13px}
- body.coreFullscreenDemo .composer{padding:8px;gap:6px}
- body.coreFullscreenDemo .composer textarea{min-height:42px;padding:9px 10px;font-size:14px}
- body.coreFullscreenDemo .send{min-width:68px;min-height:40px;padding:0 9px;font-size:12px}
- body.coreFullscreenDemo .quickbar{gap:5px;padding:0 9px 8px;overflow-x:auto;flex-wrap:nowrap}
- body.coreFullscreenDemo .quickbar button{flex:0 0 auto;font-size:10px;padding:6px 8px}
- body.coreFullscreenDemo .chatFoot{padding:0 10px 8px;font-size:9px}
-}
-@media(max-height:650px) and (min-width:701px){
- body.coreFullscreenDemo .hero{padding:5px 12px}
- body.coreFullscreenDemo .notice{padding:7px 10px;margin-bottom:5px}
- body.coreFullscreenDemo .chatHead{padding:8px 12px}
-}
+@media(max-height:620px) and (min-width:681px){.hero{padding:2px}.notice{padding:6px 9px}.shell,body.coreFullscreenDemo .shell{gap:5px}.topbar{padding:7px 12px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -195,59 +88,76 @@ body.coreFullscreenDemo .chatFoot{padding:0 14px 10px;color:#999;font-size:10px}
 </main>
 <script>
 (()=>{
- const API="https://tillbot.onrender.com";
- const params=new URLSearchParams(window.location.search);
+ 'use strict';
+ const API='https://tillbot.onrender.com';
+ const params=new URLSearchParams(location.search);
  if(!params.has('embed'))document.body.classList.add('coreFullscreenDemo');
  if(params.has('embed'))document.querySelector('.currentAi')?.remove();
- const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count'),status=document.getElementById('demo-status'),newChat=document.getElementById('new-chat'),exportChat=document.getElementById('export-chat'),answerMode=document.getElementById('answer-mode');
+ const $=id=>document.getElementById(id);
+ const form=$('chat-form'),input=$('message-input'),send=$('send'),messages=$('messages'),count=$('count'),status=$('demo-status'),newChat=$('new-chat'),exportChat=$('export-chat'),answerMode=$('answer-mode'),stopButton=$('stop-chat');
+ if(!form||!input||!send||!messages||!stopButton)return;
  let sent=0,busy=false,history=[],activeController=null;
- const stopButton=document.getElementById('stop-chat');
- stopButton.disabled=true;
  input.maxLength=2000;
+ const setBusy=value=>{
+  busy=value;send.disabled=value||!input.value.trim();input.disabled=value;
+  stopButton.disabled=!value;newChat.disabled=value;exportChat.disabled=value;
+  document.querySelectorAll('[data-prompt]').forEach(button=>button.disabled=value);
+ };
  function add(text,role){
   const item=document.createElement('div');item.className='msg '+role;
   const who=document.createElement('div');who.className='who';who.textContent=role==='user'?'Du':'TILLBOT CORE';
-  const body=document.createElement('div');body.textContent=text;item.append(who,body);messages.append(item);messages.scrollTop=messages.scrollHeight;return item;
+  const body=document.createElement('div');body.className='message-text';body.textContent=text;
+  item.append(who,body);messages.append(item);messages.scrollTop=messages.scrollHeight;return item;
  }
- async function submit(text){
-  const value=String(text||'').trim();if(!value||busy)return;
-  add(value,'user');sent++;count.textContent=sent+(sent===1?' Nachricht':' Nachrichten');
-  const waiting=add('CORE denkt nach …','bot');busy=true;send.disabled=true;input.disabled=true;stopButton.disabled=false;status.textContent='CORE verarbeitet deine Nachricht …';
+ async function copyText(value,button){
   try{
-   activeController=new AbortController();
-   const response=await fetch(API+'/api/core/chat',{method:'POST',signal:activeController.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({message:value,history:history.slice(-8),answerMode:answerMode.value})});
+   if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(value);
+   else{const area=document.createElement('textarea');area.value=value;area.style.position='fixed';area.style.opacity='0';document.body.append(area);area.select();const ok=document.execCommand('copy');area.remove();if(!ok)throw new Error('copy failed')}
+   button.textContent='Kopiert';button.disabled=true;setTimeout(()=>{button.textContent='Antwort kopieren';button.disabled=false},1300);
+  }catch{button.textContent='Kopieren nicht möglich';setTimeout(()=>button.textContent='Antwort kopieren',1600)}
+ }
+ async function submit(raw){
+  const value=String(raw||'').trim();if(!value||busy)return;
+  add(value,'user');sent++;count.textContent=sent+(sent===1?' Nachricht':' Nachrichten');
+  const waiting=add('CORE denkt nach …','bot');status.textContent='CORE verarbeitet deine Nachricht …';setBusy(true);
+  const controller=new AbortController();activeController=controller;
+  try{
+   const response=await fetch(API+'/api/core/chat',{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({message:value,history:history.slice(-8),answerMode:answerMode.value})});
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.error||'CORE ist momentan nicht erreichbar.');
    const answer=String(data.answer||'Keine Antwort erhalten.');
-   waiting.lastChild.textContent=answer;
-   const copy=document.createElement('button');copy.type='button';copy.className='copy-answer';copy.textContent='Antwort kopieren';copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(answer);copy.textContent='Kopiert';setTimeout(()=>copy.textContent='Antwort kopieren',1500)}catch{copy.textContent='Kopieren nicht möglich'}});waiting.append(copy);
-   history.push({role:'user',content:value},{role:'assistant',content:answer});
-   history=history.slice(-8);
+   waiting.querySelector('.message-text').textContent=answer;
+   const copy=document.createElement('button');copy.type='button';copy.className='copy-answer';copy.textContent='Antwort kopieren';copy.addEventListener('click',()=>copyText(answer,copy));waiting.append(copy);
+   history.push({role:'user',content:value},{role:'assistant',content:answer});history=history.slice(-8);
    status.textContent='CORE ist bereit · Gesprächskontext aktiv';
   }catch(error){
    const cancelled=error.name==='AbortError';
-   waiting.lastChild.textContent=cancelled?'Antwort abgebrochen.':(error.message||'Verbindung zu CORE fehlgeschlagen.');
+   waiting.querySelector('.message-text').textContent=cancelled?'Anfrage wurde gestoppt.':(error.message||'Verbindung zu CORE fehlgeschlagen.');
    status.textContent=cancelled?'Anfrage gestoppt':'Modellserver momentan nicht erreichbar';
+  }finally{
+   if(activeController===controller)activeController=null;
+   setBusy(false);send.disabled=!input.value.trim();input.focus();
   }
-  finally{activeController=null;busy=false;stopButton.disabled=true;input.disabled=false;send.disabled=!input.value.trim();input.focus();}
  }
- form.addEventListener('submit',e=>{e.preventDefault();const value=input.value;input.value='';send.disabled=true;submit(value)});
- input.addEventListener('input',()=>{send.disabled=busy||!input.value.trim()});
- input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!send.disabled)form.requestSubmit()}});
- document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{if(!busy)submit(button.dataset.prompt)}));
- stopButton.addEventListener('click',()=>{if(activeController)activeController.abort()});
- newChat.addEventListener('click',()=>{if(busy)return;history=[];sent=0;messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');count.textContent='0 Nachrichten';status.textContent='Neuer Chat · kein vorheriger Gesprächskontext';input.value='';send.disabled=true;input.focus()});
- exportChat.addEventListener('click',()=>{const transcript=[...messages.querySelectorAll('.msg')].map(node=>{const who=node.querySelector('.who')?.textContent||'CORE';const body=[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE||n.nodeType===Node.ELEMENT_NODE&&n.classList?.contains('who')===false&&n.tagName!=='BUTTON').map(n=>n.textContent).join('').trim();return who+'\n'+body}).join('\n\n');const blob=new Blob([transcript],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='tillbot-core-chat.txt';link.click();URL.revokeObjectURL(url)});
- fetch(API+'/api/core/status',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(s=>{
-  status.textContent=s.available?'CORE bereit · '+(s.model||'Modellserver konfiguriert'):'CORE nicht verfügbar · Modellserver nicht konfiguriert';
-  const indicator=document.querySelector('.status');
-  if(indicator){indicator.lastChild.textContent=s.available?' Verbunden':' Nicht verfügbar';indicator.style.borderColor=s.available?'#456b59':'#754b4b';}
- }).catch(()=>{
-  status.textContent='CORE-Status momentan nicht erreichbar';
-  const indicator=document.querySelector('.status');
-  if(indicator){indicator.lastChild.textContent=' Status unbekannt';indicator.style.borderColor='#755f3d';}
+ form.addEventListener('submit',event=>{event.preventDefault();const value=input.value.trim();if(!value||busy)return;input.value='';input.style.height='';send.disabled=true;void submit(value)});
+ input.addEventListener('input',()=>{send.disabled=busy||!input.value.trim();input.style.height='auto';input.style.height=Math.min(input.scrollHeight,150)+'px'});
+ input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();if(!send.disabled)form.requestSubmit()}});
+ document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{if(!busy)void submit(button.dataset.prompt)}));
+ stopButton.addEventListener('click',()=>{activeController?.abort()});
+ newChat.addEventListener('click',()=>{
+  if(busy)return;history=[];sent=0;messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');
+  count.textContent='0 Nachrichten';status.textContent='Neuer Chat · kein vorheriger Gesprächskontext';input.value='';input.style.height='';send.disabled=true;input.focus();
  });
-})(); 
+ exportChat.addEventListener('click',()=>{
+  const transcript=[...messages.querySelectorAll('.msg')].map(node=>(node.querySelector('.who')?.textContent||'CORE')+'\n'+(node.querySelector('.message-text')?.textContent||'')).join('\n\n');
+  const blob=new Blob([transcript],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download='tillbot-core-chat.txt';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ });
+ fetch(API+'/api/core/status',{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('status');return response.json()}).then(data=>{
+  status.textContent=data.available?'CORE bereit · '+(data.model||'Modellserver konfiguriert'):'CORE nicht verfügbar · Modellserver nicht konfiguriert';
+  const indicator=document.querySelector('.status');if(indicator){indicator.lastChild.textContent=data.available?' Verbunden':' Nicht verfügbar';indicator.style.borderColor=data.available?'#456b59':'#754b4b';}
+ }).catch(()=>{status.textContent='CORE-Status momentan nicht erreichbar';const indicator=document.querySelector('.status');if(indicator){indicator.lastChild.textContent=' Status unbekannt';indicator.style.borderColor='#755f3d';}});
+})();
 </script>
 </body>
 </html>
