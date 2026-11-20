@@ -372,6 +372,20 @@ app.get("/api/admin/stats", auth, admin, async (_req, res) => { const [u,ch]=awa
 }); });
 
 // Aggregated admin overview: counts and metadata only, never chat contents or credentials.
+app.get("/api/admin/analytics",auth,admin,async(_req,res)=>{
+ try{
+  const [users,chats,usage]=await Promise.all([
+   pool.query("SELECT to_char(day::date,'DD.MM') label,COUNT(u.id)::int value FROM generate_series(CURRENT_DATE-6,CURRENT_DATE,INTERVAL '1 day') day LEFT JOIN users u ON u.created_at::date=day::date GROUP BY day ORDER BY day"),
+   pool.query("SELECT to_char(day::date,'DD.MM') label,COUNT(c.id)::int value FROM generate_series(CURRENT_DATE-6,CURRENT_DATE,INTERVAL '1 day') day LEFT JOIN chats c ON c.created_at::date=day::date GROUP BY day ORDER BY day"),
+   pool.query("SELECT to_char(usage_date,'DD.MM') label,COALESCE(SUM(message_count),0)::int value FROM user_message_usage WHERE usage_date>=CURRENT_DATE-6 GROUP BY usage_date ORDER BY usage_date")
+  ]);
+  res.set("Cache-Control","no-store").json({users:users.rows,chats:chats.rows,messages:usage.rows,checkedAt:new Date().toISOString()});
+ }catch(e){console.error("Admin analytics failed:",e.code||e.message);res.status(500).json({error:"Analytics nicht verfügbar."})}
+});
+app.get("/api/admin/logs",auth,admin,async(_req,res)=>{
+ const {rows}=await pool.query("SELECT id,level,source,message,created_at FROM system_error_logs ORDER BY created_at DESC LIMIT 100");
+ res.set("Cache-Control","no-store").json(rows);
+});
 app.get("/api/admin/overview", auth, admin, async (_req,res)=>{
  try{
   const [users,chats,tickets,active,recentUsers,recentTickets]=await Promise.all([
@@ -485,7 +499,7 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
     if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);
     res.json({ answer: data.choices?.[0]?.message?.content || "Keine Antwort",quota:req.user.role==="admin"?{unlimited:true}:undefined });
   } catch (error) {
-    console.error("Chat API error:", error);
+    console.error("Chat API error:", error);\n    pool.query("INSERT INTO system_error_logs(level,source,message) VALUES($1,$2,$3)",["error","chat",String(error.message||"Chat-Fehler").slice(0,500)]).catch(()=>{});
     res.status(500).json({ answer: error.name === "AbortError" ? "KI-Anfrage dauerte zu lange" : "KI-Serverfehler" });
   } finally {
     clearTimeout(timeout);
@@ -493,7 +507,7 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
 });
 
 app.use((error, _req, res, _next) => {
-  console.error("Express error:", error);
+  console.error("Express error:", error);\n  pool.query("INSERT INTO system_error_logs(level,source,message) VALUES($1,$2,$3)",["error","express",String(error.message||"Serverfehler").slice(0,500)]).catch(()=>{});
   res.status(500).json({ error: "Interner Serverfehler" });
 });
 
