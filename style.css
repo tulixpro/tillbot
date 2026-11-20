@@ -2385,3 +2385,39 @@ main>header #who{margin-left:auto;max-width:100px;overflow:hidden;text-overflow:
  #sidebar{width:270px;flex:0 0 270px}
  .composerArea{padding-bottom:20px}
 }
+
+
+/* TILLBOT 4.2 — final interaction and accessibility polish */
+:root{color-scheme:dark}
+html{scrollbar-color:#383838 #090909;scroll-behavior:smooth}
+body{accent-color:#d9d9d9}
+button,input,textarea,select{font:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid #d6d6d6!important;outline-offset:3px!important}
+button:disabled{opacity:.48;cursor:not-allowed}
+::selection{background:#555;color:#fff}
+#sidebar{background:#0b0b0b!important}
+#sidebar .brand{padding-bottom:18px;border-bottom:1px solid #222}
+#sidebar .sideSectionLabel,#sidebar .drawerSectionLabel,#sidebar .label{letter-spacing:1.15px;font-size:10px;color:#888}
+#history{min-height:70px}
+#history .historyItem{border-radius:10px;overflow:hidden}
+#history .historyItem.active{background:#1a1a1a}
+#history .historyOpen{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+main>header{box-shadow:0 4px 18px #0003}
+.modelPickerBtn:active,.moreMenuBtn:active,.composerTools button:active{transform:scale(.98)}
+.moreMenuPanel{max-height:min(70vh,520px);overflow:auto}
+.composer:focus-within{border-color:#555!important;box-shadow:0 0 0 1px #333,0 16px 48px #0008!important}
+.composerTools button{transition:background .16s ease,border-color .16s ease}
+#send{font-weight:700}
+#send:hover{background:#d9d9d9!important}
+#sidebar + .sidebarScrim{display:none}
+@media(max-width:820px){
+ #sidebar + .sidebarScrim{display:block;position:fixed;inset:0;z-index:50;border:0;border-radius:0;padding:0;background:#0009;opacity:0;pointer-events:none;transition:opacity .2s ease}
+ #sidebar.open + .sidebarScrim{opacity:1;pointer-events:auto}
+ #sidebar{z-index:60!important}
+ #sidebar.open{transform:translateX(0)!important}
+ #sidebar:not(.open){transform:translateX(-105%)!important}
+}
+@media(min-width:821px){
+ #sidebar + .sidebarScrim{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}button,.composer,.sidebarScrim{transition:none!important}}
