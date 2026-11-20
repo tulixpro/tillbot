@@ -137,7 +137,8 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
  if(!params.has('embed'))document.body.classList.add('coreFullscreenDemo');
  if(params.has('embed'))document.querySelector('.currentAi')?.remove();
  const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count'),status=document.getElementById('demo-status');
- let sent=0,busy=false;
+ let sent=0,busy=false,history=[];
+ input.maxLength=2000;
  function add(text,role){
   const item=document.createElement('div');item.className='msg '+role;
   const who=document.createElement('div');who.className='who';who.textContent=role==='user'?'Du':'TILLBOT CORE';
@@ -146,12 +147,16 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
  async function submit(text){
   const value=String(text||'').trim();if(!value||busy)return;
   add(value,'user');sent++;count.textContent=sent+(sent===1?' Nachricht':' Nachrichten');
-  const waiting=add('CORE denkt nach …','bot');busy=true;send.disabled=true;input.disabled=true;status.textContent='Mit dem CORE-Modellserver verbunden';
+  const waiting=add('CORE denkt nach …','bot');busy=true;send.disabled=true;input.disabled=true;status.textContent='CORE verarbeitet deine Nachricht …';
   try{
-   const response=await fetch(API+'/api/core/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:value})});
+   const response=await fetch(API+'/api/core/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:value,history:history.slice(-8)})});
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.error||'CORE ist momentan nicht erreichbar.');
-   waiting.lastChild.textContent=data.answer||'Keine Antwort erhalten.';
+   const answer=String(data.answer||'Keine Antwort erhalten.');
+   waiting.lastChild.textContent=answer;
+   history.push({role:'user',content:value},{role:'assistant',content:answer});
+   history=history.slice(-8);
+   status.textContent='CORE ist bereit · Gesprächskontext aktiv';
   }catch(error){waiting.lastChild.textContent=error.message||'Verbindung zu CORE fehlgeschlagen.';status.textContent='Modellserver momentan nicht erreichbar';}
   finally{busy=false;input.disabled=false;send.disabled=!input.value.trim();input.focus();}
  }
