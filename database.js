@@ -82,6 +82,13 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS system_error_recent ON system_error_logs(created_at DESC);
+    CREATE TABLE IF NOT EXISTS admin_permission_overrides (
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      permission_key TEXT NOT NULL CHECK(permission_key IN ('users','support','features','system')),
+      enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY(user_id,permission_key)
+    );
     CREATE TABLE IF NOT EXISTS admin_activity_log (
       id BIGSERIAL PRIMARY KEY,
       actor_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
