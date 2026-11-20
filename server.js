@@ -147,7 +147,7 @@ app.post("/api/register", rateLimit({windowMs:60*60_000,limit:5}), async (req, r
     const hash=await bcrypt.hash(password,12);
     const {rows}=await pool.query("INSERT INTO users(username,email,email_verified,password_hash,role) VALUES($1,$2,FALSE,$3,'user') RETURNING id",[username,email,hash]);
     const userId=Number(rows[0].id),token=await createEmailAction(userId,"verify");
-    const link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"?verify="+encodeURIComponent(token);
+    const link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"#verify="+encodeURIComponent(token);
     await sendAccountEmail(email,"TILLBOT – E-Mail-Adresse bestätigen","Hallo "+username+",\n\nbitte bestätige deine E-Mail-Adresse über diesen Link (24 Stunden gültig):\n"+link+"\n\nFalls du kein Konto erstellt hast, kannst du diese Nachricht ignorieren.");
     res.status(202).json({pendingVerification:true,message:"Konto erstellt. Bitte öffne den Bestätigungslink in deiner E-Mail, bevor du dich anmeldest."});
   }catch(error){
@@ -179,7 +179,7 @@ app.post("/api/auth/forgot-password",rateLimit({windowMs:60*60_000,limit:3}),asy
   const {rows}=await pool.query("SELECT id,username,email_verified FROM users WHERE email=$1",[email]);
   if(rows[0]?.email_verified){
    const token=await createEmailAction(rows[0].id,"reset");
-   const link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"?reset="+encodeURIComponent(token);
+   const link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"#reset="+encodeURIComponent(token);
    await sendAccountEmail(email,"TILLBOT – Passwort zurücksetzen","Hallo "+rows[0].username+",\n\nüber diesen Link kannst du innerhalb einer Stunde ein neues Passwort festlegen:\n"+link+"\n\nFalls du das nicht angefordert hast, ignoriere diese Nachricht.");
   }
   res.json({ok:true,message:"Falls ein bestätigtes Konto zu dieser Adresse gehört, wurde eine E-Mail mit weiteren Schritten versendet."});
