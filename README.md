@@ -107,3 +107,13 @@ The frontend is a static site; the API URL is currently configured in `app.js`.
 - Dashboard widgets can be reordered by drag-and-drop; order is stored locally in the browser.
 - Speech: browser speech recognition for dictation and speech synthesis for reading the latest answer.
 - Chat search includes saved chat history; PDF export uses the browser print dialog ("Save as PDF").
+
+
+### Remaining integrations (not enabled yet)
+The following requested features require a separately configured provider or infrastructure and are intentionally not represented as working controls yet:
+- Image generation: requires an image-provider integration and \`IMAGE_API_KEY\`.
+- Web search: requires a search provider integration and \`TAVILY_API_KEY\`.
+- Public developer API: requires scoped API-key issuance, revocation, quotas and public API documentation; the feature flag remains disabled.
+- PDF/document import: image analysis is supported, but arbitrary PDF parsing is not yet implemented.
+- Database backup/restore: use managed PostgreSQL backups in the hosting provider until an authenticated, tested backup-and-restore workflow is implemented. No fake "backup" action is exposed.
+- Push notifications: admin metrics refresh periodically while the dashboard is open; browser push delivery is not yet implemented.
