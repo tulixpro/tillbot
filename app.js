@@ -34,7 +34,7 @@ window.api = api;
 window.TILLBOT_API = API;
 
 function authMode(reg){
- registerMode=reg;
+ registerMode=reg;$("emailAuthRow").classList.toggle("hidden",!reg);$("authEmail").required=reg;
  $("tabLogin").classList.toggle("selected",!reg);$("tabRegister").classList.toggle("selected",reg);
  $("tabLogin").setAttribute("aria-selected",String(!reg));$("tabRegister").setAttribute("aria-selected",String(reg));
  $("authTitle").textContent=reg?"Erstelle dein Konto.":"Dein Platz für neue Ideen.";
@@ -69,7 +69,7 @@ async function checkAuthStatus(){
 checkAuthStatus();
 window.tillbotAuthSubmit=async()=>{
  const b=$("authSubmit"),username=$("username").value.trim().toLowerCase(),password=$("password").value,email=$("authEmail").value.trim().toLowerCase();
- if(!/^[a-z0-9_]{3,20}$/.test(username)){ $("authMsg").textContent="Benutzername: 3–20 Zeichen (a–z, 0–9, _).";$("username").focus();return; }
+ if(registerMode&&!/^[a-z0-9_]{3,20}$/.test(username)){ $("authMsg").textContent="Benutzername: 3–20 Zeichen (a–z, 0–9, _).";$("username").focus();return; } if(!registerMode&&(!username||username.length>254)){ $("authMsg").textContent="Bitte gib deinen Benutzernamen oder deine E-Mail-Adresse ein.";$("username").focus();return; }
  if(registerMode){
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254){$("authMsg").textContent="Bitte gib eine gültige E-Mail-Adresse ein.";$("authEmail").focus();return;}
   if(password.length<10||password.length>128){$("authMsg").textContent="Das Passwort muss 10–128 Zeichen haben.";$("password").focus();return;}
@@ -97,14 +97,7 @@ $("resendVerification").onclick=async()=>{
  catch(e){$("authMsg").textContent=e.message||"E-Mail konnte nicht erneut gesendet werden.";}
  finally{b.disabled=false}
 };
-$("forgotPassword").onclick=async()=>{
- const email=prompt("Gib die E-Mail-Adresse deines TILLBOT-Kontos ein:");
- if(!email)return;
- const b=$("forgotPassword");b.disabled=true;$("authMsg").textContent="Anfrage wird verarbeitet …";
- try{const d=await authRequest("/api/auth/forgot-password",{email});$("authMsg").textContent=d.message||"Falls ein Konto existiert, erhältst du eine E-Mail.";}
- catch(e){$("authMsg").textContent=e.message||"Anfrage momentan nicht möglich.";}
- finally{b.disabled=false}
-};
+$("forgotPassword").onclick=async()=>{const b=$("forgotPassword");if(!$("emailAuthRow").classList.contains("hidden")&&$("authEmail").value.trim()){b.disabled=true;$("authMsg").textContent="Anfrage wird verarbeitet …";try{const d=await authRequest("/api/auth/forgot-password",{email:$("authEmail").value.trim().toLowerCase()});$("authMsg").textContent=d.message||"Falls ein Konto existiert, erhältst du eine E-Mail.";}catch(e){$("authMsg").textContent=e.message||"Anfrage momentan nicht möglich.";}finally{b.disabled=false}}else{$("emailAuthRow").classList.remove("hidden");$("authEmail").required=true;$("authEmail").focus();$("authMsg").textContent="Gib deine Konto-E-Mail ein und wähle erneut „Passwort vergessen“."}};
 async function handleAccountEmailLink(){
  const params=new URLSearchParams(location.hash.slice(1)),verify=params.get("verify"),reset=params.get("reset");
  if(verify){
