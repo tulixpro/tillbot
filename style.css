@@ -1726,3 +1726,72 @@ body[data-theme="light"] .bubble.user{background:#f2f2f2!important;color:#242424
  #app .suggestions{grid-template-columns:repeat(2,minmax(0,1fr))}
  #app .powerTools{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+
+/* TILLBOT navigation refresh: right-side drawer, tools and demos live inside it */
+#menu{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #ffffff16;background:#ffffff08;border-radius:13px}
+#sidebar{position:fixed;z-index:30;top:0;right:0;bottom:0;left:auto;width:min(360px,92vw);height:100dvh;max-height:100dvh;overflow-y:auto;transform:translateX(110%);transition:transform .24s ease;border-right:0;border-left:1px solid #ffffff18;box-shadow:-24px 0 70px #0005;padding:20px}
+#sidebar.open{transform:translateX(0)}
+#closeMenu{display:flex;align-items:center;gap:8px;align-self:flex-end;background:#ffffff0a;border-color:#ffffff16;padding:8px 12px}
+#closeMenu span{font-size:12px}
+.drawerSectionLabel{font-size:10px;letter-spacing:1.5px;color:#8b9bff;font-weight:800;margin:10px 0 0}
+.drawerTools .toolsToggle{width:100%;text-align:left;background:#17243a;border:1px solid #ffffff15;color:#e5edfa;padding:12px 14px;border-radius:12px;font-size:13px}
+.drawerTools .powerTools{display:none;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.drawerTools .powerTools.toolsExpanded{display:grid}
+.drawerTools .powerTools button{font-size:12px;line-height:1.3;text-align:left;padding:10px 9px;background:#14243a;border:1px solid #ffffff12;border-radius:10px}
+.drawerDemos .demoPicker{display:block;margin:0;padding:0;border:0;background:transparent}
+.drawerDemos .demoPickerCopy{margin:0 0 8px}
+.drawerDemos .demoPickerCopy h2{font-size:17px;margin:5px 0}
+.drawerDemos .demoPickerCopy p{font-size:12px;line-height:1.5;color:var(--muted)}
+.drawerDemos .demoPicker>label{display:block;font-size:12px;color:var(--muted);margin:8px 0 5px}
+.drawerDemos .demoPicker select{width:100%;padding:11px;border-radius:10px;background:#101827;color:#eaf0fa;border:1px solid #ffffff18}
+.drawerDemos .demoFrameWrap{margin-top:10px}
+.drawerDemos iframe{width:100%;min-height:420px;border:1px solid #ffffff18;border-radius:12px;background:#fff}
+.drawerTools,.drawerDemos{min-width:0}
+@media(max-width:700px){#sidebar{width:min(360px,92vw);height:var(--tb-visual-height,100dvh)}}
+body[data-theme="light"] #sidebar{background:#fff;border-left-color:#dce4ef}
+body[data-theme="light"] .drawerTools .toolsToggle,body[data-theme="light"] .drawerTools .powerTools button{background:#f3f6fb;color:#263750;border-color:#dce4ef}
+body[data-theme="light"] .drawerDemos .demoPicker select{background:#f4faff;color:#17334b;border-color:#bfd9e7}
+
+/* Restore the soft TILLBOT cloud hero and give login a calmer card hierarchy */
+.welcome .cloud{width:clamp(150px,22vw,220px);height:clamp(105px,16vw,150px);border-radius:0;overflow:visible;margin:0 auto 14px;box-shadow:none;filter:drop-shadow(0 12px 28px #78aaff22)}
+.welcome .cloud img{object-fit:contain;opacity:.96}
+.authV3{position:relative;isolation:isolate;gap:22px}
+.authBackdrop{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.authBackdrop span{position:absolute;width:280px;height:150px;border-radius:100px;background:radial-gradient(ellipse,#7aa9ff35,transparent 70%);filter:blur(8px)}
+.authBackdrop span:nth-child(1){top:8%;left:8%}.authBackdrop span:nth-child(2){top:48%;right:4%;width:340px}.authBackdrop span:nth-child(3){bottom:3%;left:28%;width:360px}
+.authRebuilt{width:min(470px,100%);padding:clamp(22px,5vw,38px);border-radius:26px;background:linear-gradient(155deg,#17243beF,#0d1729f5);border:1px solid #a7bbff22;box-shadow:0 28px 90px #02081788}
+.authBrand{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.authBrand .logo{font-size:27px;letter-spacing:-1.3px}.authBrand .eyebrow{font-size:9px;color:#94a7ff}
+.authIntro h1{font-size:clamp(26px,6vw,34px);line-height:1.12;margin:16px 0 8px}
+.authIntro p{font-size:13px;line-height:1.65;color:#a7b5ca}
+.authPill{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:30px;background:#728bff16;color:#b9c5ff;font-size:11px}
+.authPill i{width:7px;height:7px;border-radius:50%;background:#50d9b3;box-shadow:0 0 12px #50d9b3}
+.authTabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;margin:20px 0 16px;background:#080f1d;border:1px solid #ffffff0d;border-radius:13px}
+.authTabs button{background:transparent;border:0;color:#9eabc0;border-radius:9px;padding:11px}
+.authTabs button.selected{background:linear-gradient(120deg,#5368e8,#259d9f);color:white;box-shadow:0 5px 16px #5368e844}
+.authFields label,.authFieldHeading label{display:block;color:#dce5f4;font-size:12px;font-weight:650;margin:12px 0 6px}
+.authInputWrap{display:flex;align-items:center;gap:9px;padding:0 12px;border:1px solid #ffffff17;background:#091323;border-radius:12px}
+.authInputWrap>span{color:#7e91b2}
+.authInputWrap input{flex:1;min-width:0;margin:0;padding:13px 0;background:transparent;border:0;outline:0;box-shadow:none}
+.authFieldHeading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.authFieldHeading>span,.authFieldHint{font-size:10px;color:#8291aa}
+.authPasswordWrap .passwordToggle{padding:6px 8px;background:#ffffff0a;border:1px solid #ffffff12;border-radius:8px;font-size:10px}
+.confirmPasswordRow{margin-top:12px}
+.authProtection{display:flex;gap:11px;align-items:flex-start;margin:15px 0;padding:12px;border:1px solid #ffffff12;border-radius:12px;background:#ffffff06}
+.authProtectionIcon{font-size:20px}.authProtection strong,.authProtection small{display:block}.authProtection strong{font-size:12px}.authProtection small{font-size:10px;line-height:1.5;color:#91a0b7;margin-top:3px}
+.authSubmit{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 16px;border-radius:13px;background:linear-gradient(120deg,#6478ff,#37bda9)}
+.authArrow{font-size:20px}
+.authMessage{min-height:20px;margin:8px 0}
+.authTrust{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#8d9bb2;font-size:10px;margin-top:8px}
+.publicDemoEmbed{width:min(760px,100%);margin:0 auto;padding:18px;border:1px solid #ffffff14;border-radius:20px;background:#101827e8}
+.publicDemoEmbedHead h2{margin:8px 0;font-size:22px}.publicDemoEmbedHead p,.publicDemoEmbedNote{font-size:12px;color:#91a0b7;line-height:1.6}
+.publicDemoEmbed iframe{width:100%;height:440px;border:1px solid #ffffff16;border-radius:14px;background:#fff}
+.authCopyright{font-size:9px;letter-spacing:2px;color:#71819b}
+body[data-theme="light"] .authRebuilt{background:#fff;border-color:#dce4ef}
+body[data-theme="light"] .authInputWrap{background:#f4faff;border-color:#dce4ef}
+body[data-theme="light"] .authInputWrap input{color:#17334b}
+body[data-theme="light"] .authFields label,body[data-theme="light"] .authFieldHeading label{color:#29445d}
+body[data-theme="light"] .authProtection{background:#f6f9fd;border-color:#e4ebf4}
+body[data-theme="light"] .authProtection small,body[data-theme="light"] .authIntro p{color:#61758c}
+@media(max-width:520px){.auth{padding:14px}.authTrust{flex-direction:column}.publicDemoEmbed{padding:12px}.publicDemoEmbed iframe{height:380px}}
