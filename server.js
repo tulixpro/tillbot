@@ -512,6 +512,13 @@ app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res
  * Uses the configured hosted model as an inference engine; this is not a separately trained foundation model.
  * Requests are rate-limited and never written to chat history or the database.
  */
+app.get("/api/core/status", (_req, res) => {
+  res.set("Cache-Control", "no-store").json({
+    available: Boolean(process.env.GROQ_API_KEY),
+    model: process.env.CORE_MODEL || "openai/gpt-oss-20b",
+    provider: "Groq"
+  });
+});
 app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { error: "CORE ist gerade stark ausgelastet. Bitte eine Minute warten." } }), async (req, res) => {
   const message = String(req.body?.message || "").trim();
   if (!message || message.length > 2000) return res.status(400).json({ error: "Bitte gib eine Nachricht mit maximal 2.000 Zeichen ein." });
@@ -526,6 +533,7 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
   const answerGuidance = { short: "Antworte sehr knapp und auf den Punkt, möglichst in wenigen Sätzen.", balanced: "Halte Antworten standardmäßig kompakt, erweitere sie bei komplexen Fragen.", detailed: "Antworte ausführlich und strukturiert mit Erklärungen, Beispielen und sinnvollen Zwischenschritten." }[answerMode];
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25_000);
+  res.on("close", () => { if (!res.writableEnded) controller.abort(); });
   try {
     const model = String(process.env.CORE_MODEL || "openai/gpt-oss-20b");
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
