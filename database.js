@@ -98,6 +98,13 @@ async function initDatabase() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS admin_activity_recent ON admin_activity_log(created_at DESC);
+    CREATE TABLE IF NOT EXISTS daily_usage_stats (
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      usage_date DATE NOT NULL,
+      message_count INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY(user_id,usage_date)
+    );
+    CREATE INDEX IF NOT EXISTS daily_usage_date ON daily_usage_stats(usage_date);
     CREATE TABLE IF NOT EXISTS user_memories (
       id BIGSERIAL PRIMARY KEY,
       user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
