@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#081321">
 <meta name="description" content="TILLBOT CORE – transparente deutsche Browser-Demo.">
-<title>TILLBOT CORE – Deutsche KI-Forschungsdemo</title>
+<title>TILLBOT CORE – Deutsche KI-KI-Forschungsdemo</title>
 <style>
 :root{color-scheme:dark;--bg:#100d1c;--panel:#1b172b;--panel2:#241d38;--line:#51436d;--text:#f4efff;--muted:#b2a9c8;--blue:#ad91ff;--mint:#79e2c2;--user:#43326f}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#3b2865 0,transparent 48%),var(--bg);color:var(--text);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
@@ -105,11 +105,11 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
 <body>
 <main class="shell">
 <header class="topbar"><div class="brand"><div class="mark" aria-hidden="true">TC</div><div><h1>TILLBOT CORE</h1><p>Deutsch zuerst · Eigenständige KI-Forschung</p></div></div><div class="status"><i></i> Forschungsdemo</div></header>
-<section class="hero"><span class="eyebrow">CORE · BROWSER-PROTOTYP</span><h2>Ein eigener KI-Kern. Schritt für Schritt.</h2><p>Hier kannst du die Oberfläche und die vorbereiteten CORE-Antworten testen. Der eigentliche Modellkern wird separat entwickelt und trainiert.</p></section>
-<div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Browserdemo verwendet feste Regeln und vorbereitete Antworten. Sie ist noch kein trainiertes Sprachmodell, kann keine freien Wissensfragen zuverlässig beantworten und lernt nicht aus deinen Nachrichten. Der Demo-Chat überträgt keine Nachrichten an einen Server.</div></div>
+<section class="hero"><span class="eyebrow">CORE · BROWSER-PROTOTYP</span><h2>Ein eigener KI-Kern. Schritt für Schritt.</h2><p>Hier kannst du TILLBOT CORE direkt mit einem extern bereitgestellten Sprachmodell testen. CORE steuert Antworten über eine eigene, abgesicherte Schnittstelle.</p></section>
+<div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
-<div class="chatHead"><strong>CORE-Testchat</strong><span>Lokale Demo · keine Anmeldung</span></div>
-<div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Ich kann dir den aktuellen Projektstand und meine Demo-Funktionen erklären. Wähle eine Frage oder schreibe direkt los.</div></div>
+<div class="chatHead"><strong>CORE-Testchat</strong><span>Öffentliche KI-Demo · ohne Anmeldung</span></div>
+<div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Stelle eine Frage oder wähle ein Beispiel. Ich antworte über den CORE-Forschungsendpunkt.</div></div>
 <div class="quickbar" aria-label="Beispielfragen">
 <button type="button" data-prompt="Was kannst du?">Was kannst du?</button>
 <button type="button" data-prompt="Was ist TILLBOT CORE?">Was ist CORE?</button>
@@ -125,43 +125,40 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
 <article><strong>✓ Bereits testbar</strong><p>Chat-Oberfläche, Beispiel-Fragen und vorbereitete Antworten über CORE, den Entwicklungsstand, Deutsch als Zielsprache und die nächsten Schritte.</p></article>
 <article><strong>⌛ Noch in Entwicklung</strong><p>Freie Wissensfragen, echte Recherche, Bildverständnis, dauerhaftes Gedächtnis und selbstständiges Lernen. Dafür braucht CORE ein trainiertes Modell und weitere geprüfte Funktionen.</p></article>
 </div>
-<p><strong>Hinweis:</strong> Bitte keine vertraulichen Informationen eingeben. Die Demo speichert den Chat nicht dauerhaft.</p>
+<p><strong>Hinweis:</strong> Bitte keine vertraulichen Informationen eingeben. TILLBOT speichert diesen öffentlichen Demo-Chat nicht dauerhaft. Nachrichten werden zur Verarbeitung an den externen Modellanbieter übertragen.</p>
 </details>
 
-<footer class="footer"><span>TILLBOT CORE · Forschungsprototyp</span><span id="demo-status">Keine Verbindung zu einem Modellserver</span></footer>
+<footer class="footer"><span>TILLBOT CORE · Forschungsprototyp</span><span id="demo-status">CORE wird beim Senden mit dem Modellserver verbunden</span></footer>
 </main>
 <script>
 (()=>{
+ const API="https://tillbot.onrender.com";
  const params=new URLSearchParams(window.location.search);
  if(!params.has('embed'))document.body.classList.add('coreFullscreenDemo');
  if(params.has('embed'))document.querySelector('.currentAi')?.remove();
- const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count');
- let sent=0;
- const answer=text=>{
-  const q=text.toLocaleLowerCase('de').replace(/[?!.,]/g,' ').replace(/\s+/g,' ').trim();
-  if(/^(hi|hallo|hey|guten morgen|guten tag|moin)\b/.test(q))return'Hallo! Schön, dass du TILLBOT CORE testest. Was möchtest du über den Prototyp wissen?';
-  if(q.includes('was kannst')||q.includes('funktionen')||q.includes('hilfe'))return'In dieser Demo kann ich einige vorbereitete Fragen zu TILLBOT CORE beantworten und den Chatablauf zeigen. Freie Wissensfragen, Websuche, langfristiges Gedächtnis und echtes Lernen sind noch nicht eingebaut.';
-  if(q.includes('wer bist')||q.includes('was ist tillbot')||q.includes('tillbot core')||q==='was ist core')return'TILLBOT CORE ist das Projekt für ein eigenständiges Sprachmodell mit eigener Tokenisierung, Modellarchitektur, Trainingspipeline und Laufzeit. Der aktuelle Stand ist ein experimenteller Prototyp – noch kein leistungsfähiger Assistent.';
-  if(q.includes('wie geht')||q.includes('nächste')||q.includes('weiter'))return'Die nächsten Schritte sind: Trainingspipeline messbar und reproduzierbar machen, rechtlich geprüfte deutsche Trainingsdaten vorbereiten, Tests bestehen lassen und erst danach kontrolliert trainieren und evaluieren.';
-  if(q.includes('lernst')||q.includes('lernen')||q.includes('merkst'))return'Nein. Diese Browserdemo trainiert nicht aus dem Chat und speichert nichts dauerhaft. Die Nachrichten sind nur während dieser geöffneten Seite im sichtbaren Verlauf.';
-  if(q.includes('internet')||q.includes('online')||q.includes('daten'))return'Öffentlich testbar, ohne Konto und ohne API: Deine Eingaben bleiben in dieser geöffneten Browserseite. Antworten stammen aus vorbereiteten Regeln und Textbausteinen.';
-  if(q.includes('deutsch')||q.includes('sprache'))return'Deutsch ist die erste Zielsprache für TILLBOT CORE. Die Oberfläche und die vorbereiteten Antworten dieser Demo sind auf Deutsch.';
-  if(q.includes('danke'))return'Gern! Du kannst weitere Beispielfragen anklicken oder direkt eine Frage zum Projekt stellen.';
-  return'Das kann ich in dieser frühen Demo noch nicht zuverlässig beantworten. Im Moment kenne ich nur einige vorbereitete Themen rund um TILLBOT CORE. Das eigentliche Sprachmodell muss noch entwickelt und trainiert werden.';
- };
+ const form=document.getElementById('chat-form'),input=document.getElementById('message-input'),send=document.getElementById('send'),messages=document.getElementById('messages'),count=document.getElementById('count'),status=document.getElementById('demo-status');
+ let sent=0,busy=false;
  function add(text,role){
   const item=document.createElement('div');item.className='msg '+role;
   const who=document.createElement('div');who.className='who';who.textContent=role==='user'?'Du':'TILLBOT CORE';
-  const body=document.createElement('div');body.textContent=text;item.append(who,body);messages.append(item);messages.scrollTop=messages.scrollHeight;
+  const body=document.createElement('div');body.textContent=text;item.append(who,body);messages.append(item);messages.scrollTop=messages.scrollHeight;return item;
  }
- function submit(text){
-  const value=text.trim();if(!value)return;
-  add(value,'user');add(answer(value),'bot');sent++;count.textContent=sent+(sent===1?' Nachricht':' Nachrichten');
+ async function submit(text){
+  const value=String(text||'').trim();if(!value||busy)return;
+  add(value,'user');sent++;count.textContent=sent+(sent===1?' Nachricht':' Nachrichten');
+  const waiting=add('CORE denkt nach …','bot');busy=true;send.disabled=true;input.disabled=true;status.textContent='Mit dem CORE-Modellserver verbunden';
+  try{
+   const response=await fetch(API+'/api/core/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:value})});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(data.error||'CORE ist momentan nicht erreichbar.');
+   waiting.lastChild.textContent=data.answer||'Keine Antwort erhalten.';
+  }catch(error){waiting.lastChild.textContent=error.message||'Verbindung zu CORE fehlgeschlagen.';status.textContent='Modellserver momentan nicht erreichbar';}
+  finally{busy=false;input.disabled=false;send.disabled=!input.value.trim();input.focus();}
  }
- form.addEventListener('submit',e=>{e.preventDefault();submit(input.value);input.value='';send.disabled=true;input.focus()});
- input.addEventListener('input',()=>{send.disabled=!input.value.trim()});
+ form.addEventListener('submit',e=>{e.preventDefault();const value=input.value;input.value='';send.disabled=true;submit(value)});
+ input.addEventListener('input',()=>{send.disabled=busy||!input.value.trim()});
  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!send.disabled)form.requestSubmit()}});
- document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{submit(button.dataset.prompt);input.focus()}));
+ document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{if(!busy)submit(button.dataset.prompt)}));
 })();
 </script>
 </body>
