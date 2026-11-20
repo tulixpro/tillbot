@@ -592,8 +592,6 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
   const messages = [{ role: "system", content: systemPrompt+" "+personalContext },
     ...history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
       .map(m => ({ role: m.role, content: m.content.slice(0, 8000) }))];
-  const userText = String(req.body.message || "").slice(0, 8000);
-  const image = req.body.image;
   if(image&&typeof image.data==="string"&&!await featureEnabled("file_analysis"))return res.status(403).json({answer:"Datei- und Bildanalyse ist derzeit deaktiviert."});
   if (image && typeof image.data === "string") {
     if (!["image/jpeg", "image/png", "image/webp"].includes(image.mime) || image.data.length > 2_500_000 || !/^[A-Za-z0-9+/]+={0,2}$/.test(image.data)) {
