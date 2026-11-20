@@ -256,3 +256,5 @@ document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("clic
  $l("learnReveal").onclick=reveal;$l("learnKnown").onclick=()=>mark(true);$l("learnAgain").onclick=()=>mark(false);
  const langSelect=$("language");langSelect?.addEventListener("change",()=>{if(dialog.open)paint()});
 })();
+
+(()=>{const launch=document.getElementById("coreLaunchBtn"),dialog=document.getElementById("coreFullscreen"),frame=document.getElementById("coreFullscreenFrame"),close=document.getElementById("closeCoreFullscreen");if(!launch||!dialog||!frame||!close)return;launch.addEventListener("click",()=>{if(frame.src==="about:blank")frame.src=frame.dataset.src;dialog.showModal();document.getElementById("sidebar")?.classList.remove("open")});const shut=()=>dialog.close();close.addEventListener("click",shut);dialog.addEventListener("click",e=>{if(e.target===dialog)shut()})})();
