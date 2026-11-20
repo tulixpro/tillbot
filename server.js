@@ -300,6 +300,28 @@ app.get("/api/admin/stats", auth, admin, async (_req, res) => { const [u,ch]=awa
   chats: Number(ch.rows[0].n)
 }); });
 
+// Aggregated admin overview: counts and metadata only, never chat contents or credentials.
+app.get("/api/admin/overview", auth, admin, async (_req,res)=>{
+ try{
+  const [users,chats,tickets,active,recentUsers,recentTickets]=await Promise.all([
+   pool.query("SELECT COUNT(*) total,COUNT(*) FILTER (WHERE email_verified=TRUE) verified,COUNT(*) FILTER (WHERE email_verified=FALSE) unverified,COUNT(*) FILTER (WHERE created_at>=NOW()-INTERVAL '7 days') new_week FROM users"),
+   pool.query("SELECT COUNT(*) total,COUNT(*) FILTER (WHERE updated_at>=NOW()-INTERVAL '24 hours') active_day FROM chats"),
+   pool.query("SELECT COUNT(*) total,COUNT(*) FILTER (WHERE status='open') open,COUNT(*) FILTER (WHERE status='in_progress') in_progress,COUNT(*) FILTER (WHERE status='closed') closed FROM support_tickets"),
+   pool.query("SELECT COUNT(*) n FROM user_message_usage WHERE usage_date=CURRENT_DATE AND message_count>0"),
+   pool.query("SELECT id,username,role,created_at FROM users ORDER BY created_at DESC LIMIT 6"),
+   pool.query("SELECT t.id,t.subject,t.status,t.updated_at,u.username FROM support_tickets t JOIN users u ON u.id=t.user_id ORDER BY t.updated_at DESC LIMIT 6")
+  ]);
+  const n=r=>Number(r.rows[0]?.n||0),u=users.rows[0],c=chats.rows[0],t=tickets.rows[0];
+  res.set("Cache-Control","no-store").json({
+   users:{total:Number(u.total),verified:Number(u.verified),unverified:Number(u.unverified),newLast7Days:Number(u.new_week)},
+   chats:{total:Number(c.total),activeLast24Hours:Number(c.active_day)},
+   tickets:{total:Number(t.total),open:Number(t.open),inProgress:Number(t.in_progress),closed:Number(t.closed)},
+   activeUsersToday:n(active),recentUsers:recentUsers.rows,recentTickets:recentTickets.rows,
+   checkedAt:new Date().toISOString()
+  });
+ }catch(error){console.error("Admin overview failed:",error.code||error.message);res.status(500).json({error:"Admin-Übersicht konnte nicht geladen werden."})}
+});
+
 
 // Admin-controlled global AI response style, stored in PostgreSQL.
 const AI_RESPONSE_STYLES={balanced:"Antworte ausgewogen: zuerst die direkte Lösung, danach eine verständliche Erklärung und bei Bedarf ein Beispiel.",concise:"Antworte möglichst knapp und direkt. Nutze kurze Absätze und Listen, bleibe aber vollständig.",detailed:"Antworte ausführlicher und strukturiert. Erkläre Hintergründe, zeige Beispiele und nenne sinnvolle nächste Schritte."};
