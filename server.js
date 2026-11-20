@@ -72,7 +72,7 @@ async function auth(req, res, next) {
 async function admin(req, res, next) {
   if (req.user.role !== "admin") return res.status(403).json({ error: "Adminrechte erforderlich" });
   const path=req.path||"";
-  const permission=path.startsWith("/users")?"users":path.startsWith("/tickets")?"support":path.startsWith("/features")?"features":"system";
+  const permission=path.includes("/users")?"users":path.includes("/tickets")?"support":path.includes("/features")?"features":"system";
   try{
     const override=await pool.query("SELECT enabled FROM admin_permission_overrides WHERE user_id=$1 AND permission_key=$2",[req.user.id,permission]);
     if(override.rows.length&&!override.rows[0].enabled)return res.status(403).json({error:"Dir fehlt die Admin-Berechtigung: "+permission});
