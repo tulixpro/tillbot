@@ -2562,3 +2562,41 @@ input,textarea,select{accent-color:#d8dde4}
   #app.layout .composerTools > button { display:inline-flex !important; flex:0 0 auto !important; min-width:max-content !important; white-space:nowrap !important; word-break:normal !important; }
   #app.layout .composerTools > #send { flex:0 0 40px !important; min-width:40px !important; width:40px !important; margin-left:auto !important; }
 }
+
+
+/* Unified mobile layout rules: single source of truth after removing emergency inline patches. */
+@media (max-width: 820px) {
+  html, body { width:100%; max-width:100%; min-width:0; overflow-x:hidden; }
+  #app.layout { display:flex !important; flex-direction:row !important; position:relative; width:100%; height:100dvh; min-height:100svh; max-width:100%; overflow:hidden; }
+  #app.layout > main { display:flex; flex:1 1 auto; flex-direction:column; width:100%; min-width:0; min-height:0; height:100%; }
+  #sidebar { position:fixed !important; display:flex !important; inset:0 auto 0 0 !important; width:min(300px,86vw) !important; max-width:86vw !important; height:100dvh !important; min-height:100svh; z-index:1000; transform:translate3d(-105%,0,0) !important; visibility:hidden; pointer-events:none; transition:transform .2s ease,visibility .2s ease; }
+  #sidebar.open { transform:translate3d(0,0,0) !important; visibility:visible; pointer-events:auto; }
+  #sidebar + .sidebarScrim { display:block; position:fixed; inset:0; z-index:999; background:#0009; opacity:0; pointer-events:none; }
+  #sidebar.open + .sidebarScrim { opacity:1; pointer-events:auto; }
+  #app.layout > main > header { flex:0 0 56px; height:56px; min-height:56px; width:100%; min-width:0; padding:0 10px; gap:8px; overflow:visible; }
+  #app.layout > main > header #menu { display:inline-flex; flex:0 0 36px; width:36px; min-width:36px; height:36px; min-height:36px; padding:0; align-items:center; justify-content:center; }
+  #app.layout > main > header .headTitle { flex:1 1 auto; min-width:0; }
+  #app.layout > main > header #who, #app.layout > main > header .modelPickerBtn { display:none !important; }
+  #app.layout > main > header .topMenuWrap { flex:0 0 36px; width:36px; min-width:36px; margin-left:auto; }
+  #app.layout > main > header .moreMenuBtn { width:36px; min-width:36px; height:36px; min-height:36px; padding:0; }
+  #app.layout > main > .chat { flex:1 1 auto; min-height:0; width:100%; min-width:0; padding:16px 12px; overflow:auto; }
+  #app.layout .welcome { width:100%; min-width:0; max-width:650px; margin:auto; padding:20px 0; }
+  #app.layout .welcome h1 { overflow-wrap:anywhere; }
+  #app.layout .suggestions { gap:7px; }
+  #app.layout .suggestions button { min-height:34px; padding:7px 10px; font-size:12px; border-radius:10px; }
+  #app.layout > main > .composerArea { flex:0 0 auto; position:relative; bottom:auto; width:100%; min-width:0; max-width:100%; padding:8px 9px max(8px,env(safe-area-inset-bottom)); }
+  #app.layout .composer { display:flex; flex-direction:column; align-items:stretch; width:100%; min-width:0; max-width:100%; margin:0; padding:8px; gap:7px; }
+  #app.layout .composer > textarea { width:100%; min-width:0; min-height:42px; max-height:110px; padding:9px 10px; font-size:14px; }
+  #app.layout .composerTools { display:flex; flex-flow:row nowrap; align-items:center; gap:5px; width:100%; min-width:0; max-width:100%; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; }
+  #app.layout .composerTools > button { flex:0 0 auto; min-width:max-content; height:34px; min-height:34px; padding:0 8px; border-radius:9px; font-size:11px; white-space:nowrap; }
+  #app.layout .composerTools > #clearPrompt { flex:0 0 34px; width:34px; min-width:34px; padding:0; }
+  #app.layout .composerTools > #send { flex:0 0 36px; width:36px; min-width:36px; height:36px; min-height:36px; margin-left:auto; padding:0; }
+  #app.layout .composerArea > small { font-size:10px; line-height:1.25; }
+}
+@media (max-width: 390px) {
+  #app.layout > main > header { padding-inline:8px; gap:7px; }
+  #app.layout .composerTools > button { padding-inline:7px; font-size:10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #sidebar, #sidebar + .sidebarScrim, button { transition:none !important; }
+}
