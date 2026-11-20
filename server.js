@@ -69,11 +69,17 @@ async function auth(req, res, next) {
     return res.status(401).json({ error: "Bitte anmelden" });
   }
 }
-function admin(req, res, next) {
+async function admin(req, res, next) {
   if (req.user.role !== "admin") return res.status(403).json({ error: "Adminrechte erforderlich" });
-  // Record admin API access without storing request bodies, tokens, or personal content.
-  pool.query("INSERT INTO admin_activity_log(actor_id,action,method,path) VALUES($1,$2,$3,$4)",[req.user.id,req.method+" "+req.path,req.method,req.path]).catch(()=>{});
-  next();
+  const path=req.path||"";
+  const permission=path.startsWith("/users")?"users":path.startsWith("/tickets")?"support":path.startsWith("/features")?"features":"system";
+  try{
+    const override=await pool.query("SELECT enabled FROM admin_permission_overrides WHERE user_id=$1 AND permission_key=$2",[req.user.id,permission]);
+    if(override.rows.length&&!override.rows[0].enabled)return res.status(403).json({error:"Dir fehlt die Admin-Berechtigung: "+permission});
+    // Record admin API access without storing request bodies, tokens, or personal content.
+    pool.query("INSERT INTO admin_activity_log(actor_id,action,method,path) VALUES($1,$2,$3,$4)",[req.user.id,req.method+" "+path,req.method,path]).catch(()=>{});
+    next();
+  }catch(error){console.error("Admin permission check failed:",error.code||error.message);res.status(503).json({error:"Admin-Berechtigungen konnten nicht geprüft werden."})}
 }
 
 app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
@@ -256,6 +262,19 @@ app.put("/api/admin/features/:key",auth,admin,async(req,res)=>{
  const {rows}=await pool.query("UPDATE feature_flags SET enabled=$1,updated_at=NOW() WHERE key=$2 RETURNING key,enabled,description,updated_at",[enabled,String(req.params.key)]);
  if(!rows[0])return res.status(404).json({error:"Unbekannte Funktion."});
  res.json(rows[0]);
+});
+app.get("/api/admin/permissions",auth,admin,async(_req,res)=>{
+ const {rows}=await pool.query("SELECT u.id,u.username,p.permission_key,p.enabled FROM users u LEFT JOIN admin_permission_overrides p ON p.user_id=u.id WHERE u.role='admin' ORDER BY u.id,p.permission_key");
+ const map=new Map();rows.forEach(r=>{if(!map.has(r.id))map.set(r.id,{id:r.id,username:r.username,permissions:{users:true,support:true,features:true,system:true}});if(r.permission_key)map.get(r.id).permissions[r.permission_key]=r.enabled});
+ res.set("Cache-Control","no-store").json([...map.values()]);
+});
+app.put("/api/admin/permissions/:id",auth,admin,async(req,res)=>{
+ const id=Number(req.params.id),key=String(req.body.permission||""),enabled=req.body.enabled;
+ if(!Number.isInteger(id)||id<1||!["users","support","features","system"].includes(key)||typeof enabled!=="boolean")return res.status(400).json({error:"Ungültige Berechtigung."});
+ if(id===Number(req.user.id))return res.status(400).json({error:"Eigene Berechtigungen können hier nicht geändert werden."});
+ const target=await pool.query("SELECT id FROM users WHERE id=$1 AND role='admin'",[id]);if(!target.rows[0])return res.status(404).json({error:"Admin-Konto nicht gefunden."});
+ await pool.query("INSERT INTO admin_permission_overrides(user_id,permission_key,enabled) VALUES($1,$2,$3) ON CONFLICT(user_id,permission_key) DO UPDATE SET enabled=EXCLUDED.enabled,updated_at=NOW()",[id,key,enabled]);
+ res.json({ok:true,userId:id,permission:key,enabled});
 });
 app.get("/api/admin/activity",auth,admin,async(_req,res)=>{
  const {rows}=await pool.query("SELECT l.id,l.action,l.method,l.path,l.created_at,u.username FROM admin_activity_log l LEFT JOIN users u ON u.id=l.actor_id ORDER BY l.created_at DESC LIMIT 100");
