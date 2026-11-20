@@ -74,6 +74,14 @@ async function initDatabase() {
       ('memory',TRUE,'Persönliche Erinnerungen'),
       ('public_api',FALSE,'Externe API – Schlüsselverwaltung erforderlich')
     ON CONFLICT(key) DO NOTHING;
+    CREATE TABLE IF NOT EXISTS system_error_logs (
+      id BIGSERIAL PRIMARY KEY,
+      level TEXT NOT NULL DEFAULT 'error',
+      source TEXT NOT NULL DEFAULT 'server',
+      message TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS system_error_recent ON system_error_logs(created_at DESC);
     CREATE TABLE IF NOT EXISTS admin_activity_log (
       id BIGSERIAL PRIMARY KEY,
       actor_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
