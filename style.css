@@ -2011,3 +2011,7 @@ body[data-theme="light"] #sidebar .historyItem.active .historyOpen{color:#173b5d
 #chat .thinkingLabel{display:flex;align-items:center;gap:9px}
 #chat .thinkingStatus{display:block;margin-top:8px;color:var(--muted,#9db2c8);font-size:.88em}
 @media(prefers-reduced-motion:reduce){#sidebar .historyOpen.isLoading:after{animation:none}}
+
+/* Keep the conversation anchored while messages stream and render */
+#chat{overflow-anchor:auto;scroll-behavior:smooth;overscroll-behavior:contain}
+#chat .thinkingBubble{min-height:48px}
