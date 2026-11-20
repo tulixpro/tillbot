@@ -202,9 +202,37 @@ $("loadUsers").onclick=loadAdminUsers;$("adminUserSearch").oninput=renderAdminUs
 async function loadAdminTickets(){const el=$("adminTickets");el.textContent="Tickets laden …";try{const ts=await api("/api/support/tickets");el.innerHTML="";if(!ts.length){el.textContent="Keine Tickets.";return}ts.forEach(t=>{const card=document.createElement("article");card.className="ticketCard";const title=document.createElement("b");title.textContent="#"+t.id+" · "+t.username+" · "+t.subject;const p=document.createElement("p");p.textContent=t.message;const reply=document.createElement("textarea");reply.rows=2;reply.placeholder="Antwort (optional)";reply.value=t.admin_reply||"";const status=document.createElement("select");[["open","Offen"],["in_progress","In Bearbeitung"],["closed","Geschlossen"]].forEach(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;o.selected=t.status===v;status.append(o)});const save=document.createElement("button");save.className="primary";save.textContent="Speichern";save.onclick=async()=>{save.disabled=true;try{await api("/api/admin/tickets/"+t.id,{method:"PATCH",body:JSON.stringify({reply:reply.value,status:status.value})});save.textContent="Gespeichert ✓";loadAdminTickets()}catch(e){alert(e.message)}finally{save.disabled=false}};card.append(title,p,reply,status,save);el.append(card)})}catch(e){el.textContent=e.message}}
 start();
 setInterval(loadSystemNotice,30000);setInterval(checkMaintenance,30000);setInterval(loadQuota,60000);
-// Foto-Anhang: im Browser verkleinern, damit Uploads flott bleiben.
+// Fotos: Kamera oder Galerie, lokal verkleinert und vor dem Senden als Vorschau angezeigt.
+async function preparePhoto(file){
+ if(!file)return;
+ if(!file.type.startsWith("image/")){ $("voiceMsg").textContent="Bitte eine Bilddatei auswählen.";return; }
+ if(file.size>12*1024*1024){$("voiceMsg").textContent="Das Bild ist zu groß (max. 12 MB).";return;}
+ const url=URL.createObjectURL(file);
+ try{
+  const img=new Image();img.src=url;
+  if(typeof img.decode==="function")await img.decode();
+  else await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error("Bild konnte nicht geladen werden"))});
+  const scale=Math.min(1,1200/Math.max(img.width,img.height)),canvas=document.createElement("canvas");
+  canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));
+  const ctx=canvas.getContext("2d");if(!ctx)throw Error("Bildverarbeitung nicht verfügbar");
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  const encoded=canvas.toDataURL("image/jpeg",.68);
+  photoData=encoded.split(",")[1];photoMime="image/jpeg";
+  $("photoPreview").replaceChildren();
+  const preview=document.createElement("img");preview.alt="Ausgewähltes Foto";preview.src=encoded;
+  const info=document.createElement("span");info.textContent="Foto bereit · "+canvas.width+" × "+canvas.height;
+  const remove=document.createElement("button");remove.type="button";remove.id="removePhoto";remove.textContent="Entfernen";
+  remove.onclick=()=>{photoData=null;$("photoPreview").classList.add("hidden");$("photoPreview").replaceChildren();$("photoInput").value="";$("cameraInput").value=""};
+  $("photoPreview").append(preview,info,remove);$("photoPreview").classList.remove("hidden");$("voiceMsg").textContent="Foto angehängt. Du kannst noch eine Frage dazu schreiben.";
+ }catch(err){$("voiceMsg").textContent="Foto konnte nicht verarbeitet werden: "+(err.message||"unbekannter Fehler")}
+ finally{URL.revokeObjectURL(url)}
+}
 $("photoBtn").onclick=()=>$("photoInput").click();
-$("photoInput").onchange=async e=>{const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith("image/")){alert("Bitte Bilddatei auswählen.");return}try{const img=new Image(),url=URL.createObjectURL(f);img.src=url;if(typeof img.decode==="function"){try{await img.decode()}catch{if(!img.complete||!img.naturalWidth)throw Error("Bild konnte nicht dekodiert werden")}}else{await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error("Bild konnte nicht geladen werden"))})}const scale=Math.min(1,900/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);photoData=canvas.toDataURL("image/jpeg",.58).split(",")[1];photoMime="image/jpeg";$("photoPreview").innerHTML='<img alt="Foto Vorschau" src="'+canvas.toDataURL("image/jpeg",.35)+'"><button type="button" id="removePhoto">Foto entfernen ✕</button>';$("photoPreview").classList.remove("hidden");$("removePhoto").onclick=()=>{photoData=null;$("photoPreview").classList.add("hidden");$("photoPreview").innerHTML=""};URL.revokeObjectURL(url)}catch{alert("Foto konnte nicht geladen werden.")}e.target.value=""};
+$("cameraBtn").onclick=()=>$("cameraInput").click();
+$("photoInput").onchange=e=>{preparePhoto(e.target.files?.[0]);e.target.value=""};
+$("cameraInput").onchange=e=>{preparePhoto(e.target.files?.[0]);e.target.value=""};
+$("prompt").addEventListener("paste",e=>{const item=[...(e.clipboardData?.items||[])].find(x=>x.type.startsWith("image/"));if(item){const file=item.getAsFile();if(file)preparePhoto(file)}});
+
 // Spracheingabe per Browser-Spracherkennung (Chrome/Edge unterstützen sie meist).
 let activeRecognition=null;
 $("voiceBtn").onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceMsg").textContent="Diktieren wird hier nicht unterstützt. Bitte Chrome/Edge verwenden oder Text eingeben.";return}if(activeRecognition){activeRecognition.stop();return}try{const rec=new SR();activeRecognition=rec;rec.lang="de-DE";rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;let base=$("prompt").value.trim(),finalText="";$("voiceBtn").textContent="■ Stop";$("voiceMsg").textContent="🎙️ Höre zu …";rec.onresult=e=>{let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=t+" ";else interim+=t}$("prompt").value=(base+" "+finalText+" "+interim).trim();$("prompt").dispatchEvent(new Event("input"))};rec.onerror=e=>{$("voiceMsg").textContent=e.error==="not-allowed"?"Mikrofon verweigert – Browserberechtigung prüfen.":"Spracherkennung: "+e.error};rec.onend=()=>{activeRecognition=null;$("voiceBtn").textContent="Sprache";if(finalText)$("voiceMsg").textContent="Diktat eingefügt ✓"};rec.start()}catch(e){activeRecognition=null;$("voiceMsg").textContent="Mikrofonstart fehlgeschlagen: "+e.message}};
