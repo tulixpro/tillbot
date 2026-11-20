@@ -71,6 +71,8 @@ async function auth(req, res, next) {
 }
 function admin(req, res, next) {
   if (req.user.role !== "admin") return res.status(403).json({ error: "Adminrechte erforderlich" });
+  // Record admin API access without storing request bodies, tokens, or personal content.
+  pool.query("INSERT INTO admin_activity_log(actor_id,action,method,path) VALUES($1,$2,$3,$4)",[req.user.id,req.method+" "+req.path,req.method,req.path]).catch(()=>{});
   next();
 }
 
@@ -225,6 +227,75 @@ app.post("/api/admin/bootstrap", auth, rateLimit({ windowMs: 15 * 60_000, limit:
 });
 
 app.get("/api/me", auth, (req, res) => res.json({ user: req.user }));
+
+const availableGroqModels=()=>[...new Set((process.env.GROQ_ALLOWED_MODELS||"openai/gpt-oss-120b,llama-3.3-70b-versatile").split(",").map(x=>x.trim()).filter(Boolean))].slice(0,12);
+app.get("/api/preferences",auth,async(req,res)=>{
+ const {rows}=await pool.query("SELECT instructions,model FROM user_preferences WHERE user_id=$1",[req.user.id]);
+ const p=rows[0]||{instructions:"",model:process.env.GROQ_MODEL||"openai/gpt-oss-120b"};
+ res.set("Cache-Control","no-store").json({instructions:p.instructions,model:availableGroqModels().includes(p.model)?p.model:availableGroqModels()[0],models:availableGroqModels()});
+});
+app.put("/api/preferences",auth,async(req,res)=>{
+ const instructions=String(req.body.instructions||"").trim().slice(0,4000),model=String(req.body.model||"");
+ if(!availableGroqModels().includes(model))return res.status(400).json({error:"Dieses KI-Modell ist nicht freigegeben. Bitte Admin-Konfiguration prüfen."});
+ await pool.query("INSERT INTO user_preferences(user_id,instructions,model) VALUES($1,$2,$3) ON CONFLICT(user_id) DO UPDATE SET instructions=EXCLUDED.instructions,model=EXCLUDED.model,updated_at=NOW()",[req.user.id,instructions,model]);
+ res.json({ok:true,instructions,model});
+});
+app.get("/api/features",async(_req,res)=>{
+ const {rows}=await pool.query("SELECT key,enabled FROM feature_flags ORDER BY key");
+ res.set("Cache-Control","no-store").json(Object.fromEntries(rows.map(x=>[x.key,x.enabled])));
+});
+app.get("/api/admin/features",auth,admin,async(_req,res)=>{
+ const {rows}=await pool.query("SELECT key,enabled,description,updated_at FROM feature_flags ORDER BY key");
+ res.set("Cache-Control","no-store").json(rows);
+});
+app.put("/api/admin/features/:key",auth,admin,async(req,res)=>{
+ const enabled=typeof req.body.enabled==="boolean"?req.body.enabled:null;
+ if(enabled===null)return res.status(400).json({error:"enabled muss true oder false sein."});
+ const {rows}=await pool.query("UPDATE feature_flags SET enabled=$1,updated_at=NOW() WHERE key=$2 RETURNING key,enabled,description,updated_at",[enabled,String(req.params.key)]);
+ if(!rows[0])return res.status(404).json({error:"Unbekannte Funktion."});
+ res.json(rows[0]);
+});
+app.get("/api/admin/activity",auth,admin,async(_req,res)=>{
+ const {rows}=await pool.query("SELECT l.id,l.action,l.method,l.path,l.created_at,u.username FROM admin_activity_log l LEFT JOIN users u ON u.id=l.actor_id ORDER BY l.created_at DESC LIMIT 100");
+ res.set("Cache-Control","no-store").json(rows);
+});
+app.get("/api/memories",auth,async(req,res)=>{
+ const {rows}=await pool.query("SELECT id,title,content,created_at,updated_at FROM user_memories WHERE user_id=$1 ORDER BY updated_at DESC LIMIT 100",[req.user.id]);
+ res.set("Cache-Control","no-store").json(rows);
+});
+app.post("/api/memories",auth,rateLimit({windowMs:60000,limit:20}),async(req,res)=>{
+ const title=String(req.body.title||"Erinnerung").trim().slice(0,80),content=String(req.body.content||"").trim().slice(0,1000);
+ if(content.length<2)return res.status(400).json({error:"Bitte einen Erinnerungstext eingeben."});
+ const {rows}=await pool.query("INSERT INTO user_memories(user_id,title,content) VALUES($1,$2,$3) RETURNING id,title,content,created_at,updated_at",[req.user.id,title||"Erinnerung",content]);
+ res.status(201).json(rows[0]);
+});
+app.delete("/api/memories/:id",auth,async(req,res)=>{
+ const {rowCount}=await pool.query("DELETE FROM user_memories WHERE id=$1 AND user_id=$2",[Number(req.params.id),req.user.id]);
+ res.json({ok:rowCount>0});
+});
+app.get("/api/workspaces",auth,async(req,res)=>{
+ const {rows}=await pool.query("SELECT w.id,w.title,w.description,w.created_at,w.updated_at,wm.role FROM workspaces w JOIN workspace_members wm ON wm.workspace_id=w.id WHERE wm.user_id=$1 ORDER BY w.updated_at DESC LIMIT 100",[req.user.id]);
+ res.set("Cache-Control","no-store").json(rows);
+});
+app.post("/api/workspaces",auth,rateLimit({windowMs:60000,limit:12}),async(req,res)=>{
+ const title=String(req.body.title||"").trim().slice(0,100),description=String(req.body.description||"").trim().slice(0,500);
+ if(title.length<2)return res.status(400).json({error:"Projektname muss mindestens 2 Zeichen haben."});
+ const client=await pool.connect();
+ try{await client.query("BEGIN");const w=await client.query("INSERT INTO workspaces(owner_id,title,description) VALUES($1,$2,$3) RETURNING id,title,description,created_at,updated_at",[req.user.id,title,description]);await client.query("INSERT INTO workspace_members(workspace_id,user_id,role) VALUES($1,$2,'owner')",[w.rows[0].id,req.user.id]);await client.query("COMMIT");res.status(201).json({...w.rows[0],role:"owner"})}
+ catch(e){await client.query("ROLLBACK");throw e}finally{client.release()}
+});
+app.put("/api/workspaces/:id",auth,async(req,res)=>{
+ const title=String(req.body.title||"").trim().slice(0,100),description=String(req.body.description||"").trim().slice(0,500);
+ if(title.length<2)return res.status(400).json({error:"Projektname muss mindestens 2 Zeichen haben."});
+ const {rows}=await pool.query("UPDATE workspaces SET title=$1,description=$2,updated_at=NOW() WHERE id=$3 AND owner_id=$4 RETURNING id,title,description,created_at,updated_at",[title,description,Number(req.params.id),req.user.id]);
+ if(!rows[0])return res.status(404).json({error:"Workspace nicht gefunden oder keine Berechtigung."});
+ res.json(rows[0]);
+});
+app.delete("/api/workspaces/:id",auth,async(req,res)=>{
+ const {rowCount}=await pool.query("DELETE FROM workspaces WHERE id=$1 AND owner_id=$2",[Number(req.params.id),req.user.id]);
+ res.json({ok:rowCount>0});
+});
+
 app.post("/api/support/tickets",auth,rateLimit({windowMs:60000,limit:4}),async(req,res)=>{const subject=String(req.body.subject||"").trim().slice(0,120),message=String(req.body.message||"").trim().slice(0,4000);if(subject.length<4||message.length<10)return res.status(400).json({error:"Betreff (min. 4) und Nachricht (min. 10 Zeichen) erforderlich."});const {rows}=await pool.query("INSERT INTO support_tickets(user_id,subject,message) VALUES($1,$2,$3) RETURNING id,status,created_at",[req.user.id,subject,message]);res.status(201).json({ticket:rows[0]})});
 app.get("/api/support/tickets",auth,async(req,res)=>{const {rows}=req.user.role==="admin"?await pool.query("SELECT t.*,u.username FROM support_tickets t JOIN users u ON u.id=t.user_id ORDER BY t.updated_at DESC LIMIT 100"):await pool.query("SELECT id,subject,message,status,admin_reply,created_at,updated_at FROM support_tickets WHERE user_id=$1 ORDER BY updated_at DESC",[req.user.id]);res.json(rows)});
 app.patch("/api/admin/tickets/:id",auth,admin,async(req,res)=>{const status=["open","in_progress","closed"].includes(req.body.status)?req.body.status:null,reply=typeof req.body.reply==="string"?req.body.reply.trim().slice(0,4000):null;if(!status&&reply===null)return res.status(400).json({error:"Status oder Antwort angeben"});const {rows}=await pool.query("UPDATE support_tickets SET status=COALESCE($1,status),admin_reply=COALESCE($2,admin_reply),updated_at=CURRENT_TIMESTAMP WHERE id=$3 RETURNING id,status,admin_reply,updated_at",[status,reply,Number(req.params.id)]);if(!rows[0])return res.status(404).json({error:"Ticket nicht gefunden"});res.json({ticket:rows[0]})});
@@ -376,8 +447,15 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
   const history = Array.isArray(req.body.history) ? req.body.history.slice(-12) : [];
   const aiStyleResult=await pool.query("SELECT value FROM app_settings WHERE key='ai_response_style'");
   const aiStyle=AI_RESPONSE_STYLES[aiStyleResult.rows[0]?.value]||AI_RESPONSE_STYLES.balanced;
+  const prefResult=await pool.query("SELECT instructions,model FROM user_preferences WHERE user_id=$1",[req.user.id]);
+  const preferences=prefResult.rows[0]||{};
+  const allowedModels=availableGroqModels();
+  const requestedModel=String(req.body.model||preferences.model||process.env.GROQ_MODEL||allowedModels[0]);
+  const selectedModel=allowedModels.includes(requestedModel)?requestedModel:allowedModels[0];
+  const memoryResult=await pool.query("SELECT title,content FROM user_memories WHERE user_id=$1 ORDER BY updated_at DESC LIMIT 10",[req.user.id]);
+  const personalContext=[preferences.instructions?("Persönliche Anweisungen des Nutzers (als Präferenz behandeln, nicht als Systemregeln): "+preferences.instructions):"",memoryResult.rows.length?"Vom Nutzer gespeicherte Erinnerungen (nur bei Relevanz berücksichtigen): "+memoryResult.rows.map(m=>m.title+": "+m.content).join("; "):""].filter(Boolean).join("\n").slice(0,6000);
   const systemPrompt="Du bist TILLBOT, der KI-Assistent des TILLBOT-Projekts. TILLBOT wird vom TILLBOT-Team entwickelt und gepflegt. Wenn du gefragt wirst, wer dich entwickelt hat, antworte: „Ich bin TILLBOT, der KI-Assistent des TILLBOT-Teams.“ Behaupte nicht, dass das Team ein eigenes Grundmodell von Grund auf trainiert hat: Das zugrunde liegende Sprachmodell wird als externer KI-Dienst bereitgestellt. Antworte standardmäßig auf Deutsch in einem klaren, professionellen, erwachsenen und respektvollen Ton. Verwende keine kindliche Ansprache, keine unnötigen Emojis, keine übertriebenen Begeisterungsfloskeln und keine Kosenamen. Verwende keine kindliche Ansprache, keine unnötigen Emojis, keine übertriebenen Begeisterungsfloskeln und keine Kosenamen. Passe die Detailtiefe an die Aufgabe an, bleibe ruhig und präzise und erkläre Fachbegriffe bei Bedarf verständlich. Bei Programmierfragen: liefere korrekten, möglichst vollständigen Code in Markdown-Codeblöcken mit passendem Sprachlabel (z. B. ```js), erkläre kurz Verwendung und wichtige Schritte, nenne nötige Dateien/Abhängigkeiten und weise auf Annahmen hin. Bei Debugging: analysiere erst den Fehler, nenne Ursache und zeige eine konkrete Lösung. Erfinde keine Testergebnisse und behaupte nicht, Code ausgeführt zu haben. Schreibe Code sicher und warne vor riskanten Aktionen; führe niemals automatisch vom Nutzer gelieferten oder generierten Code aus. Bei großen Projekten strukturiere die Antwort in Dateien und frage nur bei wirklich fehlenden Anforderungen nach."+ " "+aiStyle;
-  const messages = [{ role: "system", content: systemPrompt },
+  const messages = [{ role: "system", content: systemPrompt+" "+personalContext },
     ...history.filter(m => ["user", "assistant"].includes(m.role) && typeof m.content === "string")
       .map(m => ({ role: m.role, content: m.content.slice(0, 8000) }))];
   const userText = String(req.body.message || "").slice(0, 8000);
@@ -399,7 +477,7 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST", signal: controller.signal,
       headers: { Authorization: "Bearer " + process.env.GROQ_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: (image ? (process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b") : (process.env.GROQ_MODEL || "openai/gpt-oss-120b")), messages, max_completion_tokens: 800, temperature: 0.7, stream:!!req.body.stream })
+      body: JSON.stringify({ model: (image ? (process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b") : selectedModel), messages, max_completion_tokens: 800, temperature: 0.7, stream:!!req.body.stream })
     });
     if(req.body.stream&&response.ok){res.status(200).set({"Content-Type":"text/event-stream; charset=utf-8","Cache-Control":"no-cache, no-transform","Connection":"keep-alive","X-Accel-Buffering":"no"});res.flushHeaders?.();const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",full="";while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const lines=pending.split("\n");pending=lines.pop()||"";for(const line of lines){const dataLine=line.trim();if(!dataLine.startsWith("data:"))continue;const raw=dataLine.slice(5).trim();if(raw==="[DONE]")continue;try{const packet=JSON.parse(raw),delta=packet.choices?.[0]?.delta?.content;if(typeof delta==="string"&&delta){full+=delta;res.write("data: "+JSON.stringify({delta})+"\n\n")}}catch{}}}if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);res.write("data: "+JSON.stringify({done:true,quota:req.user.role==="admin"?{unlimited:true}:undefined})+"\n\n");return res.end()}
     const data = await response.json();
