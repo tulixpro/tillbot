@@ -145,7 +145,7 @@ app.get("/api/notifications", async (_req,res)=>{
  }catch{return res.set("Cache-Control","no-store").json({notice:"Der Systemstatus ist momentan nicht verfügbar.",level:"warning"})}
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
-app.post("/api/register", rateLimit({windowMs:60*60_000,limit:5}), async (req, res) => {
+app.post("/api/register", async (req, res) => {
   if (isBotTrapFilled(req)) return res.status(400).json({ error: "Anfrage konnte nicht verarbeitet werden." });
   const username=normalizeUsername(req.body.username),password=String(req.body.password||""),email=String(req.body.email||"").trim().toLowerCase();
   if(!/^[a-z0-9_]{3,20}$/.test(username))return res.status(400).json({error:"Username: 3–20 Zeichen (a-z, 0-9, _)"});
@@ -205,7 +205,7 @@ app.post("/api/auth/reset-password",rateLimit({windowMs:15*60_000,limit:5}),asyn
  res.json({ok:true,message:"Passwort geändert. Bitte melde dich neu an."});
 });
 
-app.post("/api/login", loginLimit, async (req, res) => {
+app.post("/api/login", async (req, res) => {
   if (isBotTrapFilled(req)) return res.status(400).json({ error: "Anfrage konnte nicht verarbeitet werden." });
   try {
     const identity=String(req.body.username||"").trim().toLowerCase(); const { rows } = await pool.query("SELECT * FROM users WHERE username = $1 OR lower(email) = $2 LIMIT 1", [normalizeUsername(identity), identity]); const user = rows[0];
