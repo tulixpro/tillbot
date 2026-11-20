@@ -101,6 +101,68 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
 }
 @media(prefers-reduced-motion:reduce){body.coreFullscreenDemo *,body.coreFullscreenDemo *:before,body.coreFullscreenDemo *:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
 
+
+/* CORE beta finish: consistent compact, accessible layout */
+:root{--bg:#171717;--panel:#202020;--panel2:#292929;--line:#3d3d3d;--text:#f3f3f3;--muted:#a7a7a7;--blue:#d4d4d4;--mint:#c9c9c9;--user:#353535}
+body.coreFullscreenDemo{background:#171717!important}
+body.coreFullscreenDemo .shell{padding:0 0 max(8px,env(safe-area-inset-bottom));gap:0}
+body.coreFullscreenDemo .topbar{background:#202020!important;border-bottom:1px solid #3d3d3d;padding:11px clamp(14px,2.5vw,28px);box-shadow:none}
+body.coreFullscreenDemo .mark{width:40px;height:40px;animation:none;box-shadow:none!important;background:#ededed!important;color:#171717!important}
+body.coreFullscreenDemo .hero{padding:clamp(8px,1.6vh,16px) 16px 10px;animation:none}
+body.coreFullscreenDemo .hero h2{background:none;color:#f2f2f2;font-size:clamp(21px,2.8vw,30px);letter-spacing:-.7px}
+body.coreFullscreenDemo .hero p{color:#aaa;font-size:12px}
+body.coreFullscreenDemo .eyebrow{color:#bdbdbd}
+body.coreFullscreenDemo .notice{width:min(1040px,calc(100% - 28px));margin:0 auto 9px;padding:10px 13px;background:#292929;border-color:#444;color:#c9c9c9;border-radius:12px;font-size:12px}
+body.coreFullscreenDemo .chatCard{width:min(1180px,calc(100% - 28px));background:#202020!important;border-color:#3e3e3e!important;border-radius:16px;box-shadow:none;animation:none}
+body.coreFullscreenDemo .chatHead{padding:11px 14px;border-color:#3e3e3e}
+body.coreFullscreenDemo .chatHead strong{font-size:13px}
+body.coreFullscreenDemo .chatHead span{font-size:10px;color:#999}
+body.coreFullscreenDemo .toolbar{gap:6px}
+body.coreFullscreenDemo .toolbar button,body.coreFullscreenDemo .answer-setting select{min-height:32px;padding:6px 9px;background:#303030!important;border:1px solid #4a4a4a!important;border-radius:8px;color:#eee!important;font-size:11px}
+body.coreFullscreenDemo .answer-setting{font-size:11px;color:#bbb}
+body.coreFullscreenDemo #messages{padding:clamp(12px,2vw,22px);gap:11px}
+body.coreFullscreenDemo .msg{max-width:min(84%,760px);padding:12px 14px;background:#292929;border-color:#414141;border-radius:13px;font-size:14px;line-height:1.6;animation:none}
+body.coreFullscreenDemo .msg.user{background:#353535;border-color:#505050}
+body.coreFullscreenDemo .who{color:#aaa}
+body.coreFullscreenDemo .quickbar{padding:0 14px 11px;gap:7px}
+body.coreFullscreenDemo .quickbar button{min-height:31px;padding:6px 10px;background:#2d2d2d!important;border-color:#484848!important;color:#ddd!important;font-size:11px}
+body.coreFullscreenDemo .composer{padding:11px 14px;background:#202020!important;border-color:#3e3e3e!important}
+body.coreFullscreenDemo .composer textarea{min-height:46px;max-height:20vh;background:#292929!important;border-color:#484848!important;border-radius:11px;color:#f3f3f3}
+body.coreFullscreenDemo .send{min-width:86px;min-height:42px;background:#ededed!important;color:#171717!important;box-shadow:none!important}
+body.coreFullscreenDemo .send:hover{transform:none!important}
+body.coreFullscreenDemo .chatFoot{padding:0 14px 10px;color:#999;font-size:10px}
+.copy-answer{background:#303030!important;border-color:#505050!important;color:#ddd!important}
+#stop-chat{min-height:32px;padding:6px 10px;background:#3a2929!important;border:1px solid #654848!important;color:#f0dada!important;border-radius:8px;font-size:11px}
+#stop-chat:disabled{opacity:.35}
+@media(max-width:700px){
+ body.coreFullscreenDemo .topbar{padding:8px 12px}
+ body.coreFullscreenDemo .brand h1{font-size:15px}
+ body.coreFullscreenDemo .brand p{font-size:10px}
+ body.coreFullscreenDemo .mark{width:36px;height:36px}
+ body.coreFullscreenDemo .status{padding:5px 8px;font-size:10px}
+ body.coreFullscreenDemo .hero{padding:8px 12px}
+ body.coreFullscreenDemo .hero h2{font-size:21px;margin:5px 0}
+ body.coreFullscreenDemo .hero p{font-size:11px}
+ body.coreFullscreenDemo .notice{width:calc(100% - 20px);padding:8px 10px;margin-bottom:7px;font-size:10px}
+ body.coreFullscreenDemo .chatCard{width:100%;border-radius:14px 14px 0 0}
+ body.coreFullscreenDemo .chatHead{align-items:flex-start;padding:9px 10px;gap:8px}
+ body.coreFullscreenDemo .toolbar{justify-content:flex-start;max-width:100%;gap:5px}
+ body.coreFullscreenDemo .toolbar button,body.coreFullscreenDemo .answer-setting select{min-height:30px;padding:5px 7px;font-size:10px}
+ body.coreFullscreenDemo .answer-setting{gap:4px;font-size:10px}
+ body.coreFullscreenDemo #messages{padding:10px;gap:8px}
+ body.coreFullscreenDemo .msg{max-width:96%;padding:10px 11px;font-size:13px}
+ body.coreFullscreenDemo .composer{padding:8px;gap:6px}
+ body.coreFullscreenDemo .composer textarea{min-height:42px;padding:9px 10px;font-size:14px}
+ body.coreFullscreenDemo .send{min-width:68px;min-height:40px;padding:0 9px;font-size:12px}
+ body.coreFullscreenDemo .quickbar{gap:5px;padding:0 9px 8px;overflow-x:auto;flex-wrap:nowrap}
+ body.coreFullscreenDemo .quickbar button{flex:0 0 auto;font-size:10px;padding:6px 8px}
+ body.coreFullscreenDemo .chatFoot{padding:0 10px 8px;font-size:9px}
+}
+@media(max-height:650px) and (min-width:701px){
+ body.coreFullscreenDemo .hero{padding:5px 12px}
+ body.coreFullscreenDemo .notice{padding:7px 10px;margin-bottom:5px}
+ body.coreFullscreenDemo .chatHead{padding:8px 12px}
+}
 </style>
 </head>
 <body>
@@ -176,8 +238,16 @@ body.coreFullscreenDemo .msg{animation:coreMessageIn .25s ease both}
  stopButton.addEventListener('click',()=>{if(activeController)activeController.abort()});
  newChat.addEventListener('click',()=>{if(busy)return;history=[];sent=0;messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');count.textContent='0 Nachrichten';status.textContent='Neuer Chat · kein vorheriger Gesprächskontext';input.value='';send.disabled=true;input.focus()});
  exportChat.addEventListener('click',()=>{const transcript=[...messages.querySelectorAll('.msg')].map(node=>{const who=node.querySelector('.who')?.textContent||'CORE';const body=[...node.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE||n.nodeType===Node.ELEMENT_NODE&&n.classList?.contains('who')===false&&n.tagName!=='BUTTON').map(n=>n.textContent).join('').trim();return who+'\n'+body}).join('\n\n');const blob=new Blob([transcript],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='tillbot-core-chat.txt';link.click();URL.revokeObjectURL(url)});
-})();
- fetch(API+'/api/core/status',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(s=>{status.textContent=s.available?'CORE bereit · Modellserver konfiguriert':'CORE nicht verfügbar · Modellserver nicht konfiguriert'}).catch(()=>{status.textContent='CORE-Status momentan nicht verfügbar'});
+ fetch(API+'/api/core/status',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(s=>{
+  status.textContent=s.available?'CORE bereit · '+(s.model||'Modellserver konfiguriert'):'CORE nicht verfügbar · Modellserver nicht konfiguriert';
+  const indicator=document.querySelector('.status');
+  if(indicator){indicator.lastChild.textContent=s.available?' Verbunden':' Nicht verfügbar';indicator.style.borderColor=s.available?'#456b59':'#754b4b';}
+ }).catch(()=>{
+  status.textContent='CORE-Status momentan nicht erreichbar';
+  const indicator=document.querySelector('.status');
+  if(indicator){indicator.lastChild.textContent=' Status unbekannt';indicator.style.borderColor='#755f3d';}
+ });
+})(); 
 </script>
 </body>
 </html>
