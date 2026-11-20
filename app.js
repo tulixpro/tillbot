@@ -71,7 +71,7 @@ window.tillbotAuthSubmit=async()=>{
  const b=$("authSubmit"),username=$("username").value.trim().toLowerCase(),password=$("password").value,email=$("authEmail").value.trim().toLowerCase();
  if(!/^[a-z0-9_]{3,20}$/.test(username)){ $("authMsg").textContent="Benutzername: 3–20 Zeichen (a–z, 0–9, _).";$("username").focus();return; }
  if(registerMode){
-  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)||email.length>254){$("authMsg").textContent="Bitte gib eine gültige E-Mail-Adresse ein.";$("authEmail").focus();return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254){$("authMsg").textContent="Bitte gib eine gültige E-Mail-Adresse ein.";$("authEmail").focus();return;}
   if(password.length<10||password.length>128){$("authMsg").textContent="Das Passwort muss 10–128 Zeichen haben.";$("password").focus();return;}
   if(password!==$("confirmPassword").value){$("authMsg").textContent="Die Passwörter stimmen nicht überein.";$("confirmPassword").focus();return;}
  }else if(!password){$("authMsg").textContent="Bitte gib dein Passwort ein.";$("password").focus();return;}
