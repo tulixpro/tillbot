@@ -92,7 +92,7 @@ app.get("/api/admin/email-status",auth,admin,async(_req,res)=>{
 app.post("/api/admin/email-test",auth,admin,rateLimit({windowMs:15*60_000,limit:3,message:{error:"Zu viele Testmails. Bitte 15 Minuten warten."}}),async(req,res)=>{
  const c=emailTransportConfig(),to=String(req.body.to||"").trim().slice(0,254);
  if(!c.configured)return res.status(503).json({error:"SMTP ist nicht vollständig konfiguriert. Setze SMTP_HOST, SMTP_PORT, SMTP_FROM, SMTP_USER und SMTP_PASS als Render-Umgebungsvariablen."});
- if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(to))return res.status(400).json({error:"Bitte eine gültige Empfänger-E-Mail-Adresse eingeben."});
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to))return res.status(400).json({error:"Bitte eine gültige Empfänger-E-Mail-Adresse eingeben."});
  try{
   const nodemailer=require("nodemailer");
   const transporter=nodemailer.createTransport({host:c.host,port:c.port,secure:c.secure,auth:{user:c.user,pass:c.pass},connectionTimeout:10000,greetingTimeout:10000,socketTimeout:15000});
