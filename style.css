@@ -2421,3 +2421,13 @@ main>header{box-shadow:0 4px 18px #0003}
  #sidebar + .sidebarScrim{display:none!important}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}button,.composer,.sidebarScrim{transition:none!important}}
+
+
+/* TILLBOT 4.3 — model hub */
+.modelHub{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px;margin:10px 0 14px}
+.modelHubCard{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:76px;padding:12px!important;text-align:left;background:#141414!important;border:1px solid #303030!important;border-radius:12px!important;color:#eee!important}
+.modelHubCard strong{font-size:13px}
+.modelHubCard small{font-size:11px;line-height:1.4;color:#999}
+.modelHubCard.active{border-color:#aaa!important;background:#202020!important;box-shadow:inset 0 0 0 1px #777!important}
+#personalModel{margin-bottom:8px}
+@media(max-width:520px){.modelHub{grid-template-columns:1fr 1fr;gap:7px}.modelHubCard{min-height:88px;padding:10px!important}.modelHubCard strong{font-size:12px}.modelHubCard small{font-size:10px}}
