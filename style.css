@@ -2214,3 +2214,6 @@ button:active{transform:translateY(0) scale(.985)}
 .ticketCard{transition:border-color .18s,transform .18s}
 .ticketCard:hover{border-color:rgba(80,205,205,.42);transform:translateY(-1px)}
 @media(max-width:620px){.adminTicketTools{grid-template-columns:1fr}.adminTicketTools button{width:100%}}
+
+/* Admin 3.4: global AI controls */
+.aiAdmin{border:1px solid rgba(94,190,210,.24);background:linear-gradient(135deg,rgba(49,128,160,.09),rgba(117,91,190,.07))}.aiAdmin select{width:100%;max-width:420px;margin:8px 0 12px}
