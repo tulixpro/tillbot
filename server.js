@@ -528,7 +528,8 @@ app.post("/api/chat", auth, async (req,res,next)=>{try{const m=await getMaintena
     if(req.user.role!=="admin"&&req.dailyQuota)await incrementDailyQuota(req.user.id);
     res.json({ answer: data.choices?.[0]?.message?.content || "Keine Antwort",quota:req.user.role==="admin"?{unlimited:true}:undefined });
   } catch (error) {
-    console.error("Chat API error:", error);\n    pool.query("INSERT INTO system_error_logs(level,source,message) VALUES($1,$2,$3)",["error","chat",String(error.message||"Chat-Fehler").slice(0,500)]).catch(()=>{});
+    console.error("Chat API error:", error);
+    pool.query("INSERT INTO system_error_logs(level,source,message) VALUES($1,$2,$3)",["error","chat",String(error.message||"Chat-Fehler").slice(0,500)]).catch(()=>{});
     res.status(500).json({ answer: error.name === "AbortError" ? "KI-Anfrage dauerte zu lange" : "KI-Serverfehler" });
   } finally {
     clearTimeout(timeout);
