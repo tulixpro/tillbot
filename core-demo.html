@@ -118,14 +118,14 @@ details.tutorial,.currentAi{background:#11141b;border-color:#303545}
 </section>
 
 <section class="game-studio" id="game-studio" aria-label="KI-Spielstudio">
- <div><h3>🎮 CORE Game Studio</h3><p>Beschreibe dein eigenes Spiel. CORE erzeugt eine eigenständige HTML5-Spielversion, die direkt hier in einer isolierten Vorschau läuft.</p></div>
+ <div><h3>🎮 CORE Game Studio</h3><p>Beschreibe dein eigenes Spiel. CORE erstellt einen spielbaren Prototyp. Du kannst ihn testen oder als Windows-Projekt für den EXE-Build auf deinem PC exportieren.</p></div>
  <textarea id="game-prompt" class="game-prompt" maxlength="1200" placeholder="Beispiel: Erstelle ein Open-World-Fahrspiel in einer futuristischen Küstenstadt mit frei fahrbaren Autos, Tageszeiten, Minimap und drei Missionen …" aria-label="Spielbeschreibung"></textarea>
- <div class="game-actions"><button type="button" class="game-create" id="create-game">Spiel erstellen ✨</button><button type="button" id="download-game" disabled>Spiel herunterladen</button><button type="button" id="stop-game" disabled>Erstellung stoppen</button></div>
+ <div class="game-actions"><button type="button" class="game-create" id="create-game">Spiel erstellen ✨</button><button type="button" id="download-game" disabled>HTML herunterladen</button><button type="button" id="download-windows" disabled>Windows-Buildpaket (.zip)</button><button type="button" id="stop-game" disabled>Erstellung stoppen</button></div>
  <div class="game-status" id="game-status" aria-live="polite">Bereit · Beschreibe dein Spiel und starte die Erstellung.</div>
  <div class="game-loader" id="game-loader" hidden><i></i></div>
  <div class="game-frame-wrap" id="game-frame-wrap" hidden><iframe id="game-frame" class="game-frame" title="Dein erstelltes Spiel" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe></div>
- <div class="game-foot"><span>Eigenständiger Spielcode · läuft lokal in dieser Vorschau</span><span id="game-time">Noch keine Erstellung</span></div>
- <p>Hinweis: CORE erstellt kleine bis mittelgroße Browser-Spiele. Große AAA-Spiele wie GTA 6 können nicht vollständig in einem einzelnen KI-Aufruf nachgebaut werden. Figuren, Marken, Karten und Inhalte werden eigenständig gestaltet.</p>
+ <div class="game-foot"><span>Spielvorschau · Windows-Projekt exportierbar</span><span id="game-time">Noch keine Erstellung</span></div>
+ <p>Hinweis: Ein einzelner KI-Aufruf erstellt einen spielbaren Prototyp, kein komplettes AAA-Spiel. Das ZIP enthält den Windows-Build; die EXE wird anschließend auf einem Windows-PC erzeugt. Keine fremden Spielwelten oder Marken werden kopiert.</p>
 </section>
 <details class="tutorial">
 <summary>📘 Tutorial: Was kann CORE schon – und was noch nicht?</summary>
@@ -206,7 +206,7 @@ details.tutorial,.currentAi{background:#11141b;border-color:#303545}
   link.href=url;link.download='tillbot-core-chat.txt';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
  });
 
- const gamePrompt=$('game-prompt'),gameCreate=$('create-game'),gameDownload=$('download-game'),gameStop=$('stop-game'),gameStatus=$('game-status'),gameLoader=$('game-loader'),gameFrame=$('game-frame'),gameFrameWrap=$('game-frame-wrap'),gameTime=$('game-time');
+ const gamePrompt=$('game-prompt'),gameCreate=$('create-game'),gameDownload=$('download-game'),gameWindows=$('download-windows'),gameStop=$('stop-game'),gameStatus=$('game-status'),gameLoader=$('game-loader'),gameFrame=$('game-frame'),gameFrameWrap=$('game-frame-wrap'),gameTime=$('game-time');
  let gameController=null,gameStartedAt=0,gameTicker=null,generatedGame='';
  const formatElapsed=ms=>{const sec=Math.floor(ms/1000);return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')};
  function setGameBusy(value){
@@ -221,7 +221,7 @@ details.tutorial,.currentAi{background:#11141b;border-color:#303545}
  }
  async function createGame(){
   const prompt=String(gamePrompt.value||'').trim();if(!prompt||gameController)return;
-  gameStatus.textContent='CORE erstellt den Spielcode …';generatedGame='';gameDownload.disabled=true;gameFrameWrap.hidden=true;
+  gameStatus.textContent='CORE erstellt den Spielcode …';generatedGame='';gameDownload.disabled=true;gameWindows.disabled=true;gameFrameWrap.hidden=true;
   const controller=new AbortController();gameController=controller;setGameBusy(true);
   try{
    const response=await fetch(API+'/api/core/game',{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
@@ -229,7 +229,7 @@ details.tutorial,.currentAi{background:#11141b;border-color:#303545}
    if(!response.ok)throw new Error(data.error||'Das Spiel konnte nicht erstellt werden.');
    generatedGame=String(data.html||'');if(!generatedGame)throw new Error('CORE hat keinen Spielcode geliefert.');
    gameFrame.srcdoc=makePreviewDocument(generatedGame);gameFrameWrap.hidden=false;gameDownload.disabled=false;
-   gameStatus.textContent='Spiel erstellt und gestartet.';gameTime.textContent='Erstellt in '+formatElapsed(Date.now()-gameStartedAt);
+   gameStatus.textContent='Spiel erstellt und gestartet. Du kannst es als HTML testen oder als Windows-Projekt exportieren.';gameTime.textContent='Erstellt in '+formatElapsed(Date.now()-gameStartedAt);gameWindows.disabled=false;
   }catch(error){
    gameStatus.textContent=error.name==='AbortError'?'Erstellung gestoppt.':(error.message||'Spielerstellung fehlgeschlagen.');
    if(error.name==='AbortError')gameTime.textContent='Gestoppt nach '+formatElapsed(Date.now()-gameStartedAt);
@@ -237,6 +237,17 @@ details.tutorial,.currentAi{background:#11141b;border-color:#303545}
  }
  gameCreate.addEventListener('click',()=>void createGame());
  gameStop.addEventListener('click',()=>gameController?.abort());
+ gameWindows.addEventListener('click',async()=>{
+  if(!generatedGame||gameWindows.disabled)return;
+  gameWindows.disabled=true;gameStatus.textContent='Windows-Buildpaket wird vorbereitet …';
+  try{
+   const response=await fetch(API+'/api/core/game/package',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:generatedGame})});
+   if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.error||'Windows-Paket konnte nicht erstellt werden.')}
+   const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='tillbot-windows-game-project.zip';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+   gameStatus.textContent='Windows-Projekt gepackt. Entpacke die ZIP-Datei und starte BUILD-WINDOWS.bat auf einem Windows-PC.';
+  }catch(error){gameStatus.textContent=error.message||'Export fehlgeschlagen.'}
+  finally{gameWindows.disabled=false}
+ });
  gameDownload.addEventListener('click',()=>{
   if(!generatedGame)return;
   const blob=new Blob([generatedGame],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
