@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#081321">
 <meta name="description" content="TILLBOT CORE – transparente deutsche Browser-Demo.">
-<title>TILLBOT CORE – Deutsche KI-KI-Forschungsdemo</title>
+<title>TILLBOT CORE – Haupt-KI & 3D Game Studio</title>
 <style>
 :root{color-scheme:dark;--bg:#11111b;--surface:#191927;--surface-2:#222235;--border:#38384f;--text:#f4f2ff;--muted:#aaa8bd;--accent:#b7a2ff;--danger:#b96b79}
 *{box-sizing:border-box}
@@ -97,12 +97,29 @@ details.tutorial,.currentAi{background:#11141b;border-color:#303545}
 .game-frame-wrap{overflow:hidden;border:1px solid #4b4763;border-radius:12px;background:#090a12}.game-frame{display:block;width:100%;height:540px;border:0;background:#090a12}
 .game-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#aaa;font-size:10px}
 @media(max-width:680px){.game-studio{margin:0 9px;padding:11px}.game-frame{height:430px}.game-actions button{flex:1}}
+
+/* CORE visual refresh */
+:root{color-scheme:dark;--bg:#080d18;--surface:#101a2b;--surface-2:#17243a;--border:#263b59;--text:#f4f7ff;--muted:#9baec8;--accent:#7c9cff;--danger:#e17a92}
+body{background:radial-gradient(ellipse at 12% -5%,#24365e 0,transparent 42%),radial-gradient(ellipse at 90% 12%,#173b48 0,transparent 35%),#080d18}
+.shell{width:min(1280px,calc(100% - 36px));gap:18px;padding-top:22px}
+.topbar,.chatCard,.game-studio,.notice{background:linear-gradient(145deg,rgba(18,31,52,.96),rgba(12,20,35,.96));border-color:#2c4264;box-shadow:0 22px 70px #02071380}
+.topbar{border-radius:20px;padding:16px 20px}.mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#8c9eff,#4cd4d0);box-shadow:0 8px 28px #6e88ff44}
+.hero{padding:32px 30px;border:1px solid #31496d;border-radius:22px;background:linear-gradient(115deg,#1b2c4aee,#12263bdb 62%,#173a45dd);box-shadow:0 24px 70px #02071370}
+.hero h2{font-size:clamp(28px,5vw,48px);letter-spacing:-1.5px;line-height:1.08;max-width:760px}.hero p{max-width:760px;color:#c0cde0}
+.chatCard,.game-studio{border-radius:20px;padding:20px}.chatHead{border-bottom-color:#2b3e5c}
+textarea,.answer-setting select{background:#0a1424!important;border-color:#304563!important;color:#f4f7ff!important;border-radius:13px!important}
+button{border-radius:11px;border-color:#3a5274;background:#1b2b44;color:#f2f6ff}button:hover:not(:disabled){background:#2a4264;border-color:#7b9dce}
+button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;color:white;box-shadow:0 8px 24px #527be855}
+.game-frame{height:min(72vh,760px);border:1px solid #3a557c;border-radius:16px;background:#050914}.game-studio>p{color:#9eb1cb}
+.status{background:#102f35;border-color:#276b69;color:#9cf0d8}.notice{border-radius:14px;color:#bac9dc}
+.msg.bot{background:#182943;border:1px solid #30496b;border-radius:16px}.msg.user{background:linear-gradient(135deg,#526fbd,#3e5da7);border-radius:16px}
+@media(max-width:680px){.shell{width:calc(100% - 18px);padding-top:9px}.hero{padding:23px 18px}.chatCard,.game-studio{padding:13px}.topbar{padding:12px}}
 </style>
 </head>
 <body>
 <main class="shell">
-<header class="topbar"><div class="brand"><div class="mark"><img src="./icons/tillbot.svg?v=9" alt="TILLBOT Cloud"></div><div><h1>TILLBOT CORE</h1><p>Deutsch zuerst · Eigenständige KI-Forschung</p></div></div><div class="status"><i></i> Forschungsdemo</div></header>
-<section class="hero"><span class="eyebrow">CORE · BROWSER-PROTOTYP</span><h2>Ein eigener KI-Kern. Schritt für Schritt.</h2><p>Hier kannst du TILLBOT CORE direkt mit einem extern bereitgestellten Sprachmodell testen. CORE steuert Antworten über eine eigene, abgesicherte Schnittstelle.</p></section>
+<header class="topbar"><div class="brand"><div class="mark"><img src="./icons/tillbot.svg?v=9" alt="TILLBOT Cloud"></div><div><h1>TILLBOT CORE</h1><p>Haupt-KI · 3D Game Studio</p></div></div><div class="status"><i></i> CORE SYSTEM</div></header>
+<section class="hero"><span class="eyebrow">TILLBOT CORE · HAUPT-KI</span><h2>Ein zentraler KI-Arbeitsplatz für Ideen und Spiele.</h2><p>Chatte mit CORE, entwickle Projekte und erstelle eigenständige 3D-Spielprototypen direkt im Browser – mit echtem WebGL statt einer bloßen 2D-Attrappe.</p></section>
 <div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
 <div class="chatHead"><div><strong>CORE-Testchat</strong><span>Öffentliche KI-Demo · ohne Anmeldung</span></div><div class="toolbar"><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="export-chat">Chat exportieren</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
@@ -118,14 +135,14 @@ details.tutorial,.currentAi{background:#11141b;border-color:#303545}
 </section>
 
 <section class="game-studio" id="game-studio" aria-label="KI-Spielstudio">
- <div><h3>🎮 CORE Game Studio</h3><p>Beschreibe dein eigenes Spiel. CORE erstellt einen spielbaren Prototyp. Du kannst ihn testen oder als Windows-Projekt für den EXE-Build auf deinem PC exportieren.</p></div>
- <textarea id="game-prompt" class="game-prompt" maxlength="1200" placeholder="Beispiel: Erstelle ein Open-World-Fahrspiel in einer futuristischen Küstenstadt mit frei fahrbaren Autos, Tageszeiten, Minimap und drei Missionen …" aria-label="Spielbeschreibung"></textarea>
+ <div><h3>🎮 CORE 3D Game Studio</h3><p>Beschreibe deine Spielidee. CORE erzeugt ein eigenständiges WebGL-3D-Spiel mit echter Perspektive, 3D-Geometrie und spielbaren Funktionen. Teste es hier oder exportiere ein Windows-Buildprojekt.</p></div>
+ <textarea id="game-prompt" class="game-prompt" maxlength="1200" placeholder="Beispiel: Erstelle ein 3D-Erkundungsspiel in einer futuristischen Küstenstadt mit begehbaren Plätzen, Fahrzeugen, dynamischem Himmel, Sammelobjekten und drei Missionen …" aria-label="Spielbeschreibung"></textarea>
  <div class="game-actions"><button type="button" class="game-create" id="create-game">Spiel erstellen ✨</button><button type="button" id="download-game" disabled>HTML herunterladen</button><button type="button" id="download-windows" disabled>Windows-Buildpaket (.zip)</button><button type="button" id="stop-game" disabled>Erstellung stoppen</button></div>
  <div class="game-status" id="game-status" aria-live="polite">Bereit · Beschreibe dein Spiel und starte die Erstellung.</div>
  <div class="game-loader" id="game-loader" hidden><i></i></div>
  <div class="game-frame-wrap" id="game-frame-wrap" hidden><iframe id="game-frame" class="game-frame" title="Dein erstelltes Spiel" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe></div>
- <div class="game-foot"><span>Spielvorschau · Windows-Projekt exportierbar</span><span id="game-time">Noch keine Erstellung</span></div>
- <p>Hinweis: Ein einzelner KI-Aufruf erstellt einen spielbaren Prototyp, kein komplettes AAA-Spiel. Das ZIP enthält den Windows-Build; die EXE wird anschließend auf einem Windows-PC erzeugt. Keine fremden Spielwelten oder Marken werden kopiert.</p>
+ <div class="game-foot"><span>Echte WebGL-3D-Vorschau · Windows-Projekt exportierbar</span><span id="game-time">Noch keine Erstellung</span></div>
+ <p>Hinweis: CORE erstellt einen spielbaren 3D-Vertical-Slice, kein komplettes AAA-Spiel. Die WebGL-Szene nutzt echte 3D-Geometrie und Perspektive. Das ZIP enthält ein Windows-Buildprojekt; die EXE wird anschließend auf einem Windows-PC erzeugt. Keine fremden Spielwelten oder Marken werden kopiert.</p>
 </section>
 <details class="tutorial">
 <summary>📘 Tutorial: Was kann CORE schon – und was noch nicht?</summary>
