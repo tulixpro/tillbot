@@ -519,7 +519,7 @@ app.get("/api/core/status", (_req, res) => {
     provider: "Groq"
   });
 });
-app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { error: "CORE ist gerade stark ausgelastet. Bitte eine Minute warten." } }), async (req, res) => {
+app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { error: "CORE ist gerade stark ausgelastet. Bitte eine Minute warten." } }), async (_req, res, next) => { try { const m = await getMaintenance(); if (m.enabled) return res.status(503).json({ error: m.message }); next(); } catch { return res.status(503).json({ error: "Wartungsstatus konnte nicht geprüft werden." }); } }, async (req, res) => {
   const message = String(req.body?.message || "").trim();
   if (!message || message.length > 2000) return res.status(400).json({ error: "Bitte gib eine Nachricht mit maximal 2.000 Zeichen ein." });
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: "CORE ist momentan nicht verfügbar. Der Modellserver ist nicht konfiguriert." });
