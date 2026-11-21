@@ -4,6 +4,7 @@ const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const archiver = require("archiver");
 const { pool, initDatabase } = require("./database");
 
 const app = express();
@@ -547,7 +548,7 @@ app.post("/api/core/game", coreGameLimit, async (_req, res, next) => {
           { role: "system", content: "You are TILLBOT CORE Game Studio, an expert HTML5 game developer. Return ONLY one complete, self-contained HTML document, no Markdown fences and no explanations. Create an original playable browser game from the user's description. Use inline CSS and vanilla JavaScript only; no external libraries, network requests, remote assets, imports, analytics, cookies, localStorage, or service workers. The game must fit a responsive viewport, have a polished visual style, clear controls, a start/restart flow, an objective, score or progress where appropriate, and working gameplay rather than a static mockup. Prefer Canvas 2D for action games; create convincing depth, perspective, lighting, shadows, parallax and animation where feasible. Keep code compact and robust. Use keyboard and touch controls when appropriate. Make all game assets with CSS, canvas drawing, or inline SVG. Do not recreate copyrighted game maps, characters, logos, storylines, or assets; if the user references a commercial game, make a distinct original game inspired only by broad genre conventions. Keep violence stylized and non-graphic; never include real-world tactical instructions. Do not include iframe, object, embed, forms, external URLs, or network APIs. Output a complete <!doctype html> document." },
           { role: "user", content: "Create an original playable HTML5 game from this brief:\n" + prompt }
         ],
-        max_completion_tokens: 4500,
+        max_completion_tokens: 6000,
         temperature: 0.65,
         stream: false
       })
@@ -569,6 +570,25 @@ app.post("/api/core/game", coreGameLimit, async (_req, res, next) => {
   } finally { clearTimeout(timeout); }
 });
 
+
+app.post("/api/core/game/package", rateLimit({ windowMs: 10 * 60_000, limit: 5, standardHeaders: true, legacyHeaders: false }), async (req, res) => {
+  const html = String(req.body?.html || "");
+  if (!/^<!doctype html/i.test(html) || !html.toLowerCase().includes("<html") || !html.toLowerCase().includes("</html>") || html.length > 65000) return res.status(400).json({ error: "Ungültiges Spielprojekt. Bitte erstelle das Spiel erneut." });
+  const safeHtml = /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, match => match + '<meta http-equiv="Content-Security-Policy" content="default-src none; script-src unsafe-inline; style-src unsafe-inline; img-src data: blob:; font-src data:; media-src data: blob:; connect-src none; object-src none; base-uri none; form-action none">') : html;
+  const projectPackage = { name: "tillbot-ai-game", version: "1.0.0", private: true, description: "Eigenes, mit TILLBOT CORE erstelltes Offline-Spiel", main: "main.cjs", scripts: { "build:win": "electron-builder --win portable --x64" }, devDependencies: { electron: "^39.0.0", "electron-builder": "^26.0.12" }, build: { appId: "de.tillbot.aigame", productName: "Mein KI-Spiel", files: ["index.html", "main.cjs", "package.json"], directories: { output: "dist" }, win: { target: ["portable"], artifactName: "Mein-KI-Spiel-${version}-${arch}.${ext}" } } };
+  const readme = "WINDOWS-BUILD\n\n1. ZIP unter Windows entpacken.\n2. Node.js LTS von https://nodejs.org installieren.\n3. BUILD-WINDOWS.bat doppelklicken.\n4. Die portable EXE liegt anschließend im Ordner dist.\n\nDer Build läuft auf deinem Windows-PC. Dieses Paket ist noch nicht die fertige EXE. Das Spiel läuft offline; Electron deaktiviert Node-Integration und blockiert externe Netzwerkaufrufe.\n";
+  res.set({ "Content-Type": "application/zip", "Content-Disposition": 'attachment; filename="tillbot-windows-game-project.zip"', "Cache-Control": "no-store" });
+  const archive = archiver("zip", { zlib: { level: 8 } });
+  archive.on("error", error => { console.error("Game project archive failed:", error.message); if (!res.headersSent) res.status(500).end("Projekt konnte nicht gepackt werden."); else res.destroy(error); });
+  archive.pipe(res);
+  archive.append(safeHtml, { name: "index.html" });
+  archive.append("const { app, BrowserWindow, session } = require(\"electron\");\nconst path = require(\"path\");\nfunction createWindow() {\n  const win = new BrowserWindow({ width: 1440, height: 900, minWidth: 900, minHeight: 600, title: \"Mein KI-Spiel\", backgroundColor: \"#090b12\", webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true } });\n  win.webContents.setWindowOpenHandler(() => ({ action: \"deny\" }));\n  win.webContents.on(\"will-navigate\", (event, url) => { if (!url.startsWith(\"file://\")) event.preventDefault(); });\n  win.loadFile(path.join(__dirname, \"index.html\"));\n}\napp.whenReady().then(() => { session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false)); session.defaultSession.webRequest.onBeforeRequest({ urls: [\"http://*/*\", \"https://*/*\"] }, (_details, callback) => callback({ cancel: true })); createWindow(); app.on(\"activate\", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); }); });\napp.on(\"window-all-closed\", () => { if (process.platform !== \"darwin\") app.quit(); });", { name: "main.cjs" });
+  archive.append(JSON.stringify(projectPackage, null, 2), { name: "package.json" });
+  archive.append("@echo off\r\nchcp 65001 >nul\r\ntitle TILLBOT - Windows-Spiel bauen\r\necho TILLBOT CORE - Windows-Spiel erstellen\r\nwhere node >nul 2>nul\r\nif errorlevel 1 ( echo Bitte Node.js LTS von https://nodejs.org installieren. & pause & exit /b 1 )\r\necho Installiere Build-Abhaengigkeiten ...\r\ncall npm install\r\nif errorlevel 1 goto error\r\necho Erstelle portable Windows-EXE ...\r\ncall npm run build:win\r\nif errorlevel 1 goto error\r\necho Fertig! Die EXE liegt im Ordner dist.\r\nexplorer dist\r\npause\r\nexit /b 0\r\n:error\r\necho Build fehlgeschlagen. Pruefe die Fehlermeldung oben.\r\npause\r\nexit /b 1", { name: "BUILD-WINDOWS.bat" });
+  archive.append(readme, { name: "README-WINDOWS.txt" });
+  archive.finalize();
+});
+
 app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { error: "CORE ist gerade stark ausgelastet. Bitte eine Minute warten." } }), async (_req, res, next) => { try { const m = await getMaintenance(); if (m.enabled) return res.status(503).json({ error: m.message }); next(); } catch { return res.status(503).json({ error: "Wartungsstatus konnte nicht geprüft werden." }); } }, async (req, res) => {
   const message = String(req.body?.message || "").trim();
   if (!message || message.length > 2000) return res.status(400).json({ error: "Bitte gib eine Nachricht mit maximal 2.000 Zeichen ein." });
@@ -582,7 +602,7 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
   const answerMode = ["short", "balanced", "detailed"].includes(req.body?.answerMode) ? req.body.answerMode : "balanced";
   const answerGuidance = { short: "Antworte sehr knapp und auf den Punkt, möglichst in wenigen Sätzen.", balanced: "Halte Antworten standardmäßig kompakt, erweitere sie bei komplexen Fragen.", detailed: "Antworte ausführlich und strukturiert mit Erklärungen, Beispielen und sinnvollen Zwischenschritten." }[answerMode];
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25_000);
+  const timeout = setTimeout(() => controller.abort(), 35_000);
   res.on("close", () => { if (!res.writableEnded) controller.abort(); });
   try {
     const model = String(process.env.CORE_MODEL || "openai/gpt-oss-20b");
@@ -593,11 +613,11 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: "Du bist TILLBOT CORE, ein experimenteller deutschsprachiger Forschungsassistent des TILLBOT-Projekts. Antworte klar, hilfreich, freundlich und ehrlich. Behaupte niemals, du seist ein selbst trainiertes oder eigenständiges Grundmodell. Du nutzt für diese öffentliche Forschungsdemo einen extern bereitgestellten Modellserver. Du lernst nicht aus einzelnen Gesprächen und TILLBOT speichert diesen öffentlichen Demo-Chat nicht als Chatverlauf. Nachrichten werden zur Verarbeitung an den externen Modellanbieter übertragen. Gib bei Unsicherheit zu, wenn du etwas nicht weißt. Antworte in der Sprache der letzten Nachricht. Erkläre schwierige Themen in verständlichen Schritten. Bei Programmierfragen liefere möglichst direkt nutzbare, sichere Beispiele. ${answerGuidance}" },
+          { role: "system", content: "Du bist TILLBOT CORE, ein leistungsfähiger deutschsprachiger KI-Assistent. Antworte klar, freundlich, kompetent und natürlich. Löse die eigentliche Aufgabe direkt statt nur allgemeine Tipps zu geben. Strukturiere komplexe Antworten in verständliche Schritte und nutze konkrete Beispiele. Bei Code: liefere vollständige, sichere und möglichst direkt ausführbare Lösungen; prüfe gedanklich Randfälle und erkläre wichtige Voraussetzungen. Bei kreativen Aufgaben: sei originell und setze die Vorgaben präzise um. Erfinde keine Funktionen, Quellen, Testergebnisse, Dateien oder erledigten Aktionen. Unterscheide klar zwischen tatsächlich geprüft und nur vorgeschlagen. Wenn wichtige Informationen fehlen, stelle höchstens eine gezielte Rückfrage; ansonsten triff vernünftige Annahmen und nenne sie kurz. Gib Unsicherheit offen zu und korrigiere Fehler direkt. Antworte in der Sprache der letzten Nachricht. Du bist kein selbst trainiertes Grundmodell, sondern nutzt einen externen Modellanbieter; TILLBOT speichert diesen öffentlichen Demo-Chat nicht als Chatverlauf, Nachrichten werden zur Verarbeitung an den externen Anbieter übertragen. ${answerGuidance}" },
           ...history,
           { role: "user", content: message }
         ],
-        max_completion_tokens: 700,
+        max_completion_tokens: 1100,
         temperature: 0.55,
         stream: false
       })
