@@ -519,6 +519,56 @@ app.get("/api/core/status", (_req, res) => {
     provider: "Groq"
   });
 });
+
+/**
+ * CORE Game Studio: generate a self-contained HTML5 game.
+ * Generated code is previewed client-side in a sandboxed iframe with a restrictive CSP.
+ */
+const coreGameLimit = rateLimit({ windowMs: 10 * 60_000, limit: 2, standardHeaders: true, legacyHeaders: false, message: { error: "Spielerstellung ist gerade limitiert. Bitte in einigen Minuten erneut versuchen." } });
+app.post("/api/core/game", coreGameLimit, async (_req, res, next) => {
+  try { const m = await getMaintenance(); if (m.enabled) return res.status(503).json({ error: m.message }); next(); }
+  catch { return res.status(503).json({ error: "Wartungsstatus konnte nicht geprüft werden." }); }
+}, async (req, res) => {
+  const prompt = String(req.body?.prompt || "").trim();
+  if (!prompt || prompt.length > 1200) return res.status(400).json({ error: "Bitte beschreibe dein Spiel mit maximal 1.200 Zeichen." });
+  if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: "CORE Game Studio ist momentan nicht konfiguriert." });
+  const startedAt = Date.now();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 90_000);
+  res.on("close", () => { if (!res.writableEnded) controller.abort(); });
+  try {
+    const model = String(process.env.CORE_MODEL || "openai/gpt-oss-20b");
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST", signal: controller.signal,
+      headers: { Authorization: "Bearer " + process.env.GROQ_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: "You are TILLBOT CORE Game Studio, an expert HTML5 game developer. Return ONLY one complete, self-contained HTML document, no Markdown fences and no explanations. Create an original playable browser game from the user's description. Use inline CSS and vanilla JavaScript only; no external libraries, network requests, remote assets, imports, analytics, cookies, localStorage, or service workers. The game must fit a responsive viewport, have a polished visual style, clear controls, a start/restart flow, an objective, score or progress where appropriate, and working gameplay rather than a static mockup. Prefer Canvas 2D for action games; create convincing depth, perspective, lighting, shadows, parallax and animation where feasible. Keep code compact and robust. Use keyboard and touch controls when appropriate. Make all game assets with CSS, canvas drawing, or inline SVG. Do not recreate copyrighted game maps, characters, logos, storylines, or assets; if the user references a commercial game, make a distinct original game inspired only by broad genre conventions. Keep violence stylized and non-graphic; never include real-world tactical instructions. Do not include iframe, object, embed, forms, external URLs, or network APIs. Output a complete <!doctype html> document." },
+          { role: "user", content: "Create an original playable HTML5 game from this brief:\n" + prompt }
+        ],
+        max_completion_tokens: 4500,
+        temperature: 0.65,
+        stream: false
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error("CORE game provider error:", response.status, data.error?.code || "provider_error");
+      return res.status(502).json({ error: "CORE konnte das Spiel gerade nicht erzeugen. Bitte versuche es später erneut." });
+    }
+    let html = String(data.choices?.[0]?.message?.content || "").trim();
+    html = html.replace(/^\uFEFF/, "").replace(/^\x60{3}(?:html)?\s*/i, "").replace(/\s*\x60{3}$/i, "").trim();
+    if (!/^<!doctype html/i.test(html) || !/<html[\s>]/i.test(html) || !/<\/html>/i.test(html) || html.length > 65000) {
+      return res.status(502).json({ error: "CORE hat keinen gültigen, kompakten HTML5-Spielcode geliefert. Bitte versuche es mit einer etwas einfacheren Beschreibung." });
+    }
+    res.set("Cache-Control", "no-store").json({ html, model: "TILLBOT CORE Game Studio", elapsedMs: Date.now() - startedAt });
+  } catch (error) {
+    console.error("CORE game request failed:", error.name || "request_error");
+    res.status(504).json({ error: error.name === "AbortError" ? "Die Spielerstellung hat zu lange gedauert. Bitte versuche es mit einer kleineren Spielidee erneut." : "CORE Game Studio ist momentan nicht erreichbar." });
+  } finally { clearTimeout(timeout); }
+});
+
 app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { error: "CORE ist gerade stark ausgelastet. Bitte eine Minute warten." } }), async (_req, res, next) => { try { const m = await getMaintenance(); if (m.enabled) return res.status(503).json({ error: m.message }); next(); } catch { return res.status(503).json({ error: "Wartungsstatus konnte nicht geprüft werden." }); } }, async (req, res) => {
   const message = String(req.body?.message || "").trim();
   if (!message || message.length > 2000) return res.status(400).json({ error: "Bitte gib eine Nachricht mit maximal 2.000 Zeichen ein." });
