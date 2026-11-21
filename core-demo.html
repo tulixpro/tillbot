@@ -87,6 +87,16 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 details.tutorial,.currentAi{background:#11141b;border-color:#303545}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
 
+
+.game-studio{padding:15px;border:1px solid #514a70;border-radius:15px;background:linear-gradient(145deg,#1c1b2d,#171725);display:flex;flex-direction:column;gap:11px}
+.game-studio h3{margin:0;font-size:16px}.game-studio p{margin:0;color:var(--muted);font-size:11px}
+.game-prompt{width:100%;min-height:88px;resize:vertical;padding:11px 12px;border:1px solid #514d6b;border-radius:10px;background:#11111d;color:var(--text)}
+.game-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.game-create{background:linear-gradient(135deg,#b7a2ff,#83d5e8);color:#171421;border:0}
+.game-status{font-size:11px;color:#c9c0ec;min-height:18px}.game-loader{height:5px;border-radius:9px;background:#302d43;overflow:hidden}.game-loader>i{display:block;width:35%;height:100%;background:linear-gradient(90deg,#b7a2ff,#83d5e8);border-radius:9px;animation:game-loading 1.4s ease-in-out infinite}
+@keyframes game-loading{0%{transform:translateX(-110%)}100%{transform:translateX(310%)}}
+.game-frame-wrap{overflow:hidden;border:1px solid #4b4763;border-radius:12px;background:#090a12}.game-frame{display:block;width:100%;height:540px;border:0;background:#090a12}
+.game-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#aaa;font-size:10px}
+@media(max-width:680px){.game-studio{margin:0 9px;padding:11px}.game-frame{height:430px}.game-actions button{flex:1}}
 </style>
 </head>
 <body>
@@ -105,6 +115,17 @@ details.tutorial,.currentAi{background:#11141b;border-color:#303545}
 </div>
 <form class="composer" id="chat-form"><textarea id="message-input" rows="1" maxlength="2000" placeholder="Nachricht an TILLBOT CORE …" aria-label="Nachricht an TILLBOT CORE"></textarea><button class="send" id="send" type="submit" disabled>Senden ↑</button></form>
 <div class="chatFoot"><span>Enter senden · Shift + Enter für Zeilenumbruch · max. 2.000 Zeichen</span><span id="count">0 Nachrichten</span></div>
+</section>
+
+<section class="game-studio" id="game-studio" aria-label="KI-Spielstudio">
+ <div><h3>🎮 CORE Game Studio</h3><p>Beschreibe dein eigenes Spiel. CORE erzeugt eine eigenständige HTML5-Spielversion, die direkt hier in einer isolierten Vorschau läuft.</p></div>
+ <textarea id="game-prompt" class="game-prompt" maxlength="1200" placeholder="Beispiel: Erstelle ein Open-World-Fahrspiel in einer futuristischen Küstenstadt mit frei fahrbaren Autos, Tageszeiten, Minimap und drei Missionen …" aria-label="Spielbeschreibung"></textarea>
+ <div class="game-actions"><button type="button" class="game-create" id="create-game">Spiel erstellen ✨</button><button type="button" id="download-game" disabled>Spiel herunterladen</button><button type="button" id="stop-game" disabled>Erstellung stoppen</button></div>
+ <div class="game-status" id="game-status" aria-live="polite">Bereit · Beschreibe dein Spiel und starte die Erstellung.</div>
+ <div class="game-loader" id="game-loader" hidden><i></i></div>
+ <div class="game-frame-wrap" id="game-frame-wrap" hidden><iframe id="game-frame" class="game-frame" title="Dein erstelltes Spiel" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe></div>
+ <div class="game-foot"><span>Eigenständiger Spielcode · läuft lokal in dieser Vorschau</span><span id="game-time">Noch keine Erstellung</span></div>
+ <p>Hinweis: CORE erstellt kleine bis mittelgroße Browser-Spiele. Große AAA-Spiele wie GTA 6 können nicht vollständig in einem einzelnen KI-Aufruf nachgebaut werden. Figuren, Marken, Karten und Inhalte werden eigenständig gestaltet.</p>
 </section>
 <details class="tutorial">
 <summary>📘 Tutorial: Was kann CORE schon – und was noch nicht?</summary>
@@ -184,6 +205,45 @@ details.tutorial,.currentAi{background:#11141b;border-color:#303545}
   const blob=new Blob([transcript],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=url;link.download='tillbot-core-chat.txt';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
  });
+
+ const gamePrompt=$('game-prompt'),gameCreate=$('create-game'),gameDownload=$('download-game'),gameStop=$('stop-game'),gameStatus=$('game-status'),gameLoader=$('game-loader'),gameFrame=$('game-frame'),gameFrameWrap=$('game-frame-wrap'),gameTime=$('game-time');
+ let gameController=null,gameStartedAt=0,gameTicker=null,generatedGame='';
+ const formatElapsed=ms=>{const sec=Math.floor(ms/1000);return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')};
+ function setGameBusy(value){
+  gameCreate.disabled=value;gamePrompt.disabled=value;gameStop.disabled=!value;gameLoader.hidden=!value;
+  if(value){gameStartedAt=Date.now();gameTime.textContent='Laufzeit: 00:00';gameTicker=setInterval(()=>{gameTime.textContent='Laufzeit: '+formatElapsed(Date.now()-gameStartedAt)},250)}
+  else if(gameTicker){clearInterval(gameTicker);gameTicker=null}
+ }
+ function makePreviewDocument(html){
+  const policy='<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'unsafe-inline\'; style-src \'unsafe-inline\'; img-src data: blob:; font-src data:; media-src data: blob:; connect-src \'none\'; object-src \'none\'; base-uri \'none\'; form-action \'none\'">';
+  if(/<head[^>]*>/i.test(html))return html.replace(/<head([^>]*)>/i,'<head$1>'+policy);
+  return '<!doctype html><html><head>'+policy+'</head><body>'+html+'</body></html>';
+ }
+ async function createGame(){
+  const prompt=String(gamePrompt.value||'').trim();if(!prompt||gameController)return;
+  gameStatus.textContent='CORE erstellt den Spielcode …';generatedGame='';gameDownload.disabled=true;gameFrameWrap.hidden=true;
+  const controller=new AbortController();gameController=controller;setGameBusy(true);
+  try{
+   const response=await fetch(API+'/api/core/game',{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(data.error||'Das Spiel konnte nicht erstellt werden.');
+   generatedGame=String(data.html||'');if(!generatedGame)throw new Error('CORE hat keinen Spielcode geliefert.');
+   gameFrame.srcdoc=makePreviewDocument(generatedGame);gameFrameWrap.hidden=false;gameDownload.disabled=false;
+   gameStatus.textContent='Spiel erstellt und gestartet.';gameTime.textContent='Erstellt in '+formatElapsed(Date.now()-gameStartedAt);
+  }catch(error){
+   gameStatus.textContent=error.name==='AbortError'?'Erstellung gestoppt.':(error.message||'Spielerstellung fehlgeschlagen.');
+   if(error.name==='AbortError')gameTime.textContent='Gestoppt nach '+formatElapsed(Date.now()-gameStartedAt);
+  }finally{if(gameController===controller)gameController=null;setGameBusy(false)}
+ }
+ gameCreate.addEventListener('click',()=>void createGame());
+ gameStop.addEventListener('click',()=>gameController?.abort());
+ gameDownload.addEventListener('click',()=>{
+  if(!generatedGame)return;
+  const blob=new Blob([generatedGame],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='tillbot-ki-spiel.html';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ });
+ gamePrompt.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='Enter')void createGame()});
+
  fetch(API+'/api/core/status',{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('status');return response.json()}).then(data=>{
   status.textContent=data.available?'CORE bereit · '+(data.model||'Modellserver konfiguriert'):'CORE nicht verfügbar · Modellserver nicht konfiguriert';
   const indicator=document.querySelector('.status');if(indicator){indicator.lastChild.textContent=data.available?' Verbunden':' Nicht verfügbar';indicator.style.borderColor=data.available?'#456b59':'#754b4b';}
