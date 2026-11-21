@@ -114,13 +114,57 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
 .status{background:#102f35;border-color:#276b69;color:#9cf0d8}.notice{border-radius:14px;color:#bac9dc}
 .msg.bot{background:#182943;border:1px solid #30496b;border-radius:16px}.msg.user{background:linear-gradient(135deg,#526fbd,#3e5da7);border-radius:16px}
 @media(max-width:680px){.shell{width:calc(100% - 18px);padding-top:9px}.hero{padding:23px 18px}.chatCard,.game-studio{padding:13px}.topbar{padding:12px}}
+
+
+/* Less clutter on phones: keep chat primary, tuck secondary panels away. */
+.noticeDisclosure{border:1px solid #2c4264;border-radius:13px;background:rgba(15,25,42,.86);overflow:hidden}
+.noticeDisclosure>summary{padding:10px 13px;cursor:pointer;color:#b8c9e2;font-size:12px;font-weight:650;list-style:none}
+.noticeDisclosure>summary::-webkit-details-marker,.game-disclosure>summary::-webkit-details-marker{display:none}
+.noticeDisclosure>summary:after,.game-disclosure>summary:after{content:"＋";float:right;color:#91a9d5}
+.noticeDisclosure[open]>summary:after,.game-disclosure[open]>summary:after{content:"−"}
+.noticeDisclosure .notice{border:0;border-top:1px solid #263b59;border-radius:0;background:transparent}
+.game-disclosure{border:1px solid #2c4264;border-radius:16px;background:linear-gradient(145deg,#101c30,#0c1627);overflow:hidden}
+.game-disclosure>summary{padding:15px 16px;cursor:pointer;font-weight:750;font-size:14px;list-style:none}
+.game-disclosure>summary span{display:block;margin:4px 22px 0;color:#9baec8;font-size:11px;font-weight:450}
+.game-disclosure .game-studio{border:0;border-top:1px solid #263b59;border-radius:0;box-shadow:none}
+@media(max-width:680px){
+ .shell,body.coreFullscreenDemo .shell{width:100%;height:100dvh;min-height:0;padding:0 0 max(6px,env(safe-area-inset-bottom));gap:8px;overflow-y:auto}
+ .topbar{flex:0 0 auto;padding:10px 14px;border-radius:0 0 17px 17px}
+ .hero{padding:12px 16px 7px}
+ .hero .eyebrow{font-size:9px;letter-spacing:1.4px}
+ .hero h2{max-width:430px;margin:5px auto;font-size:clamp(20px,5.5vw,25px);line-height:1.15}
+ .hero p{display:none}
+ .noticeDisclosure{margin:0 12px;flex:0 0 auto}
+ .chatCard{flex:1 0 470px;min-height:470px;width:100%;border-radius:16px 16px 0 0}
+ .chatHead{padding:10px 12px;align-items:center}
+ .chatHead>div:first-child span{font-size:9px}
+ .toolbar{width:100%;justify-content:flex-start;gap:5px}
+ .toolbar .answer-setting{margin-right:auto}
+ .toolbar button{min-height:34px;padding:6px 8px;font-size:10px}
+ #messages{min-height:220px;max-height:none;padding:12px}
+ .composer{padding:9px 10px;gap:7px}
+ .composer textarea{min-height:42px;font-size:16px}
+ .quickbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+ .quickbar::-webkit-scrollbar{display:none}
+ .game-disclosure{margin:0 12px 8px;flex:0 0 auto}
+ .game-disclosure>summary{padding:13px 14px;font-size:13px}
+ .game-disclosure .game-studio{margin:0;padding:13px;gap:10px}
+ .game-studio>div:first-child p{display:none}
+ .game-prompt{min-height:74px;font-size:14px}
+ .game-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .game-actions button{width:100%;min-width:0;min-height:42px;font-size:11px}
+ .game-frame{height:300px}
+ .game-foot{font-size:9px}
+ details.tutorial{margin:0 12px}
+ .footer{padding:0 12px 8px}
+}
 </style>
 </head>
 <body>
 <main class="shell">
 <header class="topbar"><div class="brand"><div class="mark"><img src="./icons/tillbot.svg?v=9" alt="TILLBOT Cloud"></div><div><h1>TILLBOT CORE</h1><p>Haupt-KI · 3D Game Studio</p></div></div><div class="status"><i></i> CORE SYSTEM</div></header>
 <section class="hero"><span class="eyebrow">TILLBOT CORE · HAUPT-KI</span><h2>Ein zentraler KI-Arbeitsplatz für Ideen und Spiele.</h2><p>Chatte mit CORE, entwickle Projekte und erstelle eigenständige 3D-Spielprototypen direkt im Browser – mit echtem WebGL statt einer bloßen 2D-Attrappe.</p></section>
-<div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div>
+<details class="noticeDisclosure"><summary>ⓘ Hinweise zu CORE & Datenschutz</summary><div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div></details>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
 <div class="chatHead"><div><strong>CORE-Testchat</strong><span>Öffentliche KI-Demo · ohne Anmeldung</span></div><div class="toolbar"><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="export-chat">Chat exportieren</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
 <div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Stelle eine Frage oder wähle ein Beispiel. Ich antworte über den CORE-Forschungsendpunkt.</div></div>
@@ -134,7 +178,7 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
 <div class="chatFoot"><span>Enter senden · Shift + Enter für Zeilenumbruch · max. 2.000 Zeichen</span><span id="count">0 Nachrichten</span></div>
 </section>
 
-<section class="game-studio" id="game-studio" aria-label="KI-Spielstudio">
+<details class="game-disclosure"><summary>🎮 CORE 3D Game Studio <span>Spiel erstellen & Windows-Projekt exportieren</span></summary><section class="game-studio" id="game-studio" aria-label="KI-Spielstudio">
  <div><h3>🎮 CORE 3D Game Studio</h3><p>Beschreibe deine Spielidee. CORE erzeugt ein eigenständiges WebGL-3D-Spiel mit echter Perspektive, 3D-Geometrie und spielbaren Funktionen. Teste es hier oder exportiere ein Windows-Buildprojekt.</p></div>
  <textarea id="game-prompt" class="game-prompt" maxlength="1200" placeholder="Beispiel: Erstelle ein 3D-Erkundungsspiel in einer futuristischen Küstenstadt mit begehbaren Plätzen, Fahrzeugen, dynamischem Himmel, Sammelobjekten und drei Missionen …" aria-label="Spielbeschreibung"></textarea>
  <div class="game-actions"><button type="button" class="game-create" id="create-game">Spiel erstellen ✨</button><button type="button" id="download-game" disabled>HTML herunterladen</button><button type="button" id="download-windows" disabled>Windows-Buildpaket (.zip)</button><button type="button" id="stop-game" disabled>Erstellung stoppen</button></div>
@@ -143,7 +187,7 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
  <div class="game-frame-wrap" id="game-frame-wrap" hidden><iframe id="game-frame" class="game-frame" title="Dein erstelltes Spiel" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe></div>
  <div class="game-foot"><span>Echte WebGL-3D-Vorschau · Windows-Projekt exportierbar</span><span id="game-time">Noch keine Erstellung</span></div>
  <p>Hinweis: CORE erstellt einen spielbaren 3D-Vertical-Slice, kein komplettes AAA-Spiel. Die WebGL-Szene nutzt echte 3D-Geometrie und Perspektive. Das ZIP enthält ein Windows-Buildprojekt; die EXE wird anschließend auf einem Windows-PC erzeugt. Keine fremden Spielwelten oder Marken werden kopiert.</p>
-</section>
+</section></details>
 <details class="tutorial">
 <summary>📘 Tutorial: Was kann CORE schon – und was noch nicht?</summary>
 <div class="tutorialGrid">
