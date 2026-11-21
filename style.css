@@ -2641,3 +2641,46 @@ main>header{box-shadow:0 1px 0 rgba(255,255,255,.025)}
 }
 @keyframes tb-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* Mobile viewport/header hotfix — prevent blank top inset and overlapping model menu. */
+@media screen and (max-width: 1024px) {
+  html, body {
+    width:100% !important; min-width:0 !important; max-width:100% !important;
+    height:100% !important; min-height:100% !important; margin:0 !important;
+    padding:0 !important; overflow:hidden !important;
+  }
+  body > #app.layout {
+    position:fixed !important; inset:0 !important;
+    display:flex !important; flex-direction:row !important;
+    width:100% !important; height:100vh !important; height:100dvh !important;
+    min-height:0 !important; max-height:100dvh !important;
+    margin:0 !important; padding:0 !important; overflow:hidden !important;
+  }
+  #app.layout > main {
+    display:flex !important; flex:1 1 auto !important; flex-direction:column !important;
+    width:100% !important; height:100% !important; min-width:0 !important;
+    min-height:0 !important; margin:0 !important; padding:0 !important;
+  }
+  #app.layout > main > header {
+    box-sizing:border-box !important; flex:0 0 60px !important;
+    width:100% !important; height:60px !important; min-height:60px !important;
+    margin:0 !important; padding:0 10px !important; border-radius:0 0 14px 14px !important;
+    gap:8px !important; overflow:visible !important;
+  }
+  #app.layout > main > header #modelPickerBtn,
+  #app.layout > main > header .modelPickerBtn { display:none !important; }
+  #app.layout > main > header .headTitle { flex:1 1 auto !important; min-width:0 !important; }
+  #app.layout > main > header .topMenuWrap { flex:0 0 40px !important; width:40px !important; margin-left:auto !important; }
+  #app.layout > main > .chat {
+    flex:1 1 auto !important; width:100% !important; min-width:0 !important;
+    min-height:0 !important; margin:0 !important; overflow:auto !important;
+    padding:18px 12px !important; box-sizing:border-box !important;
+  }
+  #app.layout .welcome { width:100% !important; max-width:650px !important; margin:0 auto !important; box-sizing:border-box !important; }
+  #app.layout > main > .composerArea {
+    flex:0 0 auto !important; position:relative !important; bottom:auto !important;
+    width:100% !important; max-width:100% !important; margin:0 !important;
+    box-sizing:border-box !important; padding:8px 9px max(8px,env(safe-area-inset-bottom)) !important;
+  }
+}
