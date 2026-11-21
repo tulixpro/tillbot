@@ -573,7 +573,7 @@ app.post("/api/core/game", coreGameLimit, async (_req, res, next) => {
 
 app.post("/api/core/game/package", rateLimit({ windowMs: 10 * 60_000, limit: 5, standardHeaders: true, legacyHeaders: false }), async (req, res) => {
   const html = String(req.body?.html || "");
-  if (!/^<!doctype html/i.test(html) || !html.toLowerCase().includes("<html") || !html.toLowerCase().includes("</html>") || html.length > 65000) return res.status(400).json({ error: "Ungültiges Spielprojekt. Bitte erstelle das Spiel erneut." });
+  if (!/^<!doctype html/i.test(html) || !html.toLowerCase().includes("<html") || !html.toLowerCase().includes("</html>") || html.length > 95000) return res.status(400).json({ error: "Ungültiges Spielprojekt. Bitte erstelle das Spiel erneut." });
   const quote = String.fromCharCode(39);
   const csp = '<meta http-equiv="Content-Security-Policy" content="default-src ' + quote + 'none' + quote + '; script-src ' + quote + 'unsafe-inline' + quote + '; style-src ' + quote + 'unsafe-inline' + quote + '; img-src data: blob:; font-src data:; media-src data: blob:; connect-src ' + quote + 'none' + quote + '; object-src ' + quote + 'none' + quote + '; base-uri ' + quote + 'none' + quote + '; form-action ' + quote + 'none' + quote + '">';
   const safeHtml = /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, match => match + csp) : html;
