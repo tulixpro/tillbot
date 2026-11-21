@@ -178,15 +178,28 @@ async function send(){
   if(!activeId){const created=await api("/api/chats",{method:"POST",body:JSON.stringify({title:text.slice(0,70)||"Neuer Chat"})});if(!created||!created.id)throw new Error("Der neue Chat konnte nicht angelegt werden.");activeId=created.id}
   const streamController=new AbortController();
   streamTimeout=setTimeout(()=>streamController.abort(),90000);
-  let response;
-  try{response=await fetch(API+"/api/chat",{method:"POST",headers:headers(),signal:streamController.signal,body:JSON.stringify({message:text,history:history.slice(0,-1),image:photoData?{data:photoData,mime:photoMime}:null,model:selectedChatModel,stream:true})})}
-  catch(streamError){if(streamError.name==="AbortError")throw new Error("Die Antwort dauert zu lange. Bitte prüfe deine Verbindung und versuche es erneut.");throw streamError}
-
-  if(!response.ok){let er={};try{er=await response.json()}catch{}throw Error(er.error||er.answer||"HTTP "+response.status)}
-  if(!response.body)throw Error("Streaming wird vom Browser nicht unterstützt.");
-  const reader=response.body.getReader(),decoder=new TextDecoder();let pending="",answer="";
-  const statusEl=wait.querySelector(".thinkingStatus");if(statusEl)statusEl.textContent="Antwort wird generiert …";wait.querySelector(".thinkingDots")?.remove();
-  while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const events=pending.split("\n\n");pending=events.pop()||"";for(const event of events){const line=event.split("\n").find(x=>x.startsWith("data:"));if(!line)continue;try{const data=JSON.parse(line.slice(5).trim());if(data.delta){answer+=data.delta;wait.textContent=answer}}catch{}}}
+  let answer="";
+  const useCore=!photoData&&text.length<=2000;
+  if(useCore){
+   // CORE is the default text assistant. The authenticated workspace still stores the conversation below.
+   let response;
+   try{response=await fetch(API+"/api/core/chat",{method:"POST",headers:headers(),signal:streamController.signal,body:JSON.stringify({message:text,history:history.slice(-9,-1),answerMode:"balanced"})})}
+   catch(coreError){if(coreError.name==="AbortError")throw new Error("CORE antwortet gerade nicht rechtzeitig. Bitte versuche es erneut.");throw coreError}
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw Error(data.error||"CORE konnte gerade nicht antworten.");
+   answer=String(data.answer||"");
+   const statusEl=wait.querySelector(".thinkingStatus");if(statusEl)statusEl.textContent="TILLBOT CORE hat geantwortet";
+   wait.textContent=answer;
+  }else{
+   let response;
+   try{response=await fetch(API+"/api/chat",{method:"POST",headers:headers(),signal:streamController.signal,body:JSON.stringify({message:text,history:history.slice(0,-1),image:photoData?{data:photoData,mime:photoMime}:null,model:selectedChatModel,stream:true})})}
+   catch(streamError){if(streamError.name==="AbortError")throw new Error("Die Antwort dauert zu lange. Bitte prüfe deine Verbindung und versuche es erneut.");throw streamError}
+   if(!response.ok){let er={};try{er=await response.json()}catch{}throw Error(er.error||er.answer||"HTTP "+response.status)}
+   if(!response.body)throw Error("Streaming wird vom Browser nicht unterstützt.");
+   const reader=response.body.getReader(),decoder=new TextDecoder();let pending="";
+   const statusEl=wait.querySelector(".thinkingStatus");if(statusEl)statusEl.textContent="Antwort wird generiert …";wait.querySelector(".thinkingDots")?.remove();
+   while(true){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});const events=pending.split("\n\n");pending=events.pop()||"";for(const event of events){const line=event.split("\n").find(x=>x.startsWith("data:"));if(!line)continue;try{const data=JSON.parse(line.slice(5).trim());if(data.delta){answer+=data.delta;wait.textContent=answer}}catch{}}}
+  }
   clearTimeout(streamTimeout);streamTimeout=null;
   if(!answer)throw Error("Die KI hat keine Antwort geliefert.");
   history.push({role:"assistant",content:answer});photoData=null;$("photoPreview").classList.add("hidden");$("photoPreview").innerHTML="";
