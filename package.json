@@ -14,7 +14,8 @@
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^7.0.10"
+    "nodemailer": "^7.0.10",
+    "archiver": "^7.0.1"
   },
   "devDependencies": {
     "electron": "^39.0.0"
