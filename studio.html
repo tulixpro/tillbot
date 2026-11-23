@@ -356,7 +356,7 @@ $("sendStudioTestEmail").addEventListener("click",async()=>{
 });
 $("checkStudioEmail").addEventListener("click",async()=>{
  setMsg("studioEmailStatus","SMTP-Konfiguration wird geprüft …");
- try{const r=await api("/api/admin/email-status");setMsg("studioEmailStatus",r.configured?"SMTP ist konfiguriert.":"SMTP ist noch nicht vollständig eingerichtet.",r.configured?"ok":"warn")}
+ try{const r=await api("/api/admin/email-status");setMsg("studioEmailStatus",r.configured?"SMTP ist vollständig konfiguriert.":"Es fehlen noch: "+(r.missing||[]).join(", ")+". SMTP_PORT ist normalerweise 587 (STARTTLS).",r.configured?"ok":"warn")}
  catch(e){setMsg("studioEmailStatus","Status nicht verfügbar: "+e.message,"bad")}
 });
 function runStudioCommand(){
