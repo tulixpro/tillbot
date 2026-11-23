@@ -1,5 +1,5 @@
-const CACHE="tillbot-pages-v135";
-const CORE=["./","./index.html","./studio.html?v=6","./updates.html","./studio-manifest.json?v=3","./core-demo.html?v=11","./style.css?v=96","./clean-theme.css?v=1","./tillbot-atelier.css?v=2","./tillbot-monolith.css?v=2","./app.js?v=92","./manifest.json?v=10","./icons/tillbot.svg?v=10","./icons/tillbot-dark.svg","./icons/studio-192.svg","./icons/studio-512.svg"];
+const CACHE="tillbot-pages-v136";
+const CORE=["./","./index.html","./studio.html?v=7","./updates.html","./studio-manifest.json?v=3","./core-demo.html?v=11","./style.css?v=96","./clean-theme.css?v=1","./tillbot-atelier.css?v=2","./tillbot-monolith.css?v=2","./app.js?v=92","./manifest.json?v=10","./icons/tillbot.svg?v=10","./icons/tillbot-dark.svg","./icons/studio-192.svg","./icons/studio-512.svg"];
 self.addEventListener("install",event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE);await Promise.allSettled(CORE.map(async url=>{const r=await fetch(url,{cache:"reload"});if(r.ok)await cache.put(url,r)}));await self.skipWaiting()})())});
 self.addEventListener("activate",event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith("tillbot-pages-")&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})())});
 self.addEventListener("fetch",event=>{
