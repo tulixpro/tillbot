@@ -27,6 +27,7 @@ async function initDatabase() {
     );
     ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT UNIQUE;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_required BOOLEAN NOT NULL DEFAULT FALSE;
     CREATE TABLE IF NOT EXISTS email_action_tokens (
       id BIGSERIAL PRIMARY KEY,
       user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
