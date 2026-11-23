@@ -106,7 +106,17 @@ async function admin(req, res, next) {
   }catch(error){console.error("Admin permission check failed:",error.code||error.message);res.status(503).json({error:"Admin-Berechtigungen konnten nicht geprüft werden."})}
 }
 
-app.get("/", (_req, res) => res.type("text").send("TILLBOT 2.0 Server online"));
+// Serve only explicitly public frontend files from this repository. Never expose server/database sources or package metadata.
+const path = require("path");
+const publicRootFiles = new Set(["index.html","studio.html","updates.html","core-demo.html","style.css","clean-theme.css","tillbot-atelier.css","tillbot-monolith.css","app.js","sw.js","manifest.json","studio-manifest.json"]);
+app.use((req,res,next)=>{
+  if(req.method!=="GET" || req.path.startsWith("/api/")) return next();
+  const relative=req.path.replace(/^\\/+/, "");
+  const allowed=publicRootFiles.has(relative) || /^icons\\/[a-zA-Z0-9._-]+\\.(svg|png|webp|ico)$/.test(relative);
+  if(!allowed) return next();
+  express.static(__dirname,{index:false,dotfiles:"deny",fallthrough:true,maxAge:0})(req,res,next);
+});
+app.get("/", (_req, res) => res.sendFile(path.join(__dirname,"index.html")));
 app.get("/api/status", (_req, res) => res.json({ online: true, name: "TILLBOT 2.0" }));
 
 function emailTransportConfig() {
