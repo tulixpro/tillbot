@@ -111,9 +111,10 @@ const path = require("path");
 const publicRootFiles = new Set(["index.html","studio.html","updates.html","core-demo.html","style.css","clean-theme.css","tillbot-atelier.css","tillbot-monolith.css","app.js","sw.js","manifest.json","studio-manifest.json"]);
 app.use((req,res,next)=>{
   if(req.method!=="GET" || req.path.startsWith("/api/")) return next();
-  const relative=req.path.replace(/^\\/+/, "");
-  const allowed=publicRootFiles.has(relative) || /^icons\\/[a-zA-Z0-9._-]+\\.(svg|png|webp|ico)$/.test(relative);
-  if(!allowed) return next();
+  const relative=req.path.startsWith("/") ? req.path.slice(1) : req.path;
+  const iconFile=relative.startsWith("icons/") && relative.split("/").length===2 &&
+    [".svg",".png",".webp",".ico"].some(ext=>relative.toLowerCase().endsWith(ext));
+  if(!publicRootFiles.has(relative) && !iconFile) return next();
   express.static(__dirname,{index:false,dotfiles:"deny",fallthrough:true,maxAge:0})(req,res,next);
 });
 app.get("/", (_req, res) => res.sendFile(path.join(__dirname,"index.html")));
