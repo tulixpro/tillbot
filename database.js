@@ -139,6 +139,7 @@ async function initDatabase() {
       published BOOLEAN NOT NULL DEFAULT TRUE,
       created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+    ALTER TABLE studio_announcements ADD COLUMN IF NOT EXISTS link_url TEXT NOT NULL DEFAULT '';
     CREATE INDEX IF NOT EXISTS studio_announcements_recent ON studio_announcements(published,created_at DESC);
     INSERT INTO studio_announcements(title,message,category,level,published)
     SELECT 'TILLBOT CORE & Studio erweitert','CORE bietet jetzt eigene Arbeitsbereiche für Lernen, Programmieren, Schreiben, Recherche, Planung, Kreativität und Analyse. Das neue Updates-Center sammelt Releases, Funktionen, Wartungshinweise und Systemmeldungen.','release','info',TRUE
