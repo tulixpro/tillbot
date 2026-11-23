@@ -449,7 +449,7 @@ app.delete("/api/chats/:id", auth, async (req, res) => {
 
 // Admin user management (role changes are server-authorized).
 app.get("/api/admin/users", auth, admin, async (_req,res)=>{
- const {rows}=await pool.query("SELECT id,username,role FROM users ORDER BY id ASC LIMIT 500");
+ const {rows}=await pool.query("SELECT id,username,role,created_at,email_verified FROM users ORDER BY id ASC LIMIT 500");
  res.set("Cache-Control","no-store");res.json(rows);
 });
 app.put("/api/admin/users/:id/role", auth, admin, async (req,res)=>{
@@ -497,6 +497,36 @@ app.get("/api/admin/logs",auth,admin,async(_req,res)=>{
  const {rows}=await pool.query("SELECT id,level,source,message,created_at FROM system_error_logs ORDER BY created_at DESC LIMIT 100");
  res.set("Cache-Control","no-store").json(rows);
 });
+// Compact health summary for the admin control room. Counts and operational signals only.
+app.get("/api/admin/health-overview",auth,admin,async(_req,res)=>{
+ try{
+  const [errors,latest]=await Promise.all([
+   pool.query("SELECT COUNT(*)::int total,COUNT(*) FILTER (WHERE level IN ('error','critical','fatal'))::int severe FROM system_error_logs WHERE created_at>=NOW()-INTERVAL '24 hours'"),
+   pool.query("SELECT level,source,message,created_at FROM system_error_logs ORDER BY created_at DESC LIMIT 8")
+  ]);
+  const mem=process.memoryUsage(),os=require("os"),cores=Math.max(1,os.cpus().length),load=os.loadavg();
+  const systemMemoryPercent=Number(((os.totalmem()-os.freemem())/os.totalmem()*100).toFixed(1));
+  const loadPerCore=Number((load[0]/cores).toFixed(2));
+  const errors24h=Number(errors.rows[0]?.total||0),severe24h=Number(errors.rows[0]?.severe||0);
+  const warnings=[];
+  if(systemMemoryPercent>=90)warnings.push({level:"critical",message:"Systemspeicher ist sehr stark ausgelastet."});
+  else if(systemMemoryPercent>=80)warnings.push({level:"warning",message:"Systemspeicher ist hoch ausgelastet."});
+  if(loadPerCore>=2)warnings.push({level:"critical",message:"CPU-Systemlast liegt deutlich über der Kernzahl."});
+  else if(loadPerCore>=1)warnings.push({level:"warning",message:"CPU-Systemlast ist erhöht."});
+  if(severe24h>0)warnings.push({level:"critical",message:severe24h+" schwere Serverfehler in den letzten 24 Stunden."});
+  else if(errors24h>10)warnings.push({level:"warning",message:errors24h+" protokollierte Fehler in den letzten 24 Stunden."});
+  res.set("Cache-Control","no-store").json({
+   status:warnings.some(x=>x.level==="critical")?"critical":warnings.length?"warning":"healthy",
+   checkedAt:new Date().toISOString(),uptimeSeconds:Math.floor(process.uptime()),
+   cpu:{cores,loadAverage:load,loadPerCore},
+   memory:{rss:mem.rss,heapUsed:mem.heapUsed,heapTotal:mem.heapTotal,total:os.totalmem(),free:os.freemem(),systemUsedPercent:systemMemoryPercent},
+   errors:{last24Hours:errors24h,severeLast24Hours:severe24h,recent:latest.rows},
+   warnings,
+   note:"Systemlast und RAM sind Momentaufnahmen der Render-Instanz. Keine garantierte Kapazitäts- oder Ausfallvorhersage."
+  });
+ }catch(error){console.error("Admin health overview failed:",error.code||error.message);res.status(500).json({error:"Serverzustand konnte nicht geladen werden."})}
+});
+
 app.get("/api/admin/overview", auth, admin, async (_req,res)=>{
  try{
   const [users,chats,tickets,active,recentUsers,recentTickets]=await Promise.all([
@@ -557,7 +587,10 @@ app.get("/api/admin/metrics", auth, admin, async (_req, res) => {
     loadAverage:require("os").loadavg(), databaseBytes:dbInfo,
     users:Number(ur.rows[0].n),
     chats:Number(cr.rows[0].n),
-    node:process.version
+    node:process.version,
+    cpuCores:require("os").cpus().length,
+    systemMemoryPercent:Number(((mem.rss / require("os").totalmem()) * 100).toFixed(2)),
+    loadAveragePerCore:require("os").loadavg().map(v=>Number((v / Math.max(1,require("os").cpus().length)).toFixed(2)))
   });
 });
 
