@@ -130,6 +130,16 @@ async function initDatabase() {
       PRIMARY KEY(workspace_id,user_id)
     );
     CREATE INDEX IF NOT EXISTS workspace_members_user ON workspace_members(user_id);
+    CREATE TABLE IF NOT EXISTS studio_announcements (
+      id BIGSERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT 'update',
+      level TEXT NOT NULL DEFAULT 'info',
+      published BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS studio_announcements_recent ON studio_announcements(published,created_at DESC);
   `);
 }
 
