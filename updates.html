@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#081321"><meta name="description" content="Offizielle TILLBOT Updates, Wartungshinweise und Versionsverlauf.">
+<link rel="icon" href="./icons/tillbot.svg" type="image/svg+xml">
+<title>TILLBOT Updates · News & Systemstatus</title>
+<style>
+:root{color-scheme:dark;--bg:#081321;--panel:#101e31;--line:#293d59;--text:#eff5ff;--muted:#9eafc7;--accent:#81a0ff;--mint:#68dfcb}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 12% -8%,#243b64 0,transparent 38%),radial-gradient(ellipse at 95% 8%,#16434b 0,transparent 32%),var(--bg);color:var(--text);font:14px/1.6 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:inherit}.top{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px max(18px,calc((100% - 1080px)/2));background:#081321e8;border-bottom:1px solid var(--line);backdrop-filter:blur(16px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.08em}.brand img{width:38px;height:38px;border-radius:12px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.16em}
+.btn{display:inline-flex;padding:9px 13px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:#12243a;font-weight:700;font-size:12px}
+main{width:min(1080px,calc(100% - 32px));margin:auto;padding:38px 0 70px}.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;padding:15px 0 28px}.eyebrow{color:var(--mint);font-size:10px;font-weight:850;letter-spacing:.2em}.hero h1{margin:9px 0;font-size:clamp(32px,6vw,56px);letter-spacing:-.055em;line-height:1.04}.hero p{max-width:650px;color:var(--muted);margin:0}.status{min-width:190px;padding:13px 16px;border:1px solid var(--line);border-radius:14px;background:#10243a}.status b,.status span{display:block}.status span{color:var(--muted);font-size:11px}
+.banner{display:none;margin:0 0 18px;padding:15px 17px;border:1px solid #7b6040;border-radius:14px;background:#30271c}.banner strong{display:block}.banner p{margin:4px 0 0;color:#e6d8c4}
+.filters{display:flex;gap:7px;overflow:auto;padding:8px 0 18px}.filters button{white-space:nowrap;border:1px solid var(--line);border-radius:999px;background:#102038;color:#bdcce0;padding:8px 13px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}.filters button[aria-pressed=true]{background:#263d65;border-color:#7699e9;color:white}
+.list{display:grid;gap:12px}.item{position:relative;padding:19px 20px 18px 24px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(140deg,#12243a,#0d1b2d)}.item:before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:5px;background:var(--mint)}.meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:11px}.tag{padding:3px 8px;border:1px solid #3a5272;border-radius:99px;color:#c7d8f5}.item h2{margin:9px 0 5px;font-size:18px;letter-spacing:-.02em}.item p{margin:0;color:#c1cee0;white-space:pre-wrap;overflow-wrap:anywhere}.empty{padding:26px;border:1px dashed #344a68;border-radius:14px;color:var(--muted);text-align:center}.foot{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:560px){.top{padding:10px 13px}.top .btn{font-size:10px;padding:8px}.brand{font-size:12px}.brand img{width:32px;height:32px}main{width:calc(100% - 22px);padding-top:25px}.item{padding:15px 15px 15px 19px}.hero{padding-top:9px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><img src="./icons/tillbot.svg" alt=""><div>TILLBOT UPDATES<small>NEWS · RELEASES · SYSTEMSTATUS</small></div></div><a class="btn" href="./">← Zurück zu TILLBOT</a></header>
+<main>
+<section class="hero"><div><span class="eyebrow">OFFIZIELLES CHANGELOG</span><h1>Was sich bei TILLBOT tut.</h1><p>Neue Funktionen, Versionshinweise und wichtige Informationen zu Wartungsarbeiten – gesammelt an einem Ort.</p></div><div class="status" id="status"><b>Systemstatus</b><span>Wird geprüft …</span></div></section>
+<section class="banner" id="notice" role="status"><strong id="noticeTitle">Wichtiger Hinweis</strong><p id="noticeText"></p></section>
+<nav class="filters" aria-label="Updates filtern">
+<button type="button" data-filter="all" aria-pressed="true">Alle</button><button type="button" data-filter="release" aria-pressed="false">Releases</button><button type="button" data-filter="feature" aria-pressed="false">Funktionen</button><button type="button" data-filter="update" aria-pressed="false">Updates</button><button type="button" data-filter="maintenance" aria-pressed="false">Wartung</button><button type="button" data-filter="security" aria-pressed="false">Sicherheit</button><button type="button" data-filter="event" aria-pressed="false">Events</button><button type="button" data-filter="general" aria-pressed="false">Allgemein</button>
+</nav>
+<section id="list" class="list" aria-live="polite"><div class="empty">Der Verlauf wird geladen …</div></section>
+<footer class="foot"><span>TILLBOT · Öffentlicher Produktverlauf</span><span><a href="./studio.html">Zum Studio</a> · <a href="./">Chat öffnen</a></span></footer>
+</main>
+<script>
+(()=>{
+const API="https://tillbot.onrender.com",root=document.getElementById("list"),status=document.getElementById("status"),notice=document.getElementById("notice");
+let items=[],filter="all";
+const labels={release:"Release",feature:"Neue Funktion",update:"Produkt-Update",maintenance:"Wartung",security:"Sicherheit",event:"Event",general:"Allgemein"};
+const fmt=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?"":d.toLocaleString("de-DE",{dateStyle:"medium",timeStyle:"short"})};
+function render(){root.replaceChildren();const rows=items.filter(x=>filter==="all"||x.category===filter);if(!rows.length){const empty=document.createElement("div");empty.className="empty";empty.textContent=filter==="all"?"Noch keine Updates veröffentlicht.":"In dieser Kategorie gibt es noch keine Einträge.";root.append(empty);return}rows.forEach(x=>{const card=document.createElement("article");card.className="item";const meta=document.createElement("div");meta.className="meta";const tag=document.createElement("span");tag.className="tag";tag.textContent=labels[x.category]||"Allgemein";const date=document.createElement("span");date.textContent=fmt(x.created_at);meta.append(tag,date);const title=document.createElement("h2");title.textContent=x.title;const body=document.createElement("p");body.textContent=x.message;card.append(meta,title,body);root.append(card)})}
+document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));render()}));
+async function load(){try{const [news,ops]=await Promise.all([fetch(API+"/api/announcements",{cache:"no-store"}),fetch(API+"/api/notifications",{cache:"no-store"})]);if(!news.ok)throw Error("News feed nicht erreichbar");items=await news.json();const n=await ops.json();status.innerHTML="<b>Systemstatus</b><span>"+(n.level==="critical"?"Wartungsarbeiten aktiv":n.notice?"Eingeschränkter Betrieb":"Betriebshinweise aktuell")+"</span>";if(n.notice){document.getElementById("noticeTitle").textContent=n.title||"Wichtiger Systemhinweis";document.getElementById("noticeText").textContent=n.notice;notice.style.display="block"}render()}catch(e){status.innerHTML="<b>Systemstatus</b><span>Momentan nicht erreichbar</span>";root.innerHTML='<div class="empty">Der Update-Verlauf konnte gerade nicht geladen werden. Bitte später erneut versuchen.</div>'}}
+load();
+})();
+</script>
+</body></html>
