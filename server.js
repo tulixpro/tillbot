@@ -127,7 +127,7 @@ function emailTransportConfig() {
   const user=String(process.env.SMTP_USER||"").trim();
   const pass=String(process.env.SMTP_PASS||"");
   const secure=String(process.env.SMTP_SECURE||"").toLowerCase()==="true"||port===465;
-  return {host,port,from,user,pass,secure,configured:!!(host&&Number.isInteger(port)&&port>0&&port<65536&&from&&user&&pass)};
+  const missing=[];if(!host)missing.push("SMTP_HOST");if(!Number.isInteger(port)||port<=0||port>=65536)missing.push("SMTP_PORT");if(!from)missing.push("SMTP_FROM");if(!user)missing.push("SMTP_USER");if(!pass)missing.push("SMTP_PASS");return {host,port,from,user,pass,secure,missing,configured:missing.length===0};
 }
 
 function validEmail(value){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||""))&&String(value).length<=254}
@@ -149,11 +149,11 @@ async function createEmailAction(userId,purpose){
 
 app.get("/api/admin/email-status",auth,admin,async(_req,res)=>{
  const c=emailTransportConfig();
- res.set("Cache-Control","no-store").json({configured:c.configured,host:c.configured?c.host:null,port:c.configured?c.port:null,secure:c.configured?c.secure:null,from:c.configured?c.from:null});
+ res.set("Cache-Control","no-store").json({configured:c.configured,missing:c.missing,host:c.configured?c.host:null,port:c.configured?c.port:null,secure:c.configured?c.secure:null,from:c.configured?c.from:null});
 });
 app.post("/api/admin/email-test",auth,admin,rateLimit({windowMs:15*60_000,limit:3,message:{error:"Zu viele Testmails. Bitte 15 Minuten warten."}}),async(req,res)=>{
  const c=emailTransportConfig(),to=String(req.body.to||"").trim().slice(0,254);
- if(!c.configured)return res.status(503).json({error:"SMTP ist nicht vollständig konfiguriert. Setze SMTP_HOST, SMTP_PORT, SMTP_FROM, SMTP_USER und SMTP_PASS als Render-Umgebungsvariablen."});
+ if(!c.configured)return res.status(503).json({error:"SMTP-Konfiguration unvollständig. Es fehlen: "+c.missing.join(", ")+". Trage diese Werte unter Render → Environment ein."});
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to))return res.status(400).json({error:"Bitte eine gültige Empfänger-E-Mail-Adresse eingeben."});
  try{
   const nodemailer=require("nodemailer");
