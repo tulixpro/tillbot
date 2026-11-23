@@ -71,6 +71,7 @@ async function initDatabase() {
       ('image_generation',FALSE,'Bildgenerierung – externer Anbieter erforderlich'),
       ('web_search',FALSE,'Websuche – Suchanbieter erforderlich'),
       ('workspaces',TRUE,'Projekt-Workspaces'),
+      ('core',TRUE,'TILLBOT CORE KI-Assistent und Game Studio'),
       ('memory',TRUE,'Persönliche Erinnerungen'),
       ('public_api',FALSE,'Externe API – Schlüsselverwaltung erforderlich')
     ON CONFLICT(key) DO NOTHING;
