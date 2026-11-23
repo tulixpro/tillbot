@@ -605,12 +605,18 @@ app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res
  * Uses the configured hosted model as an inference engine; this is not a separately trained foundation model.
  * Requests are rate-limited and never written to chat history or the database.
  */
-app.get("/api/core/status", (_req, res) => {
-  res.set("Cache-Control", "no-store").json({
-    available: Boolean(process.env.GROQ_API_KEY),
-    model: process.env.CORE_MODEL || "openai/gpt-oss-20b",
-    provider: "Groq"
-  });
+app.get("/api/core/status", async (_req, res) => {
+  try {
+    const enabled = await featureEnabled("core");
+    res.set("Cache-Control", "no-store").json({
+      enabled,
+      available: enabled && Boolean(process.env.GROQ_API_KEY),
+      model: process.env.CORE_MODEL || "openai/gpt-oss-20b",
+      provider: "Groq"
+    });
+  } catch {
+    res.set("Cache-Control", "no-store").status(503).json({ enabled: false, available: false, error: "CORE-Status gerade nicht verfügbar." });
+  }
 });
 
 /**
@@ -622,6 +628,7 @@ app.post("/api/core/game", coreGameLimit, async (_req, res, next) => {
   try { const m = await getMaintenance(); if (m.enabled) return res.status(503).json({ error: m.message }); next(); }
   catch { return res.status(503).json({ error: "Wartungsstatus konnte nicht geprüft werden." }); }
 }, async (req, res) => {
+  if (!(await featureEnabled("core"))) return res.status(503).json({ error: "TILLBOT CORE wurde vom Studio-Administrator ausgeschaltet." });
   const prompt = String(req.body?.prompt || "").trim();
   if (!prompt || prompt.length > 1200) return res.status(400).json({ error: "Bitte beschreibe dein Spiel mit maximal 1.200 Zeichen." });
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: "CORE Game Studio ist momentan nicht konfiguriert." });
@@ -684,6 +691,7 @@ app.post("/api/core/game/package", rateLimit({ windowMs: 10 * 60_000, limit: 5, 
 });
 
 app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { error: "CORE ist gerade stark ausgelastet. Bitte eine Minute warten." } }), async (_req, res, next) => { try { const m = await getMaintenance(); if (m.enabled) return res.status(503).json({ error: m.message }); next(); } catch { return res.status(503).json({ error: "Wartungsstatus konnte nicht geprüft werden." }); } }, async (req, res) => {
+  if (!(await featureEnabled("core"))) return res.status(503).json({ error: "TILLBOT CORE wurde vom Studio-Administrator ausgeschaltet." });
   const message = String(req.body?.message || "").trim();
   if (!message || message.length > 2000) return res.status(400).json({ error: "Bitte gib eine Nachricht mit maximal 2.000 Zeichen ein." });
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: "CORE ist momentan nicht verfügbar. Der Modellserver ist nicht konfiguriert." });
