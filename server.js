@@ -207,7 +207,7 @@ app.post("/api/register", async (req, res) => {
   try{
     if(!emailTransportConfig().configured)return res.status(503).json({error:"E-Mail-Versand ist noch nicht eingerichtet. Bitte später erneut versuchen."});
     const hash=await bcrypt.hash(password,12);
-    const {rows}=await pool.query("INSERT INTO users(username,email,email_verified,password_hash,role) VALUES($1,$2,FALSE,$3,'user') RETURNING id",[username,email,hash]);
+    const {rows}=await pool.query("INSERT INTO users(username,email,email_verified,email_verification_required,password_hash,role) VALUES($1,$2,FALSE,TRUE,$3,'user') RETURNING id",[username,email,hash]);
     const userId=Number(rows[0].id),token=await createEmailAction(userId,"verify");
     const link=(process.env.FRONTEND_URL||"https://tulixpro.github.io/tillbot/")+"#verify="+encodeURIComponent(token);
     await sendAccountEmail(email,"TILLBOT – E-Mail-Adresse bestätigen","Hallo "+username+",\n\nbitte bestätige deine E-Mail-Adresse über diesen Link (24 Stunden gültig):\n"+link+"\n\nFalls du kein Konto erstellt hast, kannst du diese Nachricht ignorieren.");
@@ -265,7 +265,7 @@ app.post("/api/login", async (req, res) => {
     if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
       return res.status(401).json({ error: "Login falsch" });
     }
-    if(user.email && !user.email_verified)return res.status(403).json({error:"Bitte bestätige zuerst deine E-Mail-Adresse."});
+    if(user.email_verification_required && !user.email_verified)return res.status(403).json({error:"Bitte bestätige zuerst deine E-Mail-Adresse. Du kannst dir den Bestätigungslink erneut senden lassen."});
     res.json({ token: makeToken(user), user: { id: user.id, username: user.username, role: user.role } });
   } catch (error) {
     console.error("Login error:", error);
