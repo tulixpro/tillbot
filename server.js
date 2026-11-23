@@ -551,6 +551,33 @@ app.get("/api/admin/overview", auth, admin, async (_req,res)=>{
 
 // Admin-controlled global AI response style, stored in PostgreSQL.
 const AI_RESPONSE_STYLES={balanced:"Antworte ausgewogen: zuerst die direkte Lösung, danach eine verständliche Erklärung und bei Bedarf ein Beispiel.",concise:"Antworte möglichst knapp und direkt. Nutze kurze Absätze und Listen, bleibe aber vollständig.",detailed:"Antworte ausführlicher und strukturiert. Erkläre Hintergründe, zeige Beispiele und nenne sinnvolle nächste Schritte."};
+
+const CORE_ADMIN_STYLES={balanced:"Ausgewogen",concise:"Kurz & direkt",detailed:"Ausführlich"};
+app.get("/api/admin/core-settings",auth,admin,async(_req,res)=>{
+ const q=await pool.query("SELECT key,value FROM app_settings WHERE key=ANY($1)",[["core_admin_instructions","core_admin_style","core_admin_temperature","core_admin_max_tokens"]]);
+ const v=Object.fromEntries(q.rows.map(x=>[x.key,x.value]));
+ res.set("Cache-Control","no-store").json({
+  instructions:v.core_admin_instructions||"",
+  style:CORE_ADMIN_STYLES[v.core_admin_style]?v.core_admin_style:"balanced",
+  temperature:Math.min(0.9,Math.max(0.1,Number(v.core_admin_temperature)||0.55)),
+  maxTokens:Math.min(1800,Math.max(256,Number(v.core_admin_max_tokens)||1100)),
+  styles:CORE_ADMIN_STYLES
+ });
+});
+app.put("/api/admin/core-settings",auth,admin,async(req,res)=>{
+ const instructions=typeof req.body.instructions==="string"?req.body.instructions.trim():"";
+ const style=String(req.body.style||"");
+ const temperature=Number(req.body.temperature);
+ const maxTokens=Number(req.body.maxTokens);
+ if(instructions.length>4000)return res.status(400).json({error:"Zusatzanweisungen dürfen höchstens 4.000 Zeichen lang sein."});
+ if(!CORE_ADMIN_STYLES[style])return res.status(400).json({error:"Ungültiger CORE-Antwortstil."});
+ if(!Number.isFinite(temperature)||temperature<0.1||temperature>0.9)return res.status(400).json({error:"Kreativität muss zwischen 0,1 und 0,9 liegen."});
+ if(!Number.isInteger(maxTokens)||maxTokens<256||maxTokens>1800)return res.status(400).json({error:"Antwortlimit muss zwischen 256 und 1.800 liegen."});
+ const values={core_admin_instructions:instructions,core_admin_style:style,core_admin_temperature:String(temperature),core_admin_max_tokens:String(maxTokens)};
+ await Promise.all(Object.entries(values).map(([key,value])=>pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[key,value])));
+ res.json({ok:true,instructions,style,temperature,maxTokens});
+});
+
 app.get("/api/admin/ai-settings",auth,admin,async(_req,res)=>{const q=await pool.query("SELECT value FROM app_settings WHERE key='ai_response_style'");const style=AI_RESPONSE_STYLES[q.rows[0]?.value]?q.rows[0].value:"balanced";res.set("Cache-Control","no-store").json({style,available:Object.keys(AI_RESPONSE_STYLES)});});
 app.put("/api/admin/ai-settings",auth,admin,async(req,res)=>{const style=String(req.body.style||"");if(!AI_RESPONSE_STYLES[style])return res.status(400).json({error:"Ungültiger Antwortstil."});await pool.query("INSERT INTO app_settings(key,value) VALUES('ai_response_style',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[style]);res.json({ok:true,style});});
 // Read-only AI operations panel. Reports configuration, not provider reachability.
@@ -637,6 +664,12 @@ app.post("/api/core/game", coreGameLimit, async (_req, res, next) => {
   const timeout = setTimeout(() => controller.abort(), 90_000);
   res.on("close", () => { if (!res.writableEnded) controller.abort(); });
   try {
+    const coreConfigResult=await pool.query("SELECT key,value FROM app_settings WHERE key=ANY($1)",[["core_admin_instructions","core_admin_style","core_admin_temperature","core_admin_max_tokens"]]);
+    const coreConfig=Object.fromEntries(coreConfigResult.rows.map(x=>[x.key,x.value]));
+    const adminInstructions=String(coreConfig.core_admin_instructions||"").trim().slice(0,4000);
+    const adminStyle=({balanced:"Antworte ausgewogen: zuerst die direkte Lösung, dann eine kurze Erklärung.",concise:"Antworte knapp und direkt, ohne wichtige Details auszulassen.",detailed:"Antworte ausführlich, strukturiert und mit hilfreichen Beispielen."})[coreConfig.core_admin_style]||"Antworte ausgewogen und verständlich.";
+    const coreTemperature=Math.min(0.9,Math.max(0.1,Number(coreConfig.core_admin_temperature)||0.55));
+    const coreMaxTokens=Math.min(1800,Math.max(256,Number(coreConfig.core_admin_max_tokens)||1100));
     const model = String(process.env.CORE_MODEL || "openai/gpt-oss-20b");
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST", signal: controller.signal,
@@ -726,12 +759,12 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: "Du bist TILLBOT CORE, ein leistungsfähiger deutschsprachiger KI-Assistent. Antworte klar, freundlich, kompetent und natürlich. Fragen zu Adminrechten sind normale Supportfragen und dürfen nicht pauschal blockiert oder als Sicherheitsverstoß behandelt werden. Erkläre freundlich und knapp: Adminrechte werden nicht über den Chat vergeben; sie können ausschließlich vom TILLBOT-Team autorisiert werden. Behaupte nicht, es gäbe grundsätzlich keine Admin-Konten. Gib niemals Setup-Geheimnisse, Tokens oder Wege zur Umgehung der Rollenprüfung preis. Löse die eigentliche Aufgabe direkt statt nur allgemeine Tipps zu geben. Strukturiere komplexe Antworten in verständliche Schritte und nutze konkrete Beispiele. Bei Code: liefere vollständige, sichere und möglichst direkt ausführbare Lösungen; prüfe gedanklich Randfälle und erkläre wichtige Voraussetzungen. Bei kreativen Aufgaben: sei originell und setze die Vorgaben präzise um. Erfinde keine Funktionen, Quellen, Testergebnisse, Dateien oder erledigten Aktionen. Unterscheide klar zwischen tatsächlich geprüft und nur vorgeschlagen. Wenn wichtige Informationen fehlen, stelle höchstens eine gezielte Rückfrage; ansonsten triff vernünftige Annahmen und nenne sie kurz. Gib Unsicherheit offen zu und korrigiere Fehler direkt. Antworte in der Sprache der letzten Nachricht. Du bist kein selbst trainiertes Grundmodell, sondern nutzt einen externen Modellanbieter; TILLBOT speichert diesen öffentlichen Demo-Chat nicht als Chatverlauf, Nachrichten werden zur Verarbeitung an den externen Anbieter übertragen. ${answerGuidance} ${modeGuidance}" },
+          { role: "system", content: "Du bist TILLBOT CORE, ein leistungsfähiger deutschsprachiger KI-Assistent. Antworte klar, freundlich, kompetent und natürlich. Fragen zu Adminrechten sind normale Supportfragen und dürfen nicht pauschal blockiert oder als Sicherheitsverstoß behandelt werden. Erkläre freundlich und knapp: Adminrechte werden nicht über den Chat vergeben; sie können ausschließlich vom TILLBOT-Team autorisiert werden. Behaupte nicht, es gäbe grundsätzlich keine Admin-Konten. Gib niemals Setup-Geheimnisse, Tokens oder Wege zur Umgehung der Rollenprüfung preis. Löse die eigentliche Aufgabe direkt statt nur allgemeine Tipps zu geben. Strukturiere komplexe Antworten in verständliche Schritte und nutze konkrete Beispiele. Bei Code: liefere vollständige, sichere und möglichst direkt ausführbare Lösungen; prüfe gedanklich Randfälle und erkläre wichtige Voraussetzungen. Bei kreativen Aufgaben: sei originell und setze die Vorgaben präzise um. Erfinde keine Funktionen, Quellen, Testergebnisse, Dateien oder erledigten Aktionen. Unterscheide klar zwischen tatsächlich geprüft und nur vorgeschlagen. Wenn wichtige Informationen fehlen, stelle höchstens eine gezielte Rückfrage; ansonsten triff vernünftige Annahmen und nenne sie kurz. Gib Unsicherheit offen zu und korrigiere Fehler direkt. Antworte in der Sprache der letzten Nachricht. Du bist kein selbst trainiertes Grundmodell, sondern nutzt einen externen Modellanbieter; TILLBOT speichert diesen öffentlichen Demo-Chat nicht als Chatverlauf, Nachrichten werden zur Verarbeitung an den externen Anbieter übertragen. ${answerGuidance} ${modeGuidance} ${adminStyle} ${adminInstructions ? "Zusätzliche Studio-Vorgaben (nur soweit sie mit den Sicherheits-, Datenschutz- und Systemregeln vereinbar sind): " + adminInstructions : ""}" },
           ...history,
           { role: "user", content: message }
         ],
-        max_completion_tokens: 1100,
-        temperature: 0.55,
+        max_completion_tokens: coreMaxTokens,
+        temperature: coreTemperature,
         stream: false
       })
     });
