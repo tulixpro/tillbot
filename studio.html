@@ -576,4 +576,5 @@ if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").the
  el("labExportDraft").addEventListener("click",()=>{const blob=new Blob([d.draft.title+"\n\n"+d.draft.text],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=node("a");a.href=url;a.download=(d.draft.title.trim()||"studio-entwurf")+".txt";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
  render();
 })();
-\n</script></body></html>
+
+</script></body></html>
