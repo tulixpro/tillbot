@@ -169,18 +169,20 @@ app.put("/api/admin/announcement", auth, admin, async (req,res)=>{
  const title=String(req.body.title||"TILLBOT-Mitteilung").trim().slice(0,90)||"TILLBOT-Mitteilung";
  const category=["update","maintenance","release","feature","security","event","general"].includes(req.body.category)?req.body.category:"general";
  const level=["info","warning","critical"].includes(req.body.level)?req.body.level:"info";
+ const linkUrl=String(req.body.linkUrl||"").trim().slice(0,500);
+ if(linkUrl){try{const u=new URL(linkUrl);if(u.protocol!=="https:")throw new Error("HTTPS erforderlich");}catch{return res.status(400).json({error:"Bitte einen gültigen HTTPS-Link eintragen."})}}
  try{
   await pool.query("INSERT INTO app_settings(key,value) VALUES('public_announcement',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[message]);
-  if(message)await pool.query("INSERT INTO studio_announcements(title,message,category,level,published) VALUES($1,$2,$3,$4,TRUE)",[title,message,category,level]);
+  if(message)await pool.query("INSERT INTO studio_announcements(title,message,category,level,link_url,published) VALUES($1,$2,$3,$4,$5,TRUE)",[title,message,category,level,linkUrl]);
   res.json({ok:true,message:"Ankündigung gespeichert und im Verlauf veröffentlicht."});
  }catch(e){console.error("announcement error",e);res.status(500).json({error:"Ankündigung konnte nicht gespeichert werden."})}
 });
 app.get("/api/announcements",async(_req,res)=>{
- try{const {rows}=await pool.query("SELECT id,title,message,category,level,created_at FROM studio_announcements WHERE published=TRUE ORDER BY created_at DESC LIMIT 50");res.set("Cache-Control","no-store").json(rows)}
+ try{const {rows}=await pool.query("SELECT id,title,message,category,level,link_url,created_at FROM studio_announcements WHERE published=TRUE ORDER BY created_at DESC LIMIT 50");res.set("Cache-Control","no-store").json(rows)}
  catch{res.status(503).json({error:"Ankündigungen sind momentan nicht verfügbar."})}
 });
 app.get("/api/admin/announcements",auth,admin,async(_req,res)=>{
- try{const {rows}=await pool.query("SELECT id,title,message,category,level,published,created_at FROM studio_announcements ORDER BY created_at DESC LIMIT 100");res.set("Cache-Control","no-store").json(rows)}
+ try{const {rows}=await pool.query("SELECT id,title,message,category,level,link_url,published,created_at FROM studio_announcements ORDER BY created_at DESC LIMIT 100");res.set("Cache-Control","no-store").json(rows)}
  catch{res.status(503).json({error:"Ankündigungsverlauf ist momentan nicht verfügbar."})}
 });
 app.get("/api/notifications", async (_req,res)=>{
