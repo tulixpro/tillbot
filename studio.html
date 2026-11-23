@@ -551,7 +551,7 @@ if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").the
  $id("suiteImportFile").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const parsed=JSON.parse(await file.text()),incoming=parsed.data;if(!incoming||typeof incoming!=="object")throw Error("Backup-Format nicht erkannt.");if(!confirm("Vorhandene Studio-Suite-Daten durch dieses Backup ersetzen?"))return;data={...blank(),...incoming};save();render();$id("suiteBackupMsg").textContent="Backup importiert."}catch(err){$id("suiteBackupMsg").textContent="Import fehlgeschlagen: "+err.message}finally{e.target.value=""}});
  render();
 })();
-\n
+
 /* Productivity Lab: local-first planning tools. */
 (function(){
  const KEY="tillbot-productivity-lab-v1",blank=()=>({tasks:[],goals:[],plans:[],decisions:[],draft:{title:"",text:""}});let d=blank();
