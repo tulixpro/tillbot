@@ -155,17 +155,33 @@ app.post("/api/admin/email-test",auth,admin,rateLimit({windowMs:15*60_000,limit:
 
 app.put("/api/admin/announcement", auth, admin, async (req,res)=>{
  const message=String(req.body.message||"").trim().slice(0,500);
- try{await pool.query("INSERT INTO app_settings(key,value) VALUES('public_announcement',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[message]);res.json({ok:true,message:"Ankündigung gespeichert."})}
- catch(e){console.error("announcement error",e);res.status(500).json({error:"Ankündigung konnte nicht gespeichert werden."})}
+ const title=String(req.body.title||"TILLBOT-Mitteilung").trim().slice(0,90)||"TILLBOT-Mitteilung";
+ const category=["update","maintenance","release","feature","security","event","general"].includes(req.body.category)?req.body.category:"general";
+ const level=["info","warning","critical"].includes(req.body.level)?req.body.level:"info";
+ try{
+  await pool.query("INSERT INTO app_settings(key,value) VALUES('public_announcement',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[message]);
+  if(message)await pool.query("INSERT INTO studio_announcements(title,message,category,level,published) VALUES($1,$2,$3,$4,TRUE)",[title,message,category,level]);
+  res.json({ok:true,message:"Ankündigung gespeichert und im Verlauf veröffentlicht."});
+ }catch(e){console.error("announcement error",e);res.status(500).json({error:"Ankündigung konnte nicht gespeichert werden."})}
+});
+app.get("/api/announcements",async(_req,res)=>{
+ try{const {rows}=await pool.query("SELECT id,title,message,category,level,created_at FROM studio_announcements WHERE published=TRUE ORDER BY created_at DESC LIMIT 50");res.set("Cache-Control","no-store").json(rows)}
+ catch{res.status(503).json({error:"Ankündigungen sind momentan nicht verfügbar."})}
+});
+app.get("/api/admin/announcements",auth,admin,async(_req,res)=>{
+ try{const {rows}=await pool.query("SELECT id,title,message,category,level,published,created_at FROM studio_announcements ORDER BY created_at DESC LIMIT 100");res.set("Cache-Control","no-store").json(rows)}
+ catch{res.status(503).json({error:"Ankündigungsverlauf ist momentan nicht verfügbar."})}
 });
 app.get("/api/notifications", async (_req,res)=>{
  try{
   const m=await getMaintenance();
-  const {rows:ann}=await pool.query("SELECT value FROM app_settings WHERE key='public_announcement'");const announcement=ann[0]?.value||null;
-  if(m.enabled)return res.set("Cache-Control","no-store").json({notice:m.message,announcement,level:"critical"});
+  const {rows:ann}=await pool.query("SELECT value FROM app_settings WHERE key='public_announcement'");
+  const {rows:meta}=await pool.query("SELECT title,category,level FROM studio_announcements WHERE published=TRUE ORDER BY created_at DESC LIMIT 1");
+  const announcement=ann[0]?.value||null,latest=meta[0]||{};
+  if(m.enabled)return res.set("Cache-Control","no-store").json({notice:m.message,announcement,title:latest.title||"Wartungsarbeiten",category:"maintenance",level:"critical"});
   const mem=process.memoryUsage(),ratio=mem.heapUsed/Math.max(mem.heapTotal,1);
-  if(ratio>.88)return res.set("Cache-Control","no-store").json({notice:"Der Server ist gerade stark ausgelastet. Antworten können länger dauern.",announcement,level:"warning"});
-  return res.set("Cache-Control","no-store").json({notice:null,announcement,level:"info"});
+  if(ratio>.88)return res.set("Cache-Control","no-store").json({notice:"Der Server ist gerade stark ausgelastet. Antworten können länger dauern.",announcement,title:latest.title||"",category:latest.category||"general",level:"warning"});
+  return res.set("Cache-Control","no-store").json({notice:null,announcement,title:latest.title||"",category:latest.category||"general",level:latest.level||"info"});
  }catch{return res.set("Cache-Control","no-store").json({notice:"Der Systemstatus ist momentan nicht verfügbar.",level:"warning"})}
 });
 // Public, privacy-safe operational notices; never expose logs or user data.
@@ -362,7 +378,13 @@ async function getMaintenance(){
  return {enabled,message,mode:securityWindow&&!manual?"security":manual?"maintenance":"normal",securityCheck:securityWindow};
 }
 app.get("/api/maintenance",async(_req,res)=>{try{res.json(await getMaintenance())}catch{res.status(503).json({enabled:false,message:"Status derzeit nicht verfügbar"})}});
-app.put("/api/admin/maintenance",auth,admin,async(req,res)=>{const enabled=!!req.body.enabled,message=typeof req.body.message==="string"?req.body.message.trim().slice(0,300):null;await pool.query("INSERT INTO app_settings(key,value) VALUES('maintenance_enabled',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[String(enabled)]);if(message!==null&&message.length>=5)await pool.query("INSERT INTO app_settings(key,value) VALUES('maintenance_message',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[message]);res.json({ok:true,enabled,message:message||"TILLBOT wird gerade gewartet. Bitte später erneut versuchen."})});
+app.put("/api/admin/maintenance",auth,admin,async(req,res)=>{
+ const enabled=!!req.body.enabled,message=typeof req.body.message==="string"?req.body.message.trim().slice(0,300):null;
+ await pool.query("INSERT INTO app_settings(key,value) VALUES('maintenance_enabled',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[String(enabled)]);
+ if(message!==null&&message.length>=5)await pool.query("INSERT INTO app_settings(key,value) VALUES('maintenance_message',$1) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",[message]);
+ if(enabled)await pool.query("INSERT INTO studio_announcements(title,message,category,level,published) VALUES($1,$2,'maintenance','critical',TRUE)",["Wartungsarbeiten",message||"TILLBOT wird gerade gewartet. Bitte später erneut versuchen."]);
+ res.json({ok:true,enabled,message:message||"TILLBOT wird gerade gewartet. Bitte später erneut versuchen."})
+});
 app.get("/api/chats", auth, async (req, res) => { const q=String(req.query.search||"").trim().slice(0,100); const { rows } = await pool.query("SELECT id,title,updated_at FROM chats WHERE user_id=$1 AND ($2='' OR title ILIKE $3 OR history ILIKE $3) ORDER BY updated_at DESC LIMIT 200", [req.user.id,q,"%"+q+"%"]); res.set("Cache-Control","no-store").json(rows); });
 app.post("/api/chats", auth, async (req, res) => {
   const title = String(req.body.title || "Neuer Chat").slice(0, 100);
