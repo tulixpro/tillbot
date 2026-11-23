@@ -263,13 +263,15 @@ app.post("/api/login", async (req, res) => {
   try {
     const identity=String(req.body.username||"").trim().toLowerCase(); const { rows } = await pool.query("SELECT * FROM users WHERE username = $1 OR lower(email) = $2 LIMIT 1", [normalizeUsername(identity), identity]); const user = rows[0];
     if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
-      return res.status(401).json({ error: "Login falsch" });
+      pool.query("INSERT INTO system_error_logs(level,source,message) VALUES($1,$2,$3)",["warning","auth/login","Anmeldeversuch abgelehnt: Zugangsdaten stimmen nicht überein."]).catch(()=>{});
+      return res.status(401).json({ error: "Benutzername oder Passwort ist nicht korrekt. Prüfe deine Eingabe und versuche es erneut." });
     }
     if(user.email_verification_required && !user.email_verified)return res.status(403).json({error:"Bitte bestätige zuerst deine E-Mail-Adresse. Du kannst dir den Bestätigungslink erneut senden lassen."});
     res.json({ token: makeToken(user), user: { id: user.id, username: user.username, role: user.role } });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Login fehlgeschlagen" });
+    console.error("Login error:", error.code || error.message);
+    pool.query("INSERT INTO system_error_logs(level,source,message) VALUES($1,$2,$3)",["error","auth/login","Interner Fehler beim Login: "+String(error.code || "unexpected error").slice(0,80)]).catch(()=>{});
+    res.status(500).json({ error: "Anmeldung momentan nicht möglich. Bitte prüfe den Serverstatus oder versuche es später erneut." });
   }
 });
 
