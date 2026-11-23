@@ -316,6 +316,30 @@ app.put("/api/admin/permissions/:id",auth,admin,async(req,res)=>{
  await pool.query("INSERT INTO admin_permission_overrides(user_id,permission_key,enabled) VALUES($1,$2,$3) ON CONFLICT(user_id,permission_key) DO UPDATE SET enabled=EXCLUDED.enabled,updated_at=NOW()",[id,key,enabled]);
  res.json({ok:true,userId:id,permission:key,enabled});
 });
+const RENDER_SERVICE_ID=process.env.TILLBOT_RENDER_SERVICE_ID||"srv-dbrn82bm8hqs73daniq0";
+async function renderApi(path,options={}){
+ const key=String(process.env.RENDER_API_KEY||"").trim();
+ if(!key)throw Object.assign(new Error("Render API ist noch nicht verbunden. Hinterlege RENDER_API_KEY in den geschützten Render-Umgebungsvariablen."),{status:503});
+ const response=await fetch("https://api.render.com/v1"+path,{...options,headers:{"Authorization":"Bearer "+key,"Accept":"application/json","Content-Type":"application/json",...(options.headers||{})}});
+ const body=await response.json().catch(()=>({}));
+ if(!response.ok)throw Object.assign(new Error(body.message||body.error||("Render API Fehler ("+response.status+")")),{status:response.status});
+ return body;
+}
+app.get("/api/admin/deployments",auth,admin,async(_req,res)=>{
+ try{
+  const rows=await renderApi("/services/"+encodeURIComponent(RENDER_SERVICE_ID)+"/deploys?limit=20");
+  const deployments=(Array.isArray(rows)?rows:[]).map(x=>{const d=x.deploy||x;return{id:d.id,status:d.status,createdAt:d.createdAt,updatedAt:d.updatedAt,finishedAt:d.finishedAt,commit:d.commit?{id:d.commit.id,message:d.commit.message,createdAt:d.commit.createdAt}:null,trigger:d.trigger,reason:d.reason}});
+  res.set("Cache-Control","no-store").json({serviceId:RENDER_SERVICE_ID,deployments});
+ }catch(e){res.status(e.status||502).json({error:e.message||"Deployments konnten nicht geladen werden."})}
+});
+app.post("/api/admin/deployments",auth,admin,rateLimit({windowMs:60000,limit:3}),async(req,res)=>{
+ try{
+  const clearCache=req.body?.clearCache===true;
+  const result=await renderApi("/services/"+encodeURIComponent(RENDER_SERVICE_ID)+"/deploys",{method:"POST",body:JSON.stringify({clearCache:clearCache?"clear":"do_not_clear"})});
+  const d=result.deploy||result;
+  res.status(202).json({ok:true,id:d.id,status:d.status||"created",message:"Deployment wurde an Render übergeben."});
+ }catch(e){res.status(e.status||502).json({error:e.message||"Deployment konnte nicht gestartet werden."})}
+});
 app.get("/api/admin/activity",auth,admin,async(_req,res)=>{
  const {rows}=await pool.query("SELECT l.id,l.action,l.method,l.path,l.created_at,u.username FROM admin_activity_log l LEFT JOIN users u ON u.id=l.actor_id ORDER BY l.created_at DESC LIMIT 100");
  res.set("Cache-Control","no-store").json(rows);
