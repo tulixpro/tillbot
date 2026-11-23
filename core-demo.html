@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#081321">
 <meta name="description" content="TILLBOT CORE – transparente deutsche Browser-Demo.">
 <title>TILLBOT CORE – Haupt-KI & 3D Game Studio</title>
@@ -42,7 +42,7 @@ body.coreFullscreenDemo .chatCard{width:100%;min-height:0;flex:1}
 body.coreFullscreenDemo #messages{max-height:none}
 @media(max-width:680px){
  .shell,body.coreFullscreenDemo .shell{width:100%;padding:0 0 max(6px,env(safe-area-inset-bottom));gap:7px}
- .topbar{padding:9px 11px;border-radius:0;border-left:0;border-right:0}
+ .topbar{padding:calc(9px + env(safe-area-inset-top)) max(11px,env(safe-area-inset-left)) 9px max(11px,env(safe-area-inset-right));border-radius:0;border-left:0;border-right:0}
  .brand h1{font-size:14px}.brand p{font-size:10px}.mark{width:36px;height:36px}.status{padding:5px 8px;font-size:10px}
  .hero{padding:5px 12px}.hero h2{font-size:20px;margin:4px 0}.hero p{font-size:10px}
  .notice{width:calc(100% - 18px);padding:8px 9px;font-size:10px}
@@ -50,7 +50,7 @@ body.coreFullscreenDemo #messages{max-height:none}
  .chatHead{align-items:flex-start;padding:8px 9px}.toolbar{justify-content:flex-start;gap:5px}.toolbar button{min-height:31px;padding:5px 7px;font-size:10px}.answer-setting{font-size:10px}.answer-setting select{min-height:31px;font-size:10px}
  #messages,body.coreFullscreenDemo #messages{padding:10px;gap:8px}.msg{max-width:96%;padding:9px 10px;font-size:13px}
  .quickbar{flex-wrap:nowrap;overflow-x:auto;padding:0 9px 8px}.quickbar button{flex:0 0 auto;font-size:10px}
- .composer{padding:8px;gap:6px}.composer textarea{min-height:41px;padding:8px 9px;font-size:14px}.send{min-width:64px;min-height:39px;padding:0 8px;font-size:11px}
+ .composer{padding:8px;gap:6px}.composer textarea{min-height:41px;padding:8px 9px;font-size:16px;resize:none}.send{min-width:64px;min-height:39px;padding:0 8px;font-size:11px}
  .chatFoot{padding:0 9px 7px;font-size:9px}.tutorialGrid{grid-template-columns:1fr}
  body.coreFullscreenDemo .tutorial,body.coreFullscreenDemo .footer{display:none}
 }
