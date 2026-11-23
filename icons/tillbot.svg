@@ -1,1 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="TILLBOT Cloud"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#69c9e8"/></linearGradient></defs><rect x="20" y="20" width="472" height="472" rx="118" fill="#171522"/><path d="M151 351h207c48 0 79-31 79-75 0-41-29-70-68-75-12-58-60-98-119-98-56 0-101 35-116 86-49 3-83 36-83 81 0 47 38 81 100 81Z" fill="none" stroke="url(#g)" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/><path d="M256 190v119m-42-42 42 42 42-42" fill="none" stroke="#f4f1fa" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="TILLBOT">
+  <defs>
+    <linearGradient id="tile" x1="48" y1="24" x2="468" y2="492" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1b2a46"/>
+      <stop offset="1" stop-color="#0b1425"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="135" y1="118" x2="384" y2="394" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a99aff"/>
+      <stop offset=".52" stop-color="#8297ff"/>
+      <stop offset="1" stop-color="#53dfd0"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="145" y1="130" x2="367" y2="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="65" y="65" width="382" height="382" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="13"/>
+    </filter>
+  </defs>
+  <rect x="20" y="20" width="472" height="472" rx="132" fill="url(#tile)"/>
+  <rect x="21" y="21" width="470" height="470" rx="131" stroke="#dbe7ff" stroke-opacity=".12" stroke-width="2"/>
+  <path d="M256 105c-78 0-141 63-141 141 0 78 63 141 141 141s141-63 141-141c0-78-63-141-141-141Z" fill="url(#mark)" opacity=".16" filter="url(#glow)"/>
+  <path d="M155 185h202M256 185v164" fill="none" stroke="url(#mark)" stroke-width="39" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M155 185h202M256 185v164" fill="none" stroke="url(#shine)" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="256" cy="349" r="23" fill="#56dfd0"/>
+  <circle cx="256" cy="349" r="9" fill="#102137"/>
+  <circle cx="155" cy="185" r="12" fill="#a99aff"/>
+  <circle cx="357" cy="185" r="12" fill="#56dfd0"/>
+  <path d="M116 385c36 37 85 59 140 59s104-22 140-59" fill="none" stroke="#dce8ff" stroke-opacity=".10" stroke-width="5" stroke-linecap="round"/>
+</svg>
