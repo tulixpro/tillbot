@@ -123,3 +123,70 @@ body::after{
 @media(prefers-reduced-motion:reduce){
  body::before,body::after{animation:none!important}
 }
+
+
+/* Visible Christmas decorations: Santa hat on every TILLBOT logo */
+.brandIcon,.authIcon,.mark{
+  position:relative!important;
+  overflow:visible!important;
+  isolation:isolate;
+}
+.brandIcon img,.authIcon img,.mark img{
+  position:relative;
+  z-index:1;
+}
+.brandIcon::before,.authIcon::before,.mark::before{
+  content:"";
+  position:absolute;
+  z-index:5;
+  width:25px;
+  height:18px;
+  top:-10px;
+  right:-3px;
+  background:linear-gradient(145deg,#f0646b 0%,#c92e43 72%);
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:85% 12% 8% 8%;
+  clip-path:polygon(0 100%,14% 48%,100% 0,79% 100%);
+  transform:rotate(8deg);
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));
+  pointer-events:none;
+}
+.brandIcon::after,.authIcon::after,.mark::after{
+  content:"";
+  position:absolute;
+  z-index:6;
+  width:8px;
+  height:8px;
+  top:-11px;
+  right:-5px;
+  border-radius:50%;
+  background:#fff8e9;
+  box-shadow:0 0 0 2px rgba(255,255,255,.18),0 1px 4px #0008;
+  pointer-events:none;
+}
+.brandIcon{box-shadow:0 8px 24px rgba(25,95,65,.42),0 0 0 1px rgba(226,199,127,.38)!important}
+.authIcon{box-shadow:0 8px 24px rgba(169,54,69,.32),0 0 0 1px rgba(226,199,127,.38)!important}
+
+/* Snow remains visible on dark app surfaces without blocking controls */
+body::before{
+  z-index:100000!important;
+  inset:0!important;
+  background-image:
+    radial-gradient(2px 2px at 24px 38px,rgba(255,255,255,.92) 48%,transparent 56%),
+    radial-gradient(1.5px 1.5px at 110px 145px,rgba(255,255,255,.82) 48%,transparent 56%),
+    radial-gradient(2.5px 2.5px at 205px 85px,rgba(255,247,221,.88) 48%,transparent 56%),
+    radial-gradient(1.5px 1.5px at 310px 210px,rgba(255,255,255,.82) 48%,transparent 56%),
+    radial-gradient(2px 2px at 390px 28px,rgba(255,255,255,.78) 48%,transparent 56%);
+  background-size:420px 260px;
+  animation:tb-snowfall-visible 16s linear infinite;
+  opacity:.78;
+}
+@keyframes tb-snowfall-visible{
+  from{background-position:0 -260px,0 -180px,0 -80px,0 -320px,0 -120px}
+  to{background-position:24px 100vh,24px calc(100vh + 80px),24px calc(100vh + 180px),24px calc(100vh + 320px),24px calc(100vh + 120px)}
+}
+body::after{z-index:100001!important;height:34px!important}
+@media(max-width:600px){
+  .brandIcon::before,.authIcon::before,.mark::before{width:23px;height:16px;top:-9px}
+  body::after{height:27px!important}
+}
