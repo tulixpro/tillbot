@@ -243,7 +243,7 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
   const waiting=add('CORE denkt nach …','bot');status.textContent='CORE verarbeitet deine Nachricht …';setBusy(true);
   const controller=new AbortController();activeController=controller;
   try{
-   const response=await fetch(API+'/api/core/chat',{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({message:value,history:history.slice(-8),answerMode:answerMode.value,mode:$('core-mode').value})});
+   const token=localStorage.getItem('tb-token');if(!token)throw new Error('Bitte melde dich zuerst auf derselben TILLBOT-Website mit deinem Konto an. Danach CORE neu laden.');const response=await fetch(API+'/api/core/chat',{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({message:value,history:history.slice(-8),answerMode:answerMode.value,mode:$('core-mode').value})});
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.error||'CORE ist momentan nicht erreichbar.');
    const answer=String(data.answer||'Keine Antwort erhalten.');
@@ -293,7 +293,7 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
   gameStatus.textContent='CORE erstellt den Spielcode …';generatedGame='';gameDownload.disabled=true;gameWindows.disabled=true;gameFrameWrap.hidden=true;
   const controller=new AbortController();gameController=controller;setGameBusy(true);
   try{
-   const response=await fetch(API+'/api/core/game',{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+   const token=localStorage.getItem('tb-token');if(!token)throw new Error('Bitte melde dich zuerst auf derselben TILLBOT-Website mit deinem Konto an.');const response=await fetch(API+'/api/core/game',{method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({prompt})});
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.error||'Das Spiel konnte nicht erstellt werden.');
    generatedGame=String(data.html||'');if(!generatedGame)throw new Error('CORE hat keinen Spielcode geliefert.');
@@ -310,7 +310,7 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
   if(!generatedGame||gameWindows.disabled)return;
   gameWindows.disabled=true;gameStatus.textContent='Windows-Buildpaket wird vorbereitet …';
   try{
-   const response=await fetch(API+'/api/core/game/package',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({html:generatedGame})});
+   const token=localStorage.getItem('tb-token');if(!token)throw new Error('Bitte melde dich zuerst mit deinem TILLBOT-Konto an.');const response=await fetch(API+'/api/core/game/package',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({html:generatedGame})});
    if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.error||'Windows-Paket konnte nicht erstellt werden.')}
    const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='tillbot-windows-game-project.zip';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
    gameStatus.textContent='Windows-Projekt gepackt. Entpacke die ZIP-Datei und starte BUILD-WINDOWS.bat auf einem Windows-PC.';
