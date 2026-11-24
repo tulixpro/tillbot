@@ -685,7 +685,7 @@ app.post("/api/core/game", auth, coreGameLimit, coreGameAccountLimit, async (_re
 });
 
 
-app.post("/api/core/game/package", auth, rateLimit({ windowMs: 10 * 60_000, limit: 5, standardHeaders: true, legacyHeaders: false }), async (req, res) => {
+app.post("/api/core/game/package", auth, rateLimit({ windowMs: 10 * 60_000, limit: 5, standardHeaders: true, legacyHeaders: false }), coreAccountLimit, async (req, res) => {
   const html = String(req.body?.html || "");
   if (!/^<!doctype html/i.test(html) || !html.toLowerCase().includes("<html") || !html.toLowerCase().includes("</html>") || html.length > 95000) return res.status(400).json({ error: "Ungültiges Spielprojekt. Bitte erstelle das Spiel erneut." });
   const quote = String.fromCharCode(39);
