@@ -1,0 +1,72 @@
+/* TILLBOT Christmas Edition 2026 — seasonal visual layer */
+:root{
+  --tb-xmas-pine:#123b30;
+  --tb-xmas-pine-light:#1d5944;
+  --tb-xmas-red:#a93645;
+  --tb-xmas-red-light:#d15a61;
+  --tb-xmas-gold:#d9b96e;
+}
+html{scrollbar-color:#426b58 #0a1714}
+body{
+  background-image:
+    radial-gradient(ellipse at 8% 0%,rgba(35,112,76,.19),transparent 36%),
+    radial-gradient(ellipse at 94% 7%,rgba(169,54,69,.13),transparent 32%),
+    radial-gradient(circle at 15% 24%,rgba(236,218,164,.10) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 80% 42%,rgba(236,218,164,.08) 0 1px,transparent 1.8px);
+}
+#app.layout{background:radial-gradient(ellipse at 70% -8%,rgba(42,112,76,.22),transparent 43%),#09130f!important}
+#app.layout>aside,#sidebar{background:linear-gradient(180deg,#10291f,#0b1b16)!important;border-color:#294b3a!important}
+#app.layout>main{background:radial-gradient(ellipse at 50% 0%,rgba(169,54,69,.09),transparent 48%),#09130f!important}
+#app.layout>main>header{border-color:#385744!important;background:rgba(12,29,22,.91)!important}
+#app .headTitle strong{color:#fff8e8!important}
+#app .headTitle small{color:#c1aa79!important}
+#app .welcome{
+  border-color:#456b50!important;
+  background:linear-gradient(140deg,rgba(24,67,48,.96),rgba(17,39,31,.94))!important;
+  box-shadow:0 24px 80px rgba(0,0,0,.38),inset 0 1px rgba(232,211,158,.12)!important;
+}
+#app .welcome .cloud,#sidebar .coreOrb{
+  background:linear-gradient(145deg,#e0c47b,#a93645)!important;
+  color:#fff!important;
+  box-shadow:0 10px 32px rgba(169,54,69,.27)!important;
+}
+#app .suggestions button,#app .composerTools button{
+  border-color:#42644d!important;background:#173629!important;color:#f2f4e8!important;
+}
+#app #prompt,#app .composer,#app .inputWrap{background:#10271d!important;border-color:#42644d!important}
+#app #send{background:linear-gradient(135deg,#b43f4c,#d0ad60)!important;color:#fff!important;box-shadow:0 8px 25px rgba(169,54,69,.25)!important}
+#sidebar .coreLaunchBtn{border-color:#8b6841!important;background:linear-gradient(115deg,#254b35,#612b32)!important}
+#sidebar .coreLaunchBtn small{color:#e6d8bc!important}
+#coreFullscreen{background:#0c1d15!important;border-color:#47634b!important}
+.authCard,.authbox{border-color:rgba(217,185,110,.36)!important}
+.authBackdrop span{background:radial-gradient(circle,rgba(169,54,69,.25),rgba(29,89,68,.08) 65%,transparent 72%)!important}
+.publicDemo{border-color:rgba(217,185,110,.35)!important;background:rgba(29,89,68,.16)!important}
+.publicDemo a{background:linear-gradient(120deg,#a93645,#1d5944)!important}
+.top,.topbar{
+  border-color:#42634b!important;
+  background:linear-gradient(115deg,rgba(17,57,40,.97),rgba(43,31,31,.96))!important;
+}
+.top .brand,.topbar .brand{color:#fff8e8}
+.hero{
+  border-color:#526b48!important;
+  background:linear-gradient(120deg,rgba(24,75,49,.96),rgba(76,39,44,.92),rgba(37,65,47,.94))!important;
+}
+.eyebrow{color:#dfc47d!important}
+button,.button{accent-color:#b43f4c}
+button:hover:not(:disabled){border-color:#d0ad60!important}
+.status{border-color:#4c7554!important;background:#173b2a!important;color:#e8d9ad!important}
+.status i{background:#d7bd75!important;box-shadow:0 0 10px rgba(215,189,117,.55)!important}
+.chatCard,.game-studio,.panel,.card{
+  border-color:#3c5d47!important;
+}
+.msg.user{background:linear-gradient(130deg,#8f3542,#28543d)!important;border-color:#bd8b58!important}
+.send,.game-create{background:linear-gradient(120deg,#a93645,#d0ad60)!important;color:#fff!important}
+.composer{border-color:#3c5d47!important}
+.composer textarea,.game-prompt{border-color:#49674e!important}
+.notice,.noticeDisclosure,.game-disclosure{border-color:#4b6347!important}
+.footer{color:#b8b99d!important}
+@media(prefers-reduced-motion:no-preference){
+  #app .welcome .cloud{animation:tb-xmas-glow 5s ease-in-out infinite alternate}
+  @keyframes tb-xmas-glow{from{filter:saturate(.92)}to{filter:saturate(1.18) brightness(1.08)}}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
