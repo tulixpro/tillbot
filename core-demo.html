@@ -324,7 +324,7 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
  });
  gamePrompt.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='Enter')void createGame()});
 
- fetch(API+'/api/core/status',{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error('status');return response.json()}).then(data=>{
+ fetch(API+'/api/core/status',{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('tb-token')||'')}}).then(response=>{if(!response.ok)throw new Error('status');return response.json()}).then(data=>{
   status.textContent=data.available?'CORE bereit · '+(data.model||'Modellserver konfiguriert'):'CORE nicht verfügbar · Modellserver nicht konfiguriert';
   const indicator=document.querySelector('.status');if(indicator){indicator.lastChild.textContent=data.available?' Verbunden':' Nicht verfügbar';indicator.style.borderColor=data.available?'#456b59':'#754b4b';}
  }).catch(()=>{status.textContent='CORE-Status momentan nicht erreichbar';const indicator=document.querySelector('.status');if(indicator){indicator.lastChild.textContent=' Status unbekannt';indicator.style.borderColor='#755f3d';}});
