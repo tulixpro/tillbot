@@ -620,7 +620,7 @@ const coreGameAccountLimit = rateLimit({ windowMs: 60 * 60_000, limit: 2, keyGen
  * Uses the configured hosted model as an inference engine; this is not a separately trained foundation model.
  * Requests are rate-limited and never written to chat history or the database.
  */
-app.get("/api/core/status", async (_req, res) => {
+app.get("/api/core/status", auth, async (_req, res) => {
   try {
     const enabled = await featureEnabled("core");
     res.set("Cache-Control", "no-store").json({
