@@ -70,3 +70,56 @@ button:hover:not(:disabled){border-color:#d0ad60!important}
   @keyframes tb-xmas-glow{from{filter:saturate(.92)}to{filter:saturate(1.18) brightness(1.08)}}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+
+
+/* Full festive layer: gentle snow + warm fairy lights, above every page */
+body{position:relative}
+body::before{
+ content:"";position:fixed;inset:-110vh 0 0;z-index:9998;pointer-events:none;
+ background-image:
+  radial-gradient(2px 2px at 24px 38px,rgba(255,255,255,.9) 48%,transparent 55%),
+  radial-gradient(1.5px 1.5px at 110px 145px,rgba(255,255,255,.78) 48%,transparent 55%),
+  radial-gradient(2.5px 2.5px at 205px 85px,rgba(255,247,221,.82) 48%,transparent 55%),
+  radial-gradient(1.5px 1.5px at 310px 210px,rgba(255,255,255,.8) 48%,transparent 55%),
+  radial-gradient(2px 2px at 390px 28px,rgba(255,255,255,.72) 48%,transparent 55%);
+ background-size:420px 260px;
+ animation:tb-snowfall 24s linear infinite;
+ opacity:.72;
+}
+body::after{
+ content:"";position:fixed;z-index:9999;pointer-events:none;left:0;right:0;top:0;height:28px;
+ border-top:3px solid rgba(214,190,126,.7);
+ background:
+  radial-gradient(circle at 5% 12px,#f5d78a 0 3px,rgba(245,215,138,.28) 4px,transparent 9px),
+  radial-gradient(circle at 15% 12px,#d95b61 0 3px,rgba(217,91,97,.24) 4px,transparent 9px),
+  radial-gradient(circle at 25% 12px,#7ed5a2 0 3px,rgba(126,213,162,.25) 4px,transparent 9px),
+  radial-gradient(circle at 35% 12px,#f5d78a 0 3px,rgba(245,215,138,.28) 4px,transparent 9px),
+  radial-gradient(circle at 45% 12px,#d95b61 0 3px,rgba(217,91,97,.24) 4px,transparent 9px),
+  radial-gradient(circle at 55% 12px,#7ed5a2 0 3px,rgba(126,213,162,.25) 4px,transparent 9px),
+  radial-gradient(circle at 65% 12px,#f5d78a 0 3px,rgba(245,215,138,.28) 4px,transparent 9px),
+  radial-gradient(circle at 75% 12px,#d95b61 0 3px,rgba(217,91,97,.24) 4px,transparent 9px),
+  radial-gradient(circle at 85% 12px,#7ed5a2 0 3px,rgba(126,213,162,.25) 4px,transparent 9px),
+  radial-gradient(circle at 95% 12px,#f5d78a 0 3px,rgba(245,215,138,.28) 4px,transparent 9px);
+ filter:drop-shadow(0 2px 5px rgba(232,197,117,.35));
+ animation:tb-lights 3.2s ease-in-out infinite alternate;
+}
+@keyframes tb-snowfall{to{transform:translate3d(26px,110vh,0)}}
+@keyframes tb-lights{from{opacity:.72}to{opacity:1;filter:drop-shadow(0 2px 9px rgba(232,197,117,.6))}}
+/* Small seasonal touches on brand areas and section headers */
+.brand::after,.authBrand::after{
+ content:"✦  🎄  ✦";display:block;margin-left:8px;color:#e2c77f;font-size:13px;letter-spacing:3px;white-space:nowrap;
+}
+#app .welcome::before,.hero::before{
+ content:"❄  ✦  ❄";display:block;margin:0 auto 10px;text-align:center;color:#e3cb8c;font-size:18px;letter-spacing:12px;opacity:.92;
+}
+#sidebar::before{
+ content:"🎄  ✨  🎁";display:block;text-align:center;padding:8px 0 3px;color:#e4cb8a;font-size:17px;letter-spacing:8px;
+}
+@media(max-width:600px){
+ body::after{height:23px;background-size:auto}
+ body::before{opacity:.58}
+ .brand::after,.authBrand::after{font-size:11px;letter-spacing:1px}
+}
+@media(prefers-reduced-motion:reduce){
+ body::before,body::after{animation:none!important}
+}
