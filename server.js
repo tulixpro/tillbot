@@ -147,23 +147,6 @@ async function createEmailAction(userId,purpose){
  return raw;
 }
 
-app.get("/api/admin/email-status",auth,admin,async(_req,res)=>{
- const c=emailTransportConfig();
- res.set("Cache-Control","no-store").json({configured:c.configured,missing:c.missing,host:c.configured?c.host:null,port:c.configured?c.port:null,secure:c.configured?c.secure:null,from:c.configured?c.from:null});
-});
-app.post("/api/admin/email-test",auth,admin,rateLimit({windowMs:15*60_000,limit:3,message:{error:"Zu viele Testmails. Bitte 15 Minuten warten."}}),async(req,res)=>{
- const c=emailTransportConfig(),to=String(req.body.to||"").trim().slice(0,254);
- if(!c.configured)return res.status(503).json({error:"SMTP-Konfiguration unvollständig. Es fehlen: "+c.missing.join(", ")+". Trage diese Werte unter Render → Environment ein."});
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to))return res.status(400).json({error:"Bitte eine gültige Empfänger-E-Mail-Adresse eingeben."});
- try{
-  const nodemailer=require("nodemailer");
-  const transporter=nodemailer.createTransport({host:c.host,port:c.port,secure:c.secure,auth:{user:c.user,pass:c.pass},connectionTimeout:10000,greetingTimeout:10000,socketTimeout:15000});
-  await transporter.sendMail({from:c.from,to,subject:"TILLBOT – SMTP-Test erfolgreich",text:"Diese Testnachricht wurde vom TILLBOT-Admin-Panel versendet. Der SMTP-Versand ist erreichbar."});
-  res.json({ok:true,message:"Testmail wurde vom SMTP-Server angenommen. Prüfe auch den Spam-Ordner."});
- }catch(error){console.error("SMTP test failed:",error.code||error.message);res.status(502).json({error:"E-Mail-Versand fehlgeschlagen. Prüfe SMTP-Host, Port, TLS und Zugangsdaten in Render."})}
-});
-
-
 app.put("/api/admin/announcement", auth, admin, async (req,res)=>{
  const message=String(req.body.message||"").trim().slice(0,500);
  const title=String(req.body.title||"TILLBOT-Mitteilung").trim().slice(0,90)||"TILLBOT-Mitteilung";
