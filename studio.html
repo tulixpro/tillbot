@@ -364,7 +364,7 @@ $("studioCoreBubbleForm").addEventListener("submit",async e=>{
  addCoreBubbleMessage("user",message);input.value="";button.disabled=true;$("studioCoreBubbleStatus").textContent="CORE denkt nach …";
  try{
   const history=coreBubbleHistory.slice(-8);
-  const result=await fetch(API+"/api/core/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:"Ich nutze gerade das TILLBOT Studio als Administrator. Hilf mir bei der Bedienung, erkläre Systemwerte verständlich und gib nur Schritte an, die in der Oberfläche tatsächlich vorhanden sind. Meine Frage: "+message,history,mode:"general",answerMode:"short"})});
+  const result=await fetch(API+"/api/core/chat",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+(localStorage.getItem("tb-token")||"")},body:JSON.stringify({message:"Ich nutze gerade das TILLBOT Studio als Administrator. Hilf mir bei der Bedienung, erkläre Systemwerte verständlich und gib nur Schritte an, die in der Oberfläche tatsächlich vorhanden sind. Meine Frage: "+message,history,mode:"general",answerMode:"short"})});
   const data=await result.json().catch(()=>({}));
   if(!result.ok)throw Error(data.error||"CORE-Anfrage fehlgeschlagen");
   const answer=String(data.reply||data.answer||data.message||"CORE hat keine Textantwort geliefert.");coreBubbleHistory.push({role:"user",content:message},{role:"assistant",content:answer});addCoreBubbleMessage("assistant",answer);$("studioCoreBubbleStatus").textContent="CORE bereit";
