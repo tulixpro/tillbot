@@ -612,8 +612,11 @@ app.get("/api/admin/quota",auth,admin,async(_req,res)=>{const q=await pool.query
 app.put("/api/admin/quota",auth,admin,async(req,res)=>{const limit=Math.max(1,Math.min(500,Math.floor(Number(req.body.limit)||30)));await pool.query("INSERT INTO app_settings(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",["daily_message_limit",String(limit)]);res.json({ok:true,limit})});
 app.get("/api/usage",auth,async(req,res)=>{if(req.user.role==="admin")return res.json({unlimited:true});const q=await checkDailyQuota(req.user.id);res.json({unlimited:false,count:q.count||0,remaining:q.remaining||0,limit:q.limit||30,blocked:q.blocked||false,until:q.until||null})});
 
+const coreAccountLimit = rateLimit({ windowMs: 60_000, limit: 5, keyGenerator: req => "core-account:" + String(req.user.id), standardHeaders: true, legacyHeaders: false, message: { error: "Zu viele CORE-Anfragen für dieses Konto. Bitte kurz warten." } });
+const coreGameAccountLimit = rateLimit({ windowMs: 60 * 60_000, limit: 2, keyGenerator: req => "core-game-account:" + String(req.user.id), standardHeaders: true, legacyHeaders: false, message: { error: "Die Spielerstellung ist pro Konto vorübergehend begrenzt." } });
+
 /**
- * Public TILLBOT CORE research endpoint.
+ * Authenticated TILLBOT CORE research endpoint.
  * Uses the configured hosted model as an inference engine; this is not a separately trained foundation model.
  * Requests are rate-limited and never written to chat history or the database.
  */
@@ -636,7 +639,7 @@ app.get("/api/core/status", async (_req, res) => {
  * Generated code is previewed client-side in a sandboxed iframe with a restrictive CSP.
  */
 const coreGameLimit = rateLimit({ windowMs: 10 * 60_000, limit: 2, standardHeaders: true, legacyHeaders: false, message: { error: "Spielerstellung ist gerade limitiert. Bitte in einigen Minuten erneut versuchen." } });
-app.post("/api/core/game", coreGameLimit, async (_req, res, next) => {
+app.post("/api/core/game", auth, coreGameLimit, coreGameAccountLimit, async (_req, res, next) => {
   try { const m = await getMaintenance(); if (m.enabled) return res.status(503).json({ error: m.message }); next(); }
   catch { return res.status(503).json({ error: "Wartungsstatus konnte nicht geprüft werden." }); }
 }, async (req, res) => {
@@ -682,7 +685,7 @@ app.post("/api/core/game", coreGameLimit, async (_req, res, next) => {
 });
 
 
-app.post("/api/core/game/package", rateLimit({ windowMs: 10 * 60_000, limit: 5, standardHeaders: true, legacyHeaders: false }), async (req, res) => {
+app.post("/api/core/game/package", auth, rateLimit({ windowMs: 10 * 60_000, limit: 5, standardHeaders: true, legacyHeaders: false }), async (req, res) => {
   const html = String(req.body?.html || "");
   if (!/^<!doctype html/i.test(html) || !html.toLowerCase().includes("<html") || !html.toLowerCase().includes("</html>") || html.length > 95000) return res.status(400).json({ error: "Ungültiges Spielprojekt. Bitte erstelle das Spiel erneut." });
   const quote = String.fromCharCode(39);
@@ -702,8 +705,9 @@ app.post("/api/core/game/package", rateLimit({ windowMs: 10 * 60_000, limit: 5, 
   archive.finalize();
 });
 
-app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { error: "CORE ist gerade stark ausgelastet. Bitte eine Minute warten." } }), async (_req, res, next) => { try { const m = await getMaintenance(); if (m.enabled) return res.status(503).json({ error: m.message }); next(); } catch { return res.status(503).json({ error: "Wartungsstatus konnte nicht geprüft werden." }); } }, async (req, res) => {
+app.post("/api/core/chat", auth, coreAccountLimit, rateLimit({ windowMs: 60_000, limit: 8, standardHeaders: true, legacyHeaders: false, message: { error: "CORE ist gerade stark ausgelastet. Bitte eine Minute warten." } }), async (_req, res, next) => { try { const m = await getMaintenance(); if (m.enabled) return res.status(503).json({ error: m.message }); next(); } catch { return res.status(503).json({ error: "Wartungsstatus konnte nicht geprüft werden." }); } }, async (req, res) => {
   if (!(await featureEnabled("core"))) return res.status(503).json({ error: "TILLBOT CORE wurde vom Studio-Administrator ausgeschaltet." });
+  if (req.user.role !== "admin") { const quota = await checkDailyQuota(req.user.id); if (quota.blocked) return res.status(429).json({ error: "Dein tägliches KI-Limit ist erreicht.", quota: { blocked: true, until: quota.until, remaining: 0 } }); req.coreQuota = quota; }
   const message = String(req.body?.message || "").trim();
   if (!message || message.length > 2000) return res.status(400).json({ error: "Bitte gib eine Nachricht mit maximal 2.000 Zeichen ein." });
   if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: "CORE ist momentan nicht verfügbar. Der Modellserver ist nicht konfiguriert." });
@@ -760,7 +764,8 @@ app.post("/api/core/chat", rateLimit({ windowMs: 60_000, limit: 8, standardHeade
     }
     const answer = data.choices?.[0]?.message?.content;
     if (typeof answer !== "string" || !answer.trim()) return res.status(502).json({ error: "CORE hat keine Antwort geliefert. Bitte versuche es erneut." });
-    res.set("Cache-Control", "no-store").json({ answer: answer.trim(), model: "TILLBOT CORE · Forschungsdemo", stored: false });
+    if (req.user.role !== "admin" && req.coreQuota) await incrementDailyQuota(req.user.id);
+    res.set("Cache-Control", "no-store").json({ answer: answer.trim(), model: "TILLBOT CORE · Forschungsdemo", stored: false, quota: req.user.role === "admin" ? { unlimited: true } : undefined });
   } catch (error) {
     console.error("CORE request failed:", error.name || "request_error");
     res.status(504).json({ error: error.name === "AbortError" ? "CORE braucht gerade zu lange. Bitte versuche es erneut." : "CORE ist momentan nicht erreichbar." });
