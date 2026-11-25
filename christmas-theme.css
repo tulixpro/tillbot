@@ -240,3 +240,126 @@ body::after{
   #sidebar .brandIcon::before,.authBrand .authIcon::before,.topbar .mark::before{width:21px;height:16px;top:-7px}
   .top .brand::after{left:24px;top:-11px;font-size:13px}
 }
+
+
+/* CHRISTMAS VISIBILITY PASS — deliberately noticeable, while keeping controls clear */
+body{
+  background-color:#071710!important;
+  background-image:
+    radial-gradient(ellipse at 50% -12%,rgba(38,112,69,.38),transparent 52%),
+    radial-gradient(ellipse at 3% 100%,rgba(169,54,69,.22),transparent 42%),
+    radial-gradient(ellipse at 100% 100%,rgba(217,185,110,.13),transparent 38%)!important;
+}
+body::before{
+  z-index:40!important;
+  opacity:.68!important;
+  background-image:
+    radial-gradient(3px 3px at 7% 13%,#fff 48%,transparent 60%),
+    radial-gradient(2px 2px at 22% 42%,#fff 48%,transparent 60%),
+    radial-gradient(3px 3px at 39% 8%,#fff8e8 48%,transparent 60%),
+    radial-gradient(2px 2px at 57% 31%,#fff 48%,transparent 60%),
+    radial-gradient(3px 3px at 73% 17%,#fff 48%,transparent 60%),
+    radial-gradient(2px 2px at 91% 49%,#fff 48%,transparent 60%),
+    radial-gradient(2px 2px at 15% 76%,#fff 48%,transparent 60%),
+    radial-gradient(3px 3px at 84% 83%,#fff8e8 48%,transparent 60%)!important;
+  background-size:260px 210px!important;
+}
+body::after{
+  z-index:41!important;
+  height:32px!important;
+  opacity:1!important;
+  background:
+    radial-gradient(ellipse at 4% 13px,#f2d58b 0 5px,transparent 7px),
+    radial-gradient(ellipse at 13% 13px,#ed6870 0 5px,transparent 7px),
+    radial-gradient(ellipse at 22% 13px,#91d6a5 0 5px,transparent 7px),
+    radial-gradient(ellipse at 31% 13px,#f2d58b 0 5px,transparent 7px),
+    radial-gradient(ellipse at 40% 13px,#ed6870 0 5px,transparent 7px),
+    radial-gradient(ellipse at 49% 13px,#91d6a5 0 5px,transparent 7px),
+    radial-gradient(ellipse at 58% 13px,#f2d58b 0 5px,transparent 7px),
+    radial-gradient(ellipse at 67% 13px,#ed6870 0 5px,transparent 7px),
+    radial-gradient(ellipse at 76% 13px,#91d6a5 0 5px,transparent 7px),
+    radial-gradient(ellipse at 85% 13px,#f2d58b 0 5px,transparent 7px),
+    radial-gradient(ellipse at 94% 13px,#ed6870 0 5px,transparent 7px),
+    linear-gradient(180deg,rgba(9,35,24,.95),rgba(9,35,24,.0));
+  filter:drop-shadow(0 2px 5px rgba(230,190,100,.35));
+}
+#app.layout{
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(39,117,72,.30),transparent 48%),
+    radial-gradient(ellipse at 95% 100%,rgba(169,54,69,.12),transparent 38%),
+    #09130f!important;
+}
+#app.layout>aside,#sidebar{
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(43,126,77,.35),transparent 48%),
+    linear-gradient(180deg,#123c2a,#091c14)!important;
+  border-color:#947344!important;
+}
+#sidebar::before{
+  content:"🎄  ❄  🎁  ✨  🎄"!important;
+  display:block!important;
+  margin:5px 0 12px!important;
+  padding:13px 5px!important;
+  text-align:center!important;
+  border:1px solid rgba(226,194,119,.42)!important;
+  border-radius:14px!important;
+  background:linear-gradient(115deg,rgba(25,92,55,.88),rgba(116,39,48,.72))!important;
+  color:#ffe5a5!important;
+  font-size:19px!important;
+  letter-spacing:3px!important;
+  text-shadow:0 2px 12px rgba(0,0,0,.45)!important;
+}
+#app .welcome,.hero{
+  position:relative!important;
+  overflow:hidden;
+  border:1px solid rgba(224,192,117,.65)!important;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(48,125,75,.38),transparent 65%),
+    linear-gradient(135deg,rgba(18,75,48,.98),rgba(91,38,48,.94),rgba(19,61,43,.98))!important;
+  box-shadow:0 18px 60px rgba(0,0,0,.32),inset 0 1px rgba(255,238,190,.16)!important;
+}
+#app .welcome::before,.hero::before{
+  content:"🎄   ✨   ❄   ✨   🎄"!important;
+  display:block!important;
+  margin:0 auto 15px!important;
+  text-align:center!important;
+  color:#ffe2a0!important;
+  font-size:clamp(19px,3vw,27px)!important;
+  letter-spacing:7px!important;
+  opacity:1!important;
+  text-shadow:0 2px 14px rgba(0,0,0,.4)!important;
+}
+.authBackdrop{
+  background:
+    radial-gradient(ellipse at 15% 15%,rgba(29,111,66,.38),transparent 45%),
+    radial-gradient(ellipse at 88% 85%,rgba(169,54,69,.24),transparent 42%)!important;
+}
+.authCard{
+  border:1px solid rgba(217,185,110,.65)!important;
+  box-shadow:0 24px 90px rgba(0,0,0,.35),0 0 50px rgba(35,112,70,.12)!important;
+}
+.top,.topbar{
+  position:relative!important;
+  border:1px solid rgba(224,192,117,.65)!important;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(42,126,75,.45),transparent 72%),
+    linear-gradient(110deg,#123d2a,#542a32,#123d2a)!important;
+  box-shadow:0 10px 32px rgba(0,0,0,.22)!important;
+}
+.top .brand::after{
+  content:"🎄  ❄  🎄"!important;
+  display:block!important;
+  position:absolute!important;
+  left:0!important;
+  right:auto!important;
+  bottom:-17px!important;
+  top:auto!important;
+  color:#f1d48e!important;
+  font-size:10px!important;
+  letter-spacing:4px!important;
+}
+@media(max-width:600px){
+  body::after{height:25px!important}
+  #sidebar::before{font-size:16px!important;letter-spacing:1px!important}
+  #app .welcome::before,.hero::before{letter-spacing:3px!important}
+}
