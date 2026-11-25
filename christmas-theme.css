@@ -137,36 +137,106 @@ body::after{
 @media(prefers-reduced-motion:reduce){body::before{animation:none!important}}
 
 
-/* TILLBOT stands in a small winter-holiday scene */
-.brand,.authBrand,.topbar .brand,.top .brand{
+/* TILLBOT winter scene — scoped to the four actual brand areas */
+#sidebar .brand,.authBrand,.topbar .brand,.top .brand{
   position:relative;
   isolation:isolate;
 }
-.brand .logo,.authBrand .logo,.topbar .brand h1,.top .brand>div{
-  color:#fff4d8!important;
-  text-shadow:0 1px 0 #6c432d,0 0 14px rgba(220,190,120,.22);
+#sidebar .brand::before,.authBrand::before,.topbar .brand::before,.top .brand::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-9px -12px;
+  border-radius:16px;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at 12% 5%,rgba(37,111,70,.22),transparent 54%),
+    radial-gradient(ellipse at 88% 95%,rgba(169,54,69,.14),transparent 55%);
 }
-.brand .logo::after,.authBrand .logo::after{
-  content:"  ✦";color:#e7c77d;font-size:.72em;vertical-align:top;
+#sidebar .brand .logo,.authBrand .logo,.topbar .brand h1,.top .brand>div{
+  color:#fff4dc!important;
+  text-shadow:0 1px 0 #543b2b,0 0 12px rgba(220,190,120,.16);
 }
-.brandIcon,.authIcon,.topbar .mark{
+#sidebar .brand .logo::after,.authBrand .logo::after,.topbar .brand h1::after{
+  content:"  ✦";
+  color:#e7c77d;
+  font-size:.68em;
+  vertical-align:top;
+}
+#sidebar .brandIcon,.authBrand .authIcon,.topbar .mark{
+  position:relative!important;
+  overflow:visible!important;
+  isolation:isolate;
   background:linear-gradient(145deg,#1d6045,#123b30)!important;
   border:1px solid rgba(231,199,125,.7)!important;
+  box-shadow:0 6px 20px rgba(25,95,65,.22),0 0 0 1px rgba(226,199,127,.2)!important;
 }
-.brand::before,.authBrand::before,.topbar .brand::before,.top .brand::before{
-  content:"";position:absolute;z-index:-1;inset:-10px -14px;
-  border-radius:18px;pointer-events:none;
-  background:
-    radial-gradient(ellipse at 12% 0%,rgba(37,111,70,.27),transparent 52%),
-    radial-gradient(ellipse at 88% 100%,rgba(169,54,69,.18),transparent 55%);
+#sidebar .brandIcon::before,.authBrand .authIcon::before,.topbar .mark::before{
+  content:"";
+  position:absolute;
+  z-index:5;
+  pointer-events:none;
+  width:24px;
+  height:18px;
+  top:-8px;
+  right:-2px;
+  border-radius:75% 15% 10% 10%;
+  background:linear-gradient(145deg,#f36b70,#bd2e40 82%);
+  transform:rotate(8deg);
+  clip-path:polygon(4% 100%,18% 48%,88% 0,79% 100%);
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));
 }
-.brand::after,.authBrand::after,.topbar .brand::after,.top .brand::after{
+#sidebar .brandIcon::after,.authBrand .authIcon::after,.topbar .mark::after{
+  content:"";
+  position:absolute;
+  z-index:6;
+  pointer-events:none;
+  width:17px;
+  height:5px;
+  top:5px;
+  right:0;
+  border-radius:99px;
+  background:#fff8eb;
+  transform:rotate(8deg);
+  box-shadow:11px -12px 0 -1px #fff8eb;
+}
+#sidebar .brand::after,.authBrand::after{
   content:"🎄  ✧  ❄  ✧  🎄";
-  display:block;position:absolute;left:0;right:0;bottom:-18px;
-  text-align:center;color:#dfc47d;font-size:10px;letter-spacing:4px;
-  white-space:nowrap;pointer-events:none;opacity:.9;
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-15px;
+  text-align:center;
+  color:#dfc47d;
+  font-size:9px;
+  letter-spacing:3px;
+  white-space:nowrap;
+  pointer-events:none;
+  opacity:.88;
 }
-.topbar .brand::after,.top .brand::after{bottom:-13px;font-size:9px}
+.top .brand::after{
+  content:"🎅";
+  position:absolute;
+  left:27px;
+  top:-13px;
+  font-size:15px;
+  line-height:1;
+  pointer-events:none;
+  transform:rotate(-12deg);
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));
+}
+.top .brand>div::after{
+  content:"✦  ❄  ✦";
+  display:block;
+  margin-top:2px;
+  color:#dfc47d;
+  font-size:9px;
+  letter-spacing:3px;
+  text-shadow:none;
+}
+.topbar .brand h1::after{content:"  ✦  ❄"}
 @media(max-width:600px){
-  .brand::after,.authBrand::after{font-size:9px;letter-spacing:2px;bottom:-15px}
+  #sidebar .brand::after,.authBrand::after{font-size:8px;letter-spacing:2px;bottom:-13px}
+  #sidebar .brandIcon::before,.authBrand .authIcon::before,.topbar .mark::before{width:21px;height:16px;top:-7px}
+  .top .brand::after{left:24px;top:-11px;font-size:13px}
 }
