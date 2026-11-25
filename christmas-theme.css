@@ -135,3 +135,38 @@ body::after{
  body::after{height:15px}
 }
 @media(prefers-reduced-motion:reduce){body::before{animation:none!important}}
+
+
+/* TILLBOT stands in a small winter-holiday scene */
+.brand,.authBrand,.topbar .brand,.top .brand{
+  position:relative;
+  isolation:isolate;
+}
+.brand .logo,.authBrand .logo,.topbar .brand h1,.top .brand>div{
+  color:#fff4d8!important;
+  text-shadow:0 1px 0 #6c432d,0 0 14px rgba(220,190,120,.22);
+}
+.brand .logo::after,.authBrand .logo::after{
+  content:"  ✦";color:#e7c77d;font-size:.72em;vertical-align:top;
+}
+.brandIcon,.authIcon,.topbar .mark{
+  background:linear-gradient(145deg,#1d6045,#123b30)!important;
+  border:1px solid rgba(231,199,125,.7)!important;
+}
+.brand::before,.authBrand::before,.topbar .brand::before,.top .brand::before{
+  content:"";position:absolute;z-index:-1;inset:-10px -14px;
+  border-radius:18px;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 12% 0%,rgba(37,111,70,.27),transparent 52%),
+    radial-gradient(ellipse at 88% 100%,rgba(169,54,69,.18),transparent 55%);
+}
+.brand::after,.authBrand::after,.topbar .brand::after,.top .brand::after{
+  content:"🎄  ✧  ❄  ✧  🎄";
+  display:block;position:absolute;left:0;right:0;bottom:-18px;
+  text-align:center;color:#dfc47d;font-size:10px;letter-spacing:4px;
+  white-space:nowrap;pointer-events:none;opacity:.9;
+}
+.topbar .brand::after,.top .brand::after{bottom:-13px;font-size:9px}
+@media(max-width:600px){
+  .brand::after,.authBrand::after{font-size:9px;letter-spacing:2px;bottom:-15px}
+}
