@@ -89,6 +89,19 @@ input:focus,textarea:focus,select:focus{outline:2px solid #c6a85e!important;outl
 @media(max-width:900px){.nav{background:#10291c;border-color:#456044}}
 @media(prefers-reduced-motion:reduce){body:before{animation:none}.btn,button.btn{transition:none}}
 </style>
+<style id="studio-button-sparkle">
+/* Festive button feedback: quick warm glow on every deliberate click. */
+button,a.btn,[role="button"]{ -webkit-tap-highlight-color:transparent; }
+button:active,a.btn:active,[role="button"]:active{transform:translateY(1px) scale(.975)!important;filter:brightness(1.18)!important;box-shadow:0 0 0 2px #e5ca7b66,0 0 24px #e5c87888,0 0 42px #6bb77a44!important}
+.tb-click-flash{animation:tbChristmasClick .62s ease-out!important}
+@keyframes tbChristmasClick{
+0%{filter:brightness(1.28);box-shadow:0 0 0 0 #f5df9b,0 0 0 0 #b6e6ad,0 0 0 #e5c878}
+24%{filter:brightness(1.22);box-shadow:0 0 0 3px #f5df9b99,0 0 22px 8px #e5c878aa,0 0 38px 13px #6bb77a66}
+100%{filter:brightness(1);box-shadow:0 4px 12px #0003}
+}
+button:focus-visible,a:focus-visible,[role="button"]:focus-visible{outline:3px solid #f0d58a!important;outline-offset:4px!important}
+@media(prefers-reduced-motion:reduce){.tb-click-flash{animation:none!important}button:active,a.btn:active,[role="button"]:active{transform:none!important}}
+</style>
 </head>
 <body>
 <header class="top"><div class="brand"><img src="./icons/tillbot.svg" alt=""><div>TILLBOT STUDIO <span style="color:var(--accent)">PRO</span><small>ADMIN CONTROL CENTER</small></div></div><div class="topActions"><button class="btn" id="notificationBell" class="btn hidden" type="button">🔔 <span id="notificationCount">0</span></button><button class="btn primary" id="install">↓ Installieren</button><a class="btn quiet" href="./updates.html">Öffentliche Updates ↗</a><a class="btn quiet" href="./">Chat ↗</a><div class="profileChip hidden" id="adminProfile"><span class="avatar" id="profileAvatar">A</span><span><b id="profileName">Admin</b><small id="profileRole">Administrator</small></span></div></div></header>
@@ -731,4 +744,7 @@ if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").the
 
 })();
 
-</script></body></html>
+</script><script id="studio-button-feedback">
+(()=>{document.addEventListener("click",event=>{const target=event.target instanceof Element?event.target.closest("button,a.btn,[role=button]"):null;if(!target||target.matches(":disabled,[aria-disabled=true]"))return;target.classList.remove("tb-click-flash");void target.offsetWidth;target.classList.add("tb-click-flash")},true);document.addEventListener("animationend",event=>{if(event.animationName==="tbChristmasClick")event.target.classList.remove("tb-click-flash")},true)})();
+</script>
+</body></html>
