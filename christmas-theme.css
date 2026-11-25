@@ -363,3 +363,88 @@ body::after{
   #sidebar::before{font-size:16px!important;letter-spacing:1px!important}
   #app .welcome::before,.hero::before{letter-spacing:3px!important}
 }
+
+
+/* FIX: the login screen is the first screen most visitors see.
+   Earlier theme rules only recolored its backdrop, while clean-theme.css
+   kept the auth panel itself opaque white. Make the Christmas scene visible
+   on the actual sign-in view as well as the authenticated workspace. */
+#auth.auth{
+  position:relative!important;
+  isolation:isolate;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 12% 8%,rgba(42,139,78,.42),transparent 38%),
+    radial-gradient(ellipse at 88% 88%,rgba(177,49,65,.34),transparent 42%),
+    linear-gradient(145deg,#071b13 0%,#102d20 48%,#24151b 100%)!important;
+}
+#auth .authBackdrop{
+  position:absolute!important;inset:0!important;z-index:0!important;
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(226,195,119,.17),transparent 45%),
+    radial-gradient(ellipse at 8% 90%,rgba(35,116,69,.24),transparent 45%)!important;
+  pointer-events:none;
+}
+#auth .authBackdrop::before{
+  content:"";position:absolute;inset:0;opacity:.8;
+  background-image:
+    radial-gradient(3px 3px at 8% 18%,#fff 48%,transparent 60%),
+    radial-gradient(2px 2px at 21% 63%,#fff8e8 48%,transparent 60%),
+    radial-gradient(3px 3px at 42% 29%,#fff 48%,transparent 60%),
+    radial-gradient(2px 2px at 67% 12%,#fff 48%,transparent 60%),
+    radial-gradient(3px 3px at 83% 54%,#fff 48%,transparent 60%),
+    radial-gradient(2px 2px at 94% 82%,#fff8e8 48%,transparent 60%);
+  background-size:230px 190px;
+  animation:tb-snow-drift 22s linear infinite;
+}
+#auth .authBackdrop::after{
+  content:"";position:absolute;top:0;left:0;right:0;height:38px;
+  background:
+    radial-gradient(circle at 5% 17px,#f4d68b 0 5px,transparent 7px),
+    radial-gradient(circle at 15% 17px,#ee6872 0 5px,transparent 7px),
+    radial-gradient(circle at 25% 17px,#8bd4a0 0 5px,transparent 7px),
+    radial-gradient(circle at 35% 17px,#f4d68b 0 5px,transparent 7px),
+    radial-gradient(circle at 45% 17px,#ee6872 0 5px,transparent 7px),
+    radial-gradient(circle at 55% 17px,#8bd4a0 0 5px,transparent 7px),
+    radial-gradient(circle at 65% 17px,#f4d68b 0 5px,transparent 7px),
+    radial-gradient(circle at 75% 17px,#ee6872 0 5px,transparent 7px),
+    radial-gradient(circle at 85% 17px,#8bd4a0 0 5px,transparent 7px),
+    radial-gradient(circle at 95% 17px,#f4d68b 0 5px,transparent 7px);
+  filter:drop-shadow(0 2px 5px rgba(235,197,112,.55));
+}
+#auth .authbox.authCard{
+  position:relative!important;z-index:1!important;
+  overflow:visible;
+  color:#fff7e6!important;
+  background:linear-gradient(150deg,rgba(17,57,39,.97),rgba(37,30,30,.97))!important;
+  border:1px solid rgba(236,202,126,.82)!important;
+  box-shadow:0 25px 90px rgba(0,0,0,.52),0 0 48px rgba(39,125,75,.2)!important;
+}
+#auth .authbox.authCard::before{
+  content:"🎄   ✨   ❄   🎁   ❄   ✨   🎄";
+  display:block;text-align:center;margin:0 0 17px;
+  padding:9px 5px;border-radius:12px;
+  color:#ffe5a4;font-size:clamp(16px,3vw,21px);letter-spacing:2px;
+  background:linear-gradient(100deg,rgba(29,104,60,.7),rgba(139,43,54,.62),rgba(29,104,60,.7));
+  border:1px solid rgba(236,202,126,.45);
+  text-shadow:0 2px 10px rgba(0,0,0,.45);
+}
+#auth .authBrand .logo,#auth .authIntro h1{color:#fff5df!important}
+#auth .authBrand .eyebrow,#auth .authIntro p,#auth .authFieldHint,#auth .authTrust{color:#d8d2bd!important}
+#auth .authPill{background:rgba(28,91,55,.7)!important;border:1px solid rgba(229,195,119,.42)!important;color:#ffe7b1!important}
+#auth .authTabs{background:rgba(4,25,17,.72)!important;border:1px solid rgba(220,191,124,.3)!important}
+#auth .authTabs button{color:#d5d7c8!important}
+#auth .authTabs button.selected{background:linear-gradient(120deg,#1e6842,#7d303b)!important;color:#fff!important;box-shadow:0 2px 12px rgba(0,0,0,.24)!important}
+#auth .authInputWrap{background:rgba(4,24,17,.78)!important;border:1px solid rgba(208,190,139,.4)!important}
+#auth .authInputWrap input{background:transparent!important;color:#fff8e9!important}
+#auth .authInputWrap input::placeholder{color:#b9c2b5!important}
+#auth .authProtection{background:rgba(7,31,21,.72)!important;border:1px solid rgba(208,190,139,.3)!important}
+#auth .authProtection strong{color:#f5e6c3!important}
+#auth .authProtection small{color:#c6c9b8!important}
+#auth .authSubmit{background:linear-gradient(115deg,#a93645,#d2ad62)!important;color:#fff!important;border:1px solid rgba(255,226,163,.35)!important}
+#auth .authCopyright{position:relative;z-index:1;color:#d1cbb9!important}
+#auth .authCopyright a{color:#f0d58f!important}
+@media(max-width:520px){
+  #auth .authbox.authCard::before{font-size:15px;letter-spacing:1px;margin-bottom:13px}
+  #auth .authBackdrop::after{height:30px}
+}
