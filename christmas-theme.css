@@ -505,3 +505,72 @@ body::before{display:block!important}
   #auth .authbox.authCard{width:min(100%,470px);padding:22px 18px}
   #auth .authBrand{margin-bottom:26px}
 }
+
+
+/* Christmas countdown feature */
+.christmasCountdownOpen{
+ width:calc(100% - 24px);margin:12px 12px 16px;padding:12px 13px;
+ display:flex;align-items:center;gap:10px;border-radius:13px;
+ border:1px solid rgba(231,197,128,.48)!important;
+ background:linear-gradient(110deg,rgba(19,73,48,.96),rgba(117,39,53,.96))!important;
+ color:#fff3d5!important;font-weight:800;text-align:left;cursor:pointer;
+ box-shadow:0 7px 22px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.12);
+ transition:transform .18s ease,filter .18s ease;
+}
+.christmasCountdownOpen:hover{transform:translateY(-1px);filter:brightness(1.12)}
+.christmasCountdownOpen>span:first-child{font-size:19px}
+.christmasCountdownArrow{margin-left:auto;color:#f0d18c}
+.christmasCountdownDialog{
+ width:min(520px,calc(100vw - 28px));max-width:520px;
+ padding:0;border:1px solid rgba(232,202,145,.62);border-radius:22px;
+ background:#10271d;color:#f9f1df;overflow:visible;
+ box-shadow:0 24px 90px rgba(0,0,0,.55);
+}
+.christmasCountdownDialog::backdrop{background:rgba(3,13,9,.76);backdrop-filter:blur(5px)}
+.christmasCountdownCard{
+ position:relative;overflow:hidden;padding:34px 26px 25px;text-align:center;
+ border-radius:21px;background:
+ radial-gradient(ellipse at 10% 0%,rgba(181,53,68,.22),transparent 42%),
+ radial-gradient(ellipse at 100% 100%,rgba(196,158,83,.14),transparent 42%),
+ linear-gradient(145deg,#173b2b,#0d2119 70%);
+}
+.christmasCountdownCard::before,.christmasCountdownCard::after{
+ content:"";position:absolute;pointer-events:none;border-radius:50%;
+ width:210px;height:210px;border:1px solid rgba(226,193,126,.11)
+}
+.christmasCountdownCard::before{top:-145px;left:-95px}
+.christmasCountdownCard::after{bottom:-155px;right:-95px}
+.christmasCountdownClose{
+ position:absolute;right:12px;top:10px;width:36px;height:36px;
+ border-radius:50%;border:1px solid rgba(255,235,190,.25);
+ background:rgba(4,20,13,.65);color:#fff0d0;font-size:25px;cursor:pointer;z-index:2
+}
+.christmasCountdownDecor{color:#f1d18d;letter-spacing:5px;font-size:20px;margin:0 0 16px}
+.christmasCountdownEyebrow{margin:0 0 8px;color:#e7c982;font-size:10px;font-weight:900;letter-spacing:2.5px}
+.christmasCountdownCard h2{margin:0;color:#fff4df;font-size:clamp(22px,5vw,30px);line-height:1.15}
+.christmasCountdownLead{color:#d5dfd2;margin:10px 0 22px;font-size:14px}
+.christmasCountdownTimer{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:0 auto 22px}
+.christmasCountdownTimer>div{
+ padding:14px 5px 12px;border-radius:13px;
+ border:1px solid rgba(223,193,130,.36);
+ background:linear-gradient(160deg,rgba(143,48,61,.42),rgba(8,34,23,.72));
+ box-shadow:inset 0 1px rgba(255,255,255,.07)
+}
+.christmasCountdownTimer strong{display:block;color:#ffe4a7;font-size:clamp(22px,5vw,31px);font-variant-numeric:tabular-nums;line-height:1.1}
+.christmasCountdownTimer span{display:block;margin-top:6px;color:#d4ddcf;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.christmasPremiumNotice{
+ display:flex;align-items:flex-start;gap:12px;text-align:left;
+ padding:15px;border-radius:14px;border:1px solid rgba(228,192,117,.45);
+ background:rgba(118,43,53,.25)
+}
+.christmasPremiumNotice>span{font-size:25px}
+.christmasPremiumNotice strong{display:block;color:#ffe2a5;font-size:15px}
+.christmasPremiumNotice p{margin:5px 0 0;color:#e4e0d3;font-size:12px;line-height:1.5}
+.christmasCountdownDate{margin:16px 0 0;color:#bfcbbb;font-size:11px}
+@media(max-width:420px){
+ .christmasCountdownCard{padding:32px 16px 20px}
+ .christmasCountdownTimer{gap:5px}
+ .christmasCountdownTimer>div{padding:12px 2px 10px}
+ .christmasCountdownTimer span{font-size:9px;letter-spacing:.4px}
+}
+@media(prefers-reduced-motion:reduce){.christmasCountdownOpen{transition:none}}
