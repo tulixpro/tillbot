@@ -72,121 +72,66 @@ button:hover:not(:disabled){border-color:#d0ad60!important}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 
 
-/* Full festive layer: gentle snow + warm fairy lights, above every page */
+/* Refined Christmas details — restrained, aligned, and non-blocking */
 body{position:relative}
 body::before{
- content:"";position:fixed;inset:-110vh 0 0;z-index:9998;pointer-events:none;
+ content:"";position:fixed;inset:0;z-index:30;pointer-events:none;opacity:.34;
  background-image:
-  radial-gradient(2px 2px at 24px 38px,rgba(255,255,255,.9) 48%,transparent 55%),
-  radial-gradient(1.5px 1.5px at 110px 145px,rgba(255,255,255,.78) 48%,transparent 55%),
-  radial-gradient(2.5px 2.5px at 205px 85px,rgba(255,247,221,.82) 48%,transparent 55%),
-  radial-gradient(1.5px 1.5px at 310px 210px,rgba(255,255,255,.8) 48%,transparent 55%),
-  radial-gradient(2px 2px at 390px 28px,rgba(255,255,255,.72) 48%,transparent 55%);
- background-size:420px 260px;
- animation:tb-snowfall 24s linear infinite;
- opacity:.72;
+  radial-gradient(2px 2px at 7% 13%,#fff 48%,transparent 58%),
+  radial-gradient(1.5px 1.5px at 22% 42%,#fff 48%,transparent 58%),
+  radial-gradient(2px 2px at 39% 8%,#fff8e8 48%,transparent 58%),
+  radial-gradient(1.5px 1.5px at 57% 31%,#fff 48%,transparent 58%),
+  radial-gradient(2px 2px at 73% 17%,#fff 48%,transparent 58%),
+  radial-gradient(1.5px 1.5px at 91% 49%,#fff 48%,transparent 58%);
+ background-size:310px 230px;
+ animation:tb-snow-drift 28s linear infinite;
 }
+@keyframes tb-snow-drift{to{background-position:18px 230px}}
 body::after{
- content:"";position:fixed;z-index:9999;pointer-events:none;left:0;right:0;top:0;height:28px;
- border-top:3px solid rgba(214,190,126,.7);
+ content:"";position:fixed;z-index:31;pointer-events:none;top:0;left:0;right:0;height:18px;
+ opacity:.92;
  background:
-  radial-gradient(circle at 5% 12px,#f5d78a 0 3px,rgba(245,215,138,.28) 4px,transparent 9px),
-  radial-gradient(circle at 15% 12px,#d95b61 0 3px,rgba(217,91,97,.24) 4px,transparent 9px),
-  radial-gradient(circle at 25% 12px,#7ed5a2 0 3px,rgba(126,213,162,.25) 4px,transparent 9px),
-  radial-gradient(circle at 35% 12px,#f5d78a 0 3px,rgba(245,215,138,.28) 4px,transparent 9px),
-  radial-gradient(circle at 45% 12px,#d95b61 0 3px,rgba(217,91,97,.24) 4px,transparent 9px),
-  radial-gradient(circle at 55% 12px,#7ed5a2 0 3px,rgba(126,213,162,.25) 4px,transparent 9px),
-  radial-gradient(circle at 65% 12px,#f5d78a 0 3px,rgba(245,215,138,.28) 4px,transparent 9px),
-  radial-gradient(circle at 75% 12px,#d95b61 0 3px,rgba(217,91,97,.24) 4px,transparent 9px),
-  radial-gradient(circle at 85% 12px,#7ed5a2 0 3px,rgba(126,213,162,.25) 4px,transparent 9px),
-  radial-gradient(circle at 95% 12px,#f5d78a 0 3px,rgba(245,215,138,.28) 4px,transparent 9px);
- filter:drop-shadow(0 2px 5px rgba(232,197,117,.35));
- animation:tb-lights 3.2s ease-in-out infinite alternate;
+  radial-gradient(ellipse at 5% 8px,#e7c77d 0 3px,transparent 5px),
+  radial-gradient(ellipse at 15% 8px,#d95b61 0 3px,transparent 5px),
+  radial-gradient(ellipse at 25% 8px,#82c99a 0 3px,transparent 5px),
+  radial-gradient(ellipse at 35% 8px,#e7c77d 0 3px,transparent 5px),
+  radial-gradient(ellipse at 45% 8px,#d95b61 0 3px,transparent 5px),
+  radial-gradient(ellipse at 55% 8px,#82c99a 0 3px,transparent 5px),
+  radial-gradient(ellipse at 65% 8px,#e7c77d 0 3px,transparent 5px),
+  radial-gradient(ellipse at 75% 8px,#d95b61 0 3px,transparent 5px),
+  radial-gradient(ellipse at 85% 8px,#82c99a 0 3px,transparent 5px),
+  radial-gradient(ellipse at 95% 8px,#e7c77d 0 3px,transparent 5px);
+ filter:drop-shadow(0 1px 3px rgba(220,190,120,.28));
 }
-@keyframes tb-snowfall{to{transform:translate3d(26px,110vh,0)}}
-@keyframes tb-lights{from{opacity:.72}to{opacity:1;filter:drop-shadow(0 2px 9px rgba(232,197,117,.6))}}
-/* Small seasonal touches on brand areas and section headers */
-.brand::after,.authBrand::after{
- content:"✦  🎄  ✦";display:block;margin-left:8px;color:#e2c77f;font-size:13px;letter-spacing:3px;white-space:nowrap;
+.brandIcon,.authIcon{position:relative!important;overflow:visible!important;isolation:isolate}
+.brandIcon img,.authIcon img{position:relative;z-index:1}
+.brandIcon::before,.authIcon::before{
+ content:"";position:absolute;z-index:5;pointer-events:none;
+ width:25px;height:19px;top:-9px;right:-2px;
+ background:linear-gradient(145deg,#f36b70 0%,#c92f43 78%);
+ clip-path:polygon(4% 100%,17% 54%,88% 0,79% 100%);
+ transform:rotate(7deg);
+ filter:drop-shadow(0 2px 2px rgba(0,0,0,.3));
 }
+.brandIcon::after,.authIcon::after{
+ content:"";position:absolute;z-index:6;pointer-events:none;
+ width:18px;height:5px;top:5px;right:-1px;border-radius:99px;
+ background:#fff8eb;transform:rotate(7deg);
+ box-shadow:12px -13px 0 -1px #fff8eb;
+}
+.brandIcon{box-shadow:0 6px 20px rgba(25,95,65,.25),0 0 0 1px rgba(226,199,127,.28)!important}
+.authIcon{box-shadow:0 6px 20px rgba(169,54,69,.24),0 0 0 1px rgba(226,199,127,.28)!important}
 #app .welcome::before,.hero::before{
- content:"❄  ✦  ❄";display:block;margin:0 auto 10px;text-align:center;color:#e3cb8c;font-size:18px;letter-spacing:12px;opacity:.92;
+ content:"❄  ✦  ❄";display:block;margin:0 auto 10px;text-align:center;
+ color:#e3cb8c;font-size:16px;letter-spacing:9px;opacity:.86;
 }
 #sidebar::before{
- content:"🎄  ✨  🎁";display:block;text-align:center;padding:8px 0 3px;color:#e4cb8a;font-size:17px;letter-spacing:8px;
+ content:"🎄  ✨  🎁";display:block;text-align:center;padding:7px 0 2px;
+ color:#e4cb8a;font-size:15px;letter-spacing:6px;
 }
 @media(max-width:600px){
- body::after{height:23px;background-size:auto}
- body::before{opacity:.58}
- .brand::after,.authBrand::after{font-size:11px;letter-spacing:1px}
+ body::before{opacity:.25}
+ .brandIcon::before,.authIcon::before{width:22px;height:17px;top:-8px;right:-2px}
+ body::after{height:15px}
 }
-@media(prefers-reduced-motion:reduce){
- body::before,body::after{animation:none!important}
-}
-
-
-/* Visible Christmas decorations: Santa hat on every TILLBOT logo */
-.brandIcon,.authIcon,.mark{
-  position:relative!important;
-  overflow:visible!important;
-  isolation:isolate;
-}
-.brandIcon img,.authIcon img,.mark img{
-  position:relative;
-  z-index:1;
-}
-.brandIcon::before,.authIcon::before,.mark::before{
-  content:"";
-  position:absolute;
-  z-index:5;
-  width:25px;
-  height:18px;
-  top:-10px;
-  right:-3px;
-  background:linear-gradient(145deg,#f0646b 0%,#c92e43 72%);
-  border:1px solid rgba(255,255,255,.24);
-  border-radius:85% 12% 8% 8%;
-  clip-path:polygon(0 100%,14% 48%,100% 0,79% 100%);
-  transform:rotate(8deg);
-  filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));
-  pointer-events:none;
-}
-.brandIcon::after,.authIcon::after,.mark::after{
-  content:"";
-  position:absolute;
-  z-index:6;
-  width:8px;
-  height:8px;
-  top:-11px;
-  right:-5px;
-  border-radius:50%;
-  background:#fff8e9;
-  box-shadow:0 0 0 2px rgba(255,255,255,.18),0 1px 4px #0008;
-  pointer-events:none;
-}
-.brandIcon{box-shadow:0 8px 24px rgba(25,95,65,.42),0 0 0 1px rgba(226,199,127,.38)!important}
-.authIcon{box-shadow:0 8px 24px rgba(169,54,69,.32),0 0 0 1px rgba(226,199,127,.38)!important}
-
-/* Snow remains visible on dark app surfaces without blocking controls */
-body::before{
-  z-index:100000!important;
-  inset:0!important;
-  background-image:
-    radial-gradient(2px 2px at 24px 38px,rgba(255,255,255,.92) 48%,transparent 56%),
-    radial-gradient(1.5px 1.5px at 110px 145px,rgba(255,255,255,.82) 48%,transparent 56%),
-    radial-gradient(2.5px 2.5px at 205px 85px,rgba(255,247,221,.88) 48%,transparent 56%),
-    radial-gradient(1.5px 1.5px at 310px 210px,rgba(255,255,255,.82) 48%,transparent 56%),
-    radial-gradient(2px 2px at 390px 28px,rgba(255,255,255,.78) 48%,transparent 56%);
-  background-size:420px 260px;
-  animation:tb-snowfall-visible 16s linear infinite;
-  opacity:.78;
-}
-@keyframes tb-snowfall-visible{
-  from{background-position:0 -260px,0 -180px,0 -80px,0 -320px,0 -120px}
-  to{background-position:24px 100vh,24px calc(100vh + 80px),24px calc(100vh + 180px),24px calc(100vh + 320px),24px calc(100vh + 120px)}
-}
-body::after{z-index:100001!important;height:34px!important}
-@media(max-width:600px){
-  .brandIcon::before,.authIcon::before,.mark::before{width:23px;height:16px;top:-9px}
-  body::after{height:27px!important}
-}
+@media(prefers-reduced-motion:reduce){body::before{animation:none!important}}
