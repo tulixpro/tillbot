@@ -448,3 +448,60 @@ body::after{
   #auth .authbox.authCard::before{font-size:15px;letter-spacing:1px;margin-bottom:13px}
   #auth .authBackdrop::after{height:30px}
 }
+
+
+/* FINAL COLOR-CONSISTENCY FIX — override legacy light-theme text and controls */
+body::before{display:block!important}
+#auth.auth{color-scheme:dark}
+#auth .authFields>label,
+#auth .authFieldHeading label,
+#auth .authFieldHeading span,
+#auth .authHoneypot label{color:#f0e7d2!important}
+#auth .authFields .authInputWrap{
+  display:flex;align-items:center;gap:10px;
+  min-width:0;background:rgba(4,24,17,.82)!important;
+  border:1px solid rgba(218,193,139,.48)!important;
+  color:#e7d9b8!important;border-radius:12px;
+}
+#auth .authFields .authInputWrap input{
+  min-width:0;flex:1;background:transparent!important;
+  color:#fff8e9!important;caret-color:#f2d58b;
+}
+#auth .authFields .authInputWrap input::placeholder{color:#b7c5b9!important;opacity:1}
+#auth .authFields .passwordToggle{
+  flex:0 0 auto;background:rgba(35,91,59,.72)!important;
+  border:1px solid rgba(222,194,132,.35)!important;
+  color:#ffe7b1!important;
+}
+#auth .authFieldHint,#auth .authTrust,#auth .authIntro p{color:#d8d9c9!important}
+#auth .authProtection{color:#f1e8d2!important}
+#auth .authProtection small{color:#cbd4c5!important}
+#auth .authMessage{color:#ffd0d0!important}
+#auth .authSubmit{color:#fff!important}
+#app .welcome h1{color:#fff4df!important}
+#app .welcome h1 span{
+  background:linear-gradient(90deg,#f2d58b,#f0a0a5,#a8dfb6)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;
+  color:transparent!important;
+}
+#app .welcome .muted,#app .welcome .muted *{color:#d5dfd3!important}
+#app .bubble.bot{
+  background:linear-gradient(145deg,#173b2b,#10271e)!important;
+  color:#f3f0e5!important;border:1px solid #42634b!important;
+}
+#app .bubble.user{
+  background:linear-gradient(130deg,#8f3542,#28543d)!important;
+  color:#fff8eb!important;border:1px solid #bd8b58!important;
+}
+#app .headTitle small{color:#d3c29a!important}
+#app .composer,#app #prompt{
+  background:#10271d!important;color:#f7f2e7!important;
+  border-color:#496b50!important;
+}
+#app #prompt::placeholder{color:#b8c6b8!important}
+#app .suggestions button{color:#f4f0e5!important}
+@media(max-width:520px){
+  #auth.auth{padding:24px 14px 34px;min-height:100svh;height:auto}
+  #auth .authbox.authCard{width:min(100%,470px);padding:22px 18px}
+  #auth .authBrand{margin-bottom:26px}
+}
