@@ -43,6 +43,30 @@ main{width:min(1080px,calc(100% - 32px));margin:auto;padding:38px 0 70px}
 .retry{margin-top:12px;padding:9px 14px;border:1px solid #607eb6;border-radius:10px;background:#1a3150;color:#eff5ff;font-weight:750;cursor:pointer}
 .foot{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
+
+/* Festive Christmas theme */
+:root{--bg:#091810;--panel:#10251b;--panel2:#173326;--line:#31513d;--text:#f8f4e8;--muted:#b6c7b7;--accent:#e8c878;--mint:#8ee0ad;--shadow:0 18px 48px #020b0677}
+body{background:radial-gradient(ellipse at 12% -8%,#285b3c 0,transparent 38%),radial-gradient(ellipse at 95% 8%,#6b2630 0,transparent 32%),var(--bg)}
+.eyebrow{color:#e8c878}
+.status{background:linear-gradient(145deg,#193b2a,#30201f)}
+.xmas{position:relative;overflow:hidden;margin:0 0 22px;padding:24px;border:1px solid #846b3b;border-radius:20px;background:radial-gradient(ellipse at 90% 0%,#ffffff16,transparent 40%),linear-gradient(130deg,#173e2b,#4a2027);box-shadow:var(--shadow)}
+.xmas:after{content:"✦  ❄  ✧  ❄  ✦";position:absolute;right:18px;top:10px;color:#fff5d5aa;letter-spacing:10px;pointer-events:none}
+.xmas-kicker{color:#f0d58e;font-size:10px;font-weight:900;letter-spacing:.2em}
+.xmas h2{margin:7px 0 5px;font-size:clamp(23px,4vw,34px);letter-spacing:-.035em}
+.xmas p{margin:0;color:#f2e7d2}
+.xmas-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}
+.xmas .btn{background:#f0d58e;color:#26331f;border-color:#f0d58e}
+.countdown{display:none;margin-top:17px;padding-top:16px;border-top:1px solid #ffffff35}
+.countdown[aria-hidden=false]{display:block}
+.countdown-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:10px;max-width:510px}
+.count-unit{padding:11px 8px;border:1px solid #ffffff35;border-radius:12px;background:#07170e66;text-align:center}
+.count-unit strong{display:block;font-size:clamp(22px,4vw,32px);line-height:1.2;color:#ffe6a5;font-variant-numeric:tabular-nums}
+.count-unit span{font-size:10px;color:#e7ddc9;text-transform:uppercase;letter-spacing:.1em}
+.premium{margin-top:19px;padding:15px 17px;border:1px solid #d6b76c88;border-radius:14px;background:#120f0c55}
+.premium h3{margin:0;color:#ffe6a5;font-size:18px}
+.premium p{margin-top:5px;font-size:12px;color:#eadfc9}
+@media(max-width:420px){.xmas{padding:19px}.countdown-grid{gap:6px}.count-unit{padding:9px 4px}.count-unit span{font-size:9px}}
+
 /* Tablet layout: use the available width without making cards feel stretched. */
 @media (min-width:561px) and (max-width:1024px){
  .top{padding:12px 24px}
@@ -74,6 +98,23 @@ main{width:min(1080px,calc(100% - 32px));margin:auto;padding:38px 0 70px}
 <header class="top"><div class="brand"><img src="./icons/tillbot.svg" alt=""><div>TILLBOT UPDATES<small>NEWS · RELEASES · SYSTEMSTATUS</small></div></div><a class="btn" href="./">← Zurück zu TILLBOT</a></header>
 <main>
 <section class="hero"><div><span class="eyebrow">OFFIZIELLE ANKÜNDIGUNGEN</span><h1>Was sich bei TILLBOT tut.</h1><p>Neue Funktionen, Produkt-Updates und wichtige Hinweise – übersichtlich, verständlich und an einem Ort.</p></div><div class="status" id="status" role="status" aria-live="polite"><b>Systemstatus</b><span>Wird geprüft …</span></div></section>
+
+<section class="xmas" aria-labelledby="xmasTitle">
+ <div class="xmas-kicker">✦ DIE MAGISCHE JAHRESZEIT BEI TILLBOT ✦</div>
+ <h2 id="xmasTitle">Weihnachten rückt näher! 🎄</h2>
+ <p>Ein bisschen Weihnachtszauber für die TILLBOT-Community.</p>
+ <div class="xmas-actions"><button class="btn" id="countdownToggle" type="button" aria-expanded="false" aria-controls="christmasCountdown">🎁 Countdown bis Weihnachten</button></div>
+ <div class="countdown" id="christmasCountdown" aria-hidden="true">
+  <strong>Der Countdown läuft:</strong>
+  <div class="countdown-grid" role="timer" aria-live="off">
+   <div class="count-unit"><strong id="cdDays">—</strong><span>Tage</span></div>
+   <div class="count-unit"><strong id="cdHours">—</strong><span>Stunden</span></div>
+   <div class="count-unit"><strong id="cdMinutes">—</strong><span>Minuten</span></div>
+   <div class="count-unit"><strong id="cdSeconds">—</strong><span>Sekunden</span></div>
+  </div>
+  <div class="premium"><h3>✨ Premium Verlosung ✨</h3><p>Weitere Infos zur Premium-Verlosung folgen hier.</p></div>
+ </div>
+</section>
 <section class="banner" id="notice" role="status" aria-live="polite"><strong id="noticeTitle">Wichtiger Hinweis</strong><p id="noticeText"></p></section>
 <nav class="filters" aria-label="Updates filtern">
 <button type="button" data-filter="all" aria-pressed="true">Alle</button><button type="button" data-filter="release" aria-pressed="false">Releases</button><button type="button" data-filter="feature" aria-pressed="false">Funktionen</button><button type="button" data-filter="update" aria-pressed="false">Updates</button><button type="button" data-filter="maintenance" aria-pressed="false">Wartung</button><button type="button" data-filter="security" aria-pressed="false">Sicherheit</button><button type="button" data-filter="event" aria-pressed="false">Events</button><button type="button" data-filter="general" aria-pressed="false">Allgemein</button>
@@ -142,6 +183,31 @@ async function load(){
   showEmpty("Der Update-Verlauf konnte nicht geladen werden. Bitte Verbindung prüfen und erneut versuchen.",true);
  }
 }
+
+const countdownButton=document.getElementById("countdownToggle");
+const countdownPanel=document.getElementById("christmasCountdown");
+const christmasDate=new Date(2026,11,25,0,0,0);
+function updateCountdown(){
+ const remaining=Math.max(0,christmasDate.getTime()-Date.now());
+ const days=Math.floor(remaining/86400000);
+ const hours=Math.floor((remaining%86400000)/3600000);
+ const minutes=Math.floor((remaining%3600000)/60000);
+ const seconds=Math.floor((remaining%60000)/1000);
+ document.getElementById("cdDays").textContent=String(days);
+ document.getElementById("cdHours").textContent=String(hours).padStart(2,"0");
+ document.getElementById("cdMinutes").textContent=String(minutes).padStart(2,"0");
+ document.getElementById("cdSeconds").textContent=String(seconds).padStart(2,"0");
+ if(remaining===0)document.querySelector("#christmasCountdown>strong").textContent="Frohe Weihnachten!";
+}
+countdownButton.addEventListener("click",()=>{
+ const open=countdownButton.getAttribute("aria-expanded")!=="true";
+ countdownButton.setAttribute("aria-expanded",String(open));
+ countdownPanel.setAttribute("aria-hidden",String(!open));
+ countdownButton.textContent=open?"🎄 Countdown ausblenden":"🎁 Countdown bis Weihnachten";
+ if(open)updateCountdown();
+});
+updateCountdown();
+setInterval(updateCountdown,1000);
 load();
 })();
 </script>
