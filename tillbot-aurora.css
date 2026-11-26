@@ -1,0 +1,129 @@
+/* TILLBOT Aurora — unified visual polish layer (behavior-neutral). */
+:root{
+  color-scheme:dark;
+  --aurora-bg:#080d18;--aurora-panel:#101a2b;--aurora-panel-2:#152238;
+  --aurora-line:rgba(165,188,225,.15);--aurora-text:#f2f6ff;--aurora-muted:#9aabc5;
+  --aurora-violet:#9b8cff;--aurora-cyan:#69d9df;--aurora-green:#75e0bd;
+  --aurora-shadow:0 24px 70px rgba(0,0,0,.32);
+}
+html,body{background-color:var(--aurora-bg)!important;color:var(--aurora-text)!important}
+body{
+ background:
+  radial-gradient(ellipse 70% 48% at 12% -8%,rgba(106,105,224,.22),transparent 68%),
+  radial-gradient(ellipse 55% 40% at 100% 0%,rgba(48,177,184,.14),transparent 70%),
+  linear-gradient(145deg,#080d18 0%,#0b1423 56%,#09151d 100%)!important;
+ background-attachment:fixed!important;
+}
+body::before{opacity:.13!important;z-index:2!important}
+body::after{display:none!important}
+#app.layout{background:transparent!important}
+#sidebar{
+ background:linear-gradient(180deg,rgba(17,27,46,.97),rgba(9,16,29,.98))!important;
+ border-right:1px solid var(--aurora-line)!important;
+ box-shadow:18px 0 55px rgba(0,0,0,.14)!important;
+ backdrop-filter:blur(24px);
+}
+#sidebar .brand{border-bottom:1px solid var(--aurora-line)!important}
+#sidebar .logo,.authBrand .logo{color:#f5f6ff!important;letter-spacing:.13em!important}
+#sidebar .brand small,#sidebar .sideSectionLabel,#sidebar .drawerSectionLabel,#sidebar .label{color:#8192ae!important}
+#sidebar .newChat,.primary,.authSubmit{
+ background:linear-gradient(115deg,#877bfa,#4e9ed1)!important;
+ border:1px solid transparent!important;color:#fff!important;
+ box-shadow:0 10px 26px rgba(104,112,235,.2)!important;
+}
+#sidebar .newChat:hover,.primary:hover,.authSubmit:hover{filter:brightness(1.09)!important}
+#sidebar .learnModeBtn,#sidebar .toolsToggle,#sidebar .christmasCountdownOpen{
+ background:rgba(255,255,255,.035)!important;border:1px solid var(--aurora-line)!important;
+ border-radius:13px!important;color:#dce6fa!important;
+}
+#sidebar .christmasCountdownOpen{background:linear-gradient(110deg,rgba(33,111,77,.18),rgba(177,77,83,.12))!important;border-color:rgba(210,185,120,.2)!important}
+#sidebar .powerTools button,#sidebar #history button{border-radius:11px!important}
+#sidebar .coreLaunchBtn{
+ background:linear-gradient(115deg,rgba(105,111,220,.2),rgba(44,158,164,.13))!important;
+ border:1px solid rgba(112,201,218,.25)!important;border-radius:16px!important;
+}
+#sidebar .sidebottom{border-top:1px solid var(--aurora-line)!important}
+#sidebar .sideProfile{border:1px solid var(--aurora-line)!important;border-radius:14px!important;background:rgba(255,255,255,.025)!important}
+#app.layout>main{background:transparent!important}
+#app.layout>main>header{
+ background:rgba(8,14,25,.76)!important;border:0!important;
+ border-bottom:1px solid var(--aurora-line)!important;border-radius:0!important;
+ box-shadow:none!important;backdrop-filter:blur(22px);
+}
+#app .headTitle strong{color:#f4f6ff!important}
+#app .headTitle small{color:#8c9db8!important}
+#app #who,#app .tag{background:rgba(255,255,255,.04)!important;border:1px solid var(--aurora-line)!important;color:#b8c6df!important}
+#app .modelPickerBtn,#app .moreMenuBtn,#app #menu{
+ background:rgba(255,255,255,.045)!important;border:1px solid var(--aurora-line)!important;
+ color:#dce6fa!important;border-radius:12px!important;
+}
+#app .moreMenuPanel{background:#121d30!important;border:1px solid var(--aurora-line)!important;border-radius:16px!important;box-shadow:var(--aurora-shadow)!important}
+#app .chat{background:transparent!important}
+#app .welcome{
+ background:linear-gradient(145deg,rgba(22,34,57,.92),rgba(12,21,37,.9))!important;
+ border:1px solid rgba(165,188,225,.17)!important;border-radius:28px!important;
+ box-shadow:0 28px 85px rgba(0,0,0,.27),inset 0 1px rgba(255,255,255,.045)!important;
+ backdrop-filter:blur(18px);
+}
+#app .welcome::before{color:#a7a0ff!important;opacity:.65!important}
+#app .welcome h1{color:#f5f6ff!important;letter-spacing:-.055em!important}
+#app .welcome .muted{color:#a4b2cb!important}
+#app .welcome .cloud{background:linear-gradient(145deg,rgba(145,130,255,.2),rgba(76,205,209,.13))!important;border:1px solid rgba(171,170,255,.25)!important}
+#app .suggestions button{
+ background:rgba(255,255,255,.04)!important;border:1px solid var(--aurora-line)!important;
+ color:#d4def2!important;border-radius:13px!important;
+}
+#app .suggestions button:hover{background:rgba(142,132,255,.12)!important;border-color:rgba(155,140,255,.48)!important}
+#app .tillbot-guide{background:rgba(255,255,255,.035)!important;border:1px solid var(--aurora-line)!important;color:#cbd6eb!important}
+#app .bubble.bot{background:linear-gradient(145deg,#17243a,#111b2c)!important;border:1px solid var(--aurora-line)!important;color:#eaf0fc!important}
+#app .bubble.user{background:linear-gradient(135deg,#5968c9,#347f9d)!important;color:white!important}
+#app .composerArea{background:linear-gradient(180deg,transparent,rgba(8,13,24,.94) 30%)!important}
+#app .composer{
+ background:rgba(17,27,45,.94)!important;border:1px solid rgba(165,188,225,.2)!important;
+ border-radius:20px!important;box-shadow:0 18px 50px rgba(0,0,0,.26)!important;
+ backdrop-filter:blur(18px);
+}
+#app .composer:focus-within{border-color:rgba(125,155,255,.58)!important;box-shadow:0 0 0 4px rgba(125,155,255,.09),0 18px 50px rgba(0,0,0,.26)!important}
+#app #prompt{color:#f3f6ff!important}
+#app #prompt::placeholder{color:#8292ad!important}
+#app .composerTools button{background:rgba(255,255,255,.045)!important;border:1px solid var(--aurora-line)!important;color:#d0daed!important}
+#app .composerTools #send{background:linear-gradient(140deg,#9587ff,#5ac9d2)!important;color:#101629!important;border:0!important}
+#settingsDialog,#adminDialog,.settingsDialog,.coreFullscreen{
+ background:linear-gradient(145deg,#142139,#0d1728)!important;color:#eff3ff!important;
+ border:1px solid var(--aurora-line)!important;border-radius:22px!important;box-shadow:var(--aurora-shadow)!important;
+}
+dialog::backdrop{background:rgba(2,7,16,.72)!important;backdrop-filter:blur(7px)}
+dialog input,dialog textarea,dialog select,.settingsGroup input,.settingsGroup textarea,.settingsGroup select{
+ background:#0b1525!important;color:#edf2ff!important;border:1px solid var(--aurora-line)!important;border-radius:11px!important;
+}
+.auth{background:transparent!important;color:var(--aurora-text)!important}
+.authbox.authCard{
+ background:linear-gradient(145deg,rgba(20,31,52,.97),rgba(10,17,30,.97))!important;
+ border:1px solid rgba(165,188,225,.18)!important;border-radius:26px!important;
+ box-shadow:0 30px 90px rgba(0,0,0,.38)!important;
+}
+.authIntro h1{color:#f4f6ff!important}
+.authIntro p,.authFieldHint,.authTrust{color:#9eacc5!important}
+.authTabs{background:rgba(255,255,255,.04)!important;border:1px solid var(--aurora-line)!important}
+.authTabs button{color:#b4c1d9!important}
+.authTabs button.selected{background:#1c2a43!important;color:#fff!important;box-shadow:0 2px 10px rgba(0,0,0,.2)!important}
+.authInputWrap{background:#0b1525!important;border:1px solid var(--aurora-line)!important}
+.authInputWrap input{color:#f1f5ff!important}
+.authProtection,.publicDemo,.publicDemoEmbed{background:rgba(255,255,255,.035)!important;border:1px solid var(--aurora-line)!important;color:#dbe4f5!important}
+.publicDemoEmbed iframe{border:1px solid var(--aurora-line)!important}
+button,a,input,textarea,select{transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--aurora-cyan)!important;outline-offset:3px}
+@media(max-width:820px){
+ #sidebar{box-shadow:18px 0 55px rgba(0,0,0,.4)!important}
+ #app.layout>main>header{padding-inline:14px!important}
+ #app .chat{padding:20px 14px!important}
+ #app .welcome{padding:28px 18px!important;border-radius:22px!important}
+ #app .welcome h1{font-size:clamp(30px,8vw,42px)!important}
+ #app .composerArea{padding:10px 12px max(16px,env(safe-area-inset-bottom))!important}
+ #app .bubble{max-width:94%!important}
+ .auth{padding:18px 12px 24px!important}
+ .authbox.authCard{padding:25px 20px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
