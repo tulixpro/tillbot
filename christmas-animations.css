@@ -1,0 +1,88 @@
+/* TILLBOT Christmas Motion Pack — festive effects without changing the layout. */
+@media (prefers-reduced-motion: no-preference) {
+  /* A second, gentle snow layer; it never intercepts clicks or scrolling. */
+  #app.layout::before, #auth.auth::before {
+    content:"";
+    position:fixed;
+    inset:-100px 0 0;
+    z-index:25;
+    pointer-events:none;
+    opacity:.48;
+    background-image:
+      radial-gradient(3px 3px at 8% 12%,#fff 48%,transparent 60%),
+      radial-gradient(2px 2px at 22% 38%,#fff8e8 48%,transparent 60%),
+      radial-gradient(3px 3px at 41% 7%,#fff 48%,transparent 60%),
+      radial-gradient(2px 2px at 63% 29%,#fff8e8 48%,transparent 60%),
+      radial-gradient(3px 3px at 82% 17%,#fff 48%,transparent 60%),
+      radial-gradient(2px 2px at 94% 53%,#fff 48%,transparent 60%);
+    background-size:280px 240px;
+    animation:tb-xmas-fall 19s linear infinite;
+  }
+  #auth.auth::before { z-index:0; opacity:.32; }
+  @keyframes tb-xmas-fall {
+    from { transform:translate3d(0,-30px,0); }
+    to { transform:translate3d(22px,240px,0); }
+  }
+
+  /* Warm, softly twinkling festive lights along the workspace header. */
+  #app.layout>main>header {
+    position:relative;
+    isolation:isolate;
+  }
+  #app.layout>main>header::after {
+    content:"";
+    position:absolute;
+    left:clamp(12px,3vw,34px);
+    right:clamp(12px,3vw,34px);
+    top:0;
+    height:2px;
+    pointer-events:none;
+    background:linear-gradient(90deg,transparent,#d9b96e 12%,#d95b61 27%,#8bc99a 43%,#d9b96e 59%,#d95b61 76%,#8bc99a 90%,transparent);
+    background-size:200% 100%;
+    opacity:.8;
+    animation:tb-xmas-lights 6s ease-in-out infinite alternate;
+  }
+  @keyframes tb-xmas-lights {
+    from { opacity:.45; filter:brightness(.85); background-position:0 0; }
+    to { opacity:1; filter:brightness(1.35); background-position:100% 0; }
+  }
+
+  #app .welcome .cloud, #sidebar .coreOrb {
+    animation:tb-xmas-orbit 4.8s ease-in-out infinite;
+  }
+  @keyframes tb-xmas-orbit {
+    0%,100% { transform:translateY(0) rotate(-2deg); }
+    50% { transform:translateY(-5px) rotate(2deg); }
+  }
+
+  #sidebar .christmasCountdownOpen {
+    animation:tb-xmas-pulse 3.8s ease-in-out infinite;
+  }
+  @keyframes tb-xmas-pulse {
+    0%,100% { box-shadow:0 0 0 rgba(217,185,110,0); }
+    50% { box-shadow:0 0 22px rgba(217,185,110,.18); }
+  }
+
+  #app button:not(:disabled), #auth button:not(:disabled) {
+    transition:transform .2s ease,filter .2s ease,box-shadow .2s ease,border-color .2s ease;
+  }
+  #app button:not(:disabled):hover, #auth button:not(:disabled):hover {
+    filter:brightness(1.08);
+  }
+  #app .suggestions button:hover, #sidebar .powerTools button:hover {
+    transform:translateY(-2px);
+    box-shadow:0 7px 18px rgba(0,0,0,.2);
+  }
+  #app .welcome, #auth .authCard {
+    animation:tb-xmas-arrive .65s cubic-bezier(.2,.75,.25,1) both;
+  }
+  @keyframes tb-xmas-arrive {
+    from { opacity:.65; transform:translateY(9px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #app.layout::before, #auth.auth::before { animation:none!important; }
+  #app .welcome, #auth .authCard { animation:none!important; }
+}
