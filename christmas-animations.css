@@ -1,88 +1,92 @@
-/* TILLBOT Christmas Motion Pack — festive effects without changing the layout. */
+/* TILLBOT Christmas Motion Pack v2
+   Uses the existing Christmas snow/light layers. No extra overlay is placed
+   above the app or login controls, so buttons and text remain unobstructed. */
+
 @media (prefers-reduced-motion: no-preference) {
-  /* A second, gentle snow layer; it never intercepts clicks or scrolling. */
-  #app.layout::before, #auth.auth::before {
-    content:"";
-    position:fixed;
-    inset:-100px 0 0;
-    z-index:25;
-    pointer-events:none;
-    opacity:.48;
-    background-image:
-      radial-gradient(3px 3px at 8% 12%,#fff 48%,transparent 60%),
-      radial-gradient(2px 2px at 22% 38%,#fff8e8 48%,transparent 60%),
-      radial-gradient(3px 3px at 41% 7%,#fff 48%,transparent 60%),
-      radial-gradient(2px 2px at 63% 29%,#fff8e8 48%,transparent 60%),
-      radial-gradient(3px 3px at 82% 17%,#fff 48%,transparent 60%),
-      radial-gradient(2px 2px at 94% 53%,#fff 48%,transparent 60%);
-    background-size:280px 240px;
-    animation:tb-xmas-fall 19s linear infinite;
+  /* Animate the snow and festive lights already drawn by christmas-theme.css. */
+  body::before {
+    animation: tb-xmas-snow-shimmer 7s ease-in-out infinite alternate,
+               tb-snow-drift 28s linear infinite !important;
+    will-change: background-position, opacity;
   }
-  #auth.auth::before { z-index:0; opacity:.32; }
-  @keyframes tb-xmas-fall {
-    from { transform:translate3d(0,-30px,0); }
-    to { transform:translate3d(22px,240px,0); }
+  body::after {
+    animation: tb-xmas-lights-twinkle 3.2s ease-in-out infinite alternate;
+    transform-origin:top center;
+  }
+  @keyframes tb-xmas-snow-shimmer {
+    from { opacity:.42; filter:brightness(.9); }
+    to { opacity:.76; filter:brightness(1.2); }
+  }
+  @keyframes tb-xmas-lights-twinkle {
+    0%,100% { opacity:.78; filter:brightness(.9) drop-shadow(0 1px 3px rgba(220,190,120,.2)); }
+    50% { opacity:1; filter:brightness(1.3) drop-shadow(0 2px 8px rgba(220,190,120,.48)); }
   }
 
-  /* Warm, softly twinkling festive lights along the workspace header. */
-  #app.layout>main>header {
-    position:relative;
-    isolation:isolate;
+  /* Subtle festive glow on the existing welcome panel and countdown entry. */
+  #app .welcome {
+    animation: tb-xmas-welcome-glow 5s ease-in-out infinite alternate;
   }
-  #app.layout>main>header::after {
-    content:"";
-    position:absolute;
-    left:clamp(12px,3vw,34px);
-    right:clamp(12px,3vw,34px);
-    top:0;
-    height:2px;
-    pointer-events:none;
-    background:linear-gradient(90deg,transparent,#d9b96e 12%,#d95b61 27%,#8bc99a 43%,#d9b96e 59%,#d95b61 76%,#8bc99a 90%,transparent);
-    background-size:200% 100%;
-    opacity:.8;
-    animation:tb-xmas-lights 6s ease-in-out infinite alternate;
+  @keyframes tb-xmas-welcome-glow {
+    from { box-shadow:0 18px 55px rgba(0,0,0,.30), 0 0 0 rgba(217,185,110,0); }
+    to { box-shadow:0 20px 62px rgba(0,0,0,.34), 0 0 26px rgba(42,126,77,.18); }
   }
-  @keyframes tb-xmas-lights {
-    from { opacity:.45; filter:brightness(.85); background-position:0 0; }
-    to { opacity:1; filter:brightness(1.35); background-position:100% 0; }
+  #sidebar .christmasCountdownOpen {
+    animation:tb-xmas-countdown-glow 3.6s ease-in-out infinite;
+  }
+  @keyframes tb-xmas-countdown-glow {
+    0%,100% { box-shadow:0 7px 22px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.12); }
+    50% { box-shadow:0 8px 28px rgba(217,185,110,.22), 0 0 18px rgba(169,54,69,.12); }
   }
 
+  /* Gentle motion that does not alter the size or position of controls. */
+  #sidebar .brandIcon, #auth .authIcon {
+    animation:tb-xmas-icon-glow 4.5s ease-in-out infinite alternate;
+  }
+  @keyframes tb-xmas-icon-glow {
+    from { filter:drop-shadow(0 0 2px rgba(217,185,110,.08)); }
+    to { filter:drop-shadow(0 0 10px rgba(217,185,110,.38)); }
+  }
   #app .welcome .cloud, #sidebar .coreOrb {
-    animation:tb-xmas-orbit 4.8s ease-in-out infinite;
+    animation:tb-xmas-orbit 5s ease-in-out infinite;
+    transform-origin:center;
   }
   @keyframes tb-xmas-orbit {
-    0%,100% { transform:translateY(0) rotate(-2deg); }
-    50% { transform:translateY(-5px) rotate(2deg); }
+    0%,100% { transform:translateY(0) rotate(-1deg); }
+    50% { transform:translateY(-4px) rotate(1deg); }
   }
 
-  #sidebar .christmasCountdownOpen {
-    animation:tb-xmas-pulse 3.8s ease-in-out infinite;
+  #app .suggestions button, #sidebar .powerTools button,
+  #app .composerTools button, #auth .authSubmit {
+    transition:transform .2s ease,filter .2s ease,box-shadow .2s ease;
   }
-  @keyframes tb-xmas-pulse {
-    0%,100% { box-shadow:0 0 0 rgba(217,185,110,0); }
-    50% { box-shadow:0 0 22px rgba(217,185,110,.18); }
-  }
-
-  #app button:not(:disabled), #auth button:not(:disabled) {
-    transition:transform .2s ease,filter .2s ease,box-shadow .2s ease,border-color .2s ease;
-  }
-  #app button:not(:disabled):hover, #auth button:not(:disabled):hover {
-    filter:brightness(1.08);
-  }
-  #app .suggestions button:hover, #sidebar .powerTools button:hover {
+  #app .suggestions button:hover, #sidebar .powerTools button:hover,
+  #app .composerTools button:hover, #auth .authSubmit:hover {
     transform:translateY(-2px);
-    box-shadow:0 7px 18px rgba(0,0,0,.2);
+    filter:brightness(1.09);
+    box-shadow:0 8px 20px rgba(0,0,0,.2);
   }
-  #app .welcome, #auth .authCard {
-    animation:tb-xmas-arrive .65s cubic-bezier(.2,.75,.25,1) both;
+
+  /* Chat messages enter softly; no persistent movement while reading. */
+  #app .bubble {
+    animation:tb-xmas-message-in .28s ease-out both;
   }
-  @keyframes tb-xmas-arrive {
-    from { opacity:.65; transform:translateY(9px); }
+  @keyframes tb-xmas-message-in {
+    from { opacity:0; transform:translateY(7px); }
     to { opacity:1; transform:translateY(0); }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #app.layout::before, #auth.auth::before { animation:none!important; }
-  #app .welcome, #auth .authCard { animation:none!important; }
+  body::before, body::after,
+  #app .welcome, #sidebar .christmasCountdownOpen,
+  #sidebar .brandIcon, #auth .authIcon,
+  #app .welcome .cloud, #sidebar .coreOrb,
+  #app .bubble {
+    animation:none!important;
+    transform:none!important;
+  }
+  #app .suggestions button, #sidebar .powerTools button,
+  #app .composerTools button, #auth .authSubmit {
+    transition:none!important;
+  }
 }
