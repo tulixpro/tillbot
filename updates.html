@@ -42,6 +42,30 @@ main{width:min(1080px,calc(100% - 32px));margin:auto;padding:38px 0 70px}
 .empty{padding:28px;border:1px dashed #344a68;border-radius:15px;color:var(--muted);text-align:center;background:#0e1b2b}
 .retry{margin-top:12px;padding:9px 14px;border:1px solid #607eb6;border-radius:10px;background:#1a3150;color:#eff5ff;font-weight:750;cursor:pointer}
 .foot{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* Tablet layout: use the available width without making cards feel stretched. */
+@media (min-width:561px) and (max-width:1024px){
+ .top{padding:12px 24px}
+ main{width:min(920px,calc(100% - 48px));padding:32px 0 56px}
+ .hero{align-items:center;gap:18px;padding:18px 0 24px}
+ .hero>div:first-child{flex:1 1 390px;min-width:0}
+ .hero h1{font-size:clamp(34px,5vw,48px)}
+ .status{flex:0 1 245px;min-width:190px}
+ .filters{gap:9px;padding-bottom:20px}
+ .filters button{padding:9px 14px}
+ .list{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+ .item{min-width:0;padding:19px 18px 18px 22px}
+ .item h2{font-size:19px}
+ .banner{padding:17px 20px}
+}
+@media (min-width:561px) and (max-width:720px){
+ .top{padding-inline:18px}
+ main{width:calc(100% - 36px)}
+ .hero{align-items:stretch}
+ .hero>div:first-child{flex-basis:100%}
+ .status{flex:1 1 100%;min-width:0}
+ .list{grid-template-columns:1fr}
+}
 @media(max-width:560px){.top{padding:10px 13px}.top .btn{font-size:10px;padding:8px}.brand{font-size:12px}.brand img{width:32px;height:32px}main{width:calc(100% - 22px);padding-top:25px}.item{padding:16px 15px 16px 20px}.hero{padding-top:9px}.status{width:100%}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 </style>
