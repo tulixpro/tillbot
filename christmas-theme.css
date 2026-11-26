@@ -379,6 +379,7 @@ body::after{
     linear-gradient(145deg,#071b13 0%,#102d20 48%,#24151b 100%)!important;
 }
 #auth .authBackdrop{
+  display:block!important;
   position:absolute!important;inset:0!important;z-index:0!important;
   background:
     radial-gradient(ellipse at 50% 0%,rgba(226,195,119,.17),transparent 45%),
