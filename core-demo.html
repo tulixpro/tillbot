@@ -271,6 +271,8 @@ html.tb-lite-mode body{background:#11111b!important}
 html.tb-lite-mode body:before{display:none!important}
 html.tb-lite-mode *,html.tb-lite-mode *:before,html.tb-lite-mode *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;filter:none!important;box-shadow:none!important}
 html.tb-lite-mode .shell{background:transparent!important}
+
+.chatHistoryPanel{padding:10px 13px;border-bottom:1px solid var(--border);background:#121621}.chatHistoryHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.chatHistoryHead strong{font-size:12px}.chatHistoryHead span,.chatHistoryEmpty{color:var(--muted);font-size:10px}.savedChatList{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px;max-height:210px;overflow:auto}.savedChatItem{display:flex;align-items:center;gap:6px;min-width:0;padding:6px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2)}.savedChatOpen{flex:1;min-width:0;justify-content:flex-start;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.savedChatDelete{flex:0 0 auto;min-width:32px;padding:5px;color:#f0b8c2}.chatHistoryEmpty{margin:4px 0}@media(max-width:680px){.chatHistoryHead{align-items:flex-start;flex-direction:column}.savedChatList{grid-template-columns:1fr;max-height:180px}.chatHistoryPanel{padding:8px 9px}}
 </style>
 <link rel="stylesheet" href="./christmas-theme.css?v=9">
 </head>
@@ -278,9 +280,10 @@ html.tb-lite-mode .shell{background:transparent!important}
 <main class="shell">
 <header class="topbar"><div class="brand"><div class="mark"><img src="./icons/tillbot.svg?v=9" alt="TILLBOT Cloud"></div><div><h1>TILLBOT CORE</h1><p>Haupt-KI · 3D Game Studio</p></div></div><div class="status"><i></i> CORE SYSTEM <button type="button" id="core-performance-mode" aria-pressed="false">⚡ Sparmodus</button></div></header>
 <section class="hero"><span class="eyebrow">TILLBOT CORE · HAUPT-KI</span><h2>Ein zentraler KI-Arbeitsplatz für Ideen und Spiele.</h2><p>Chatte mit CORE, entwickle Projekte und erstelle eigenständige 3D-Spielprototypen direkt im Browser – mit echtem WebGL statt einer bloßen 2D-Attrappe.</p></section>
-<details class="noticeDisclosure"><summary>ⓘ Hinweise zu CORE & Datenschutz</summary><div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div></details>
+<details class="noticeDisclosure"><summary>ⓘ Hinweise zu CORE & Datenschutz</summary><div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, und können auf diesem Gerät im Browser lokal als Chatverlauf gespeichert werden. Sie werden nicht automatisch zwischen Geräten synchronisiert.</div></div></details>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
-<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="search-chat" aria-expanded="false" aria-controls="chat-search-panel">Chat durchsuchen</button><button type="button" id="open-prompt-library" aria-expanded="false" aria-controls="prompt-library">Prompt-Sammlung</button><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="copy-chat">Chat kopieren</button><button type="button" id="export-chat">TXT exportieren</button><button type="button" id="export-chat-md">Markdown exportieren</button><button type="button" id="scroll-latest" title="Zum Ende springen">↓ Neueste</button><button type="button" id="stop-chat" disabled>Stoppen</button><button type="button" id="open-project-studio" aria-expanded="false" aria-controls="project-studio">Projekt-Studio</button></div></div>
+<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="search-chat" aria-expanded="false" aria-controls="chat-search-panel">Chat durchsuchen</button><button type="button" id="open-chat-history" aria-expanded="false" aria-controls="chat-history-panel">Gespeicherte Chats</button><button type="button" id="open-prompt-library" aria-expanded="false" aria-controls="prompt-library">Prompt-Sammlung</button><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="copy-chat">Chat kopieren</button><button type="button" id="export-chat">TXT exportieren</button><button type="button" id="export-chat-md">Markdown exportieren</button><button type="button" id="scroll-latest" title="Zum Ende springen">↓ Neueste</button><button type="button" id="stop-chat" disabled>Stoppen</button><button type="button" id="open-project-studio" aria-expanded="false" aria-controls="project-studio">Projekt-Studio</button></div></div>
+<div id="chat-history-panel" class="chatHistoryPanel" hidden><div class="chatHistoryHead"><strong>Gespeicherte Chats</strong><span>Automatisch lokal in diesem Browser gespeichert</span></div><div id="saved-chat-list" class="savedChatList"><p class="chatHistoryEmpty">Noch keine gespeicherten Chats.</p></div></div>
 <div id="chat-search-panel" class="chatSearchPanel" hidden><label for="chat-search">Nachrichten im aktuellen Chat finden</label><input id="chat-search" type="search" maxlength="120" placeholder="Suchbegriff eingeben …" autocomplete="off"><span id="chat-search-count" aria-live="polite">Alle Nachrichten sichtbar</span><button type="button" id="clear-chat-search">Zurücksetzen</button></div>
 <div id="prompt-library" class="promptLibrary" hidden><div class="promptLibraryHead"><strong>Deine gespeicherten Prompts</strong><span>Nur in diesem Browser gespeichert</span></div><div class="promptLibrarySave"><input id="prompt-title" type="text" maxlength="48" placeholder="Name (optional)" aria-label="Prompt-Name"><button type="button" id="save-prompt">Aktuelle Eingabe speichern</button></div><div id="saved-prompts" class="savedPrompts"><p class="promptLibraryEmpty">Noch keine Prompts gespeichert.</p></div></div>
 <section id="project-studio" class="projectStudio" hidden aria-label="Projekt-Studio">
@@ -369,6 +372,8 @@ html.tb-lite-mode .shell{background:transparent!important}
  const form=$('chat-form'),input=$('message-input'),send=$('send'),messages=$('messages'),count=$('count'),status=$('demo-status'),newChat=$('new-chat'),exportChat=$('export-chat'),copyChat=$('copy-chat'),exportMarkdown=$('export-chat-md'),scrollLatest=$('scroll-latest'),answerMode=$('answer-mode'),stopButton=$('stop-chat');
  if(!form||!input||!send||!messages||!stopButton)return;
  let sent=0,busy=false,history=[],activeController=null;
+ const CHAT_STORAGE_KEY='tillbot-core-saved-chats-v1',CHAT_ACTIVE_KEY='tillbot-core-active-chat-v1';let activeChatId='',restoringChat=false,chatSaveTimer=null;
+ const chatHistoryButton=$('open-chat-history'),chatHistoryPanel=$('chat-history-panel'),savedChatList=$('saved-chat-list');
  input.maxLength=2000;
  const searchButton=$('search-chat'),searchPanel=$('chat-search-panel'),searchInput=$('chat-search'),searchCount=$('chat-search-count'),clearSearch=$('clear-chat-search');
  const libraryButton=$('open-prompt-library'),libraryPanel=$('prompt-library'),promptTitle=$('prompt-title'),savePromptButton=$('save-prompt'),savedPrompts=$('saved-prompts');
@@ -459,11 +464,54 @@ html.tb-lite-mode .shell{background:transparent!important}
   stopButton.disabled=!value;newChat.disabled=value;exportChat.disabled=value;if(copyChat)copyChat.disabled=value;if(exportMarkdown)exportMarkdown.disabled=value;
   document.querySelectorAll('[data-prompt]').forEach(button=>button.disabled=value);
  };
+ 
+ function readSavedChats(){
+  try{const data=JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)||'[]');return Array.isArray(data)?data.filter(chat=>chat&&typeof chat.id==='string'&&Array.isArray(chat.messages)).slice(0,20):[]}catch{return []}
+ }
+ function saveChatSnapshot(){
+  if(restoringChat)return;
+  const entries=[...messages.querySelectorAll('.msg')].map(node=>({role:node.classList.contains('user')?'user':'assistant',content:String(node.querySelector('.message-text')?.textContent||'').slice(0,6000)})).filter(item=>item.content).slice(-40);
+  if(!entries.some(item=>item.role==='user'))return;
+  try{
+   const chats=readSavedChats(),first=entries.find(item=>item.role==='user')?.content||'Neuer Chat';
+   const existing=chats.find(item=>item.id===activeChatId);
+   const item={id:activeChatId||('chat-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)),title:first.replace(/\s+/g,' ').slice(0,58),updatedAt:new Date().toISOString(),messages:entries};
+   activeChatId=item.id;
+   const index=chats.findIndex(chat=>chat.id===item.id);if(index>=0)chats.splice(index,1);
+   chats.unshift(item);localStorage.setItem(CHAT_STORAGE_KEY,JSON.stringify(chats.slice(0,20)));
+   localStorage.setItem(CHAT_ACTIVE_KEY,activeChatId);
+   if(chatHistoryPanel&&!chatHistoryPanel.hidden)renderSavedChats();
+  }catch{status.textContent='Chat konnte lokal nicht gespeichert werden · eventuell ist der Browserspeicher voll.'}
+ }
+ function scheduleChatSave(){clearTimeout(chatSaveTimer);chatSaveTimer=setTimeout(saveChatSnapshot,350)}
+ function renderSavedChats(){
+  if(!savedChatList)return;savedChatList.replaceChildren();const chats=readSavedChats();
+  if(!chats.length){const empty=document.createElement('p');empty.className='chatHistoryEmpty';empty.textContent='Noch keine gespeicherten Chats.';savedChatList.append(empty);return}
+  chats.forEach(chat=>{
+   const row=document.createElement('div');row.className='savedChatItem';
+   const open=document.createElement('button');open.type='button';open.className='savedChatOpen';open.textContent=chat.title||'Gespräch';open.title=new Date(chat.updatedAt||Date.now()).toLocaleString('de-DE');open.addEventListener('click',()=>loadSavedChat(chat.id));
+   const remove=document.createElement('button');remove.type='button';remove.className='savedChatDelete';remove.textContent='Löschen';remove.setAttribute('aria-label','Chat löschen');remove.addEventListener('click',()=>{const next=readSavedChats().filter(item=>item.id!==chat.id);localStorage.setItem(CHAT_STORAGE_KEY,JSON.stringify(next));if(activeChatId===chat.id){activeChatId='';localStorage.removeItem(CHAT_ACTIVE_KEY)}renderSavedChats()});
+   row.append(open,remove);savedChatList.append(row);
+  });
+ }
+ function loadSavedChat(id){
+  if(busy)return;const chat=readSavedChats().find(item=>item.id===id);if(!chat)return;
+  clearTimeout(chatSaveTimer);restoringChat=true;activeChatId=chat.id;history=[];sent=0;messages.replaceChildren();
+  chat.messages.slice(-40).forEach(item=>{const node=add(item.content,item.role==='user'?'user':'bot');if(item.role!=='user')renderCoreMarkdown(node.querySelector('.message-text'),item.content);else node.querySelector('.message-text').textContent=item.content});
+  history=chat.messages.filter(item=>item.role==='user'||item.role==='assistant').slice(-8).map(item=>({role:item.role,content:item.content.slice(0,6000)}));
+  sent=chat.messages.filter(item=>item.role==='user').length;count.textContent=sent+' '+(sent===1?'Nachricht':'Nachrichten');
+  status.textContent='Gespeicherter Chat geladen · lokal auf diesem Gerät';restoringChat=false;
+  localStorage.setItem(CHAT_ACTIVE_KEY,activeChatId);chatHistoryPanel.hidden=true;chatHistoryButton.setAttribute('aria-expanded','false');
+ }
+ chatHistoryButton?.addEventListener('click',()=>{const opening=chatHistoryPanel.hidden;chatHistoryPanel.hidden=!opening;chatHistoryButton.setAttribute('aria-expanded',String(opening));if(opening)renderSavedChats()});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&chatHistoryPanel&&!chatHistoryPanel.hidden){chatHistoryPanel.hidden=true;chatHistoryButton?.setAttribute('aria-expanded','false')}});
+
  function add(text,role){
   const item=document.createElement('div');item.className='msg '+role;
   const who=document.createElement('div');who.className='who';who.textContent=role==='user'?'Du':'TILLBOT CORE';
   const body=document.createElement('div');body.className='message-text';body.textContent=text;
   item.append(who,body);messages.append(item);
+  if(!restoringChat)scheduleChatSave();
   // Bound the live DOM so very long sessions cannot slow down scrolling/search.
   while(messages.children.length>100)messages.firstElementChild?.remove();
   if(searchPanel&&!searchPanel.hidden)applyChatSearch();
@@ -545,10 +593,12 @@ html.tb-lite-mode .shell{background:transparent!important}
    renderCoreMarkdown(waiting.querySelector('.message-text'),answer);applyChatSearch();
    const copy=document.createElement('button');copy.type='button';copy.className='copy-answer';copy.textContent='Antwort kopieren';copy.addEventListener('click',()=>copyText(answer,copy));waiting.append(copy);
    history.push({role:'user',content:value},{role:'assistant',content:answer});history=history.slice(-8);
+   scheduleChatSave();
    status.textContent='CORE ist bereit · Gesprächskontext aktiv';
   }catch(error){
    const cancelled=error.name==='AbortError';
    waiting.querySelector('.message-text').textContent=cancelled?'Anfrage wurde gestoppt.':(error.message||'Verbindung zu CORE fehlgeschlagen.');
+   scheduleChatSave();
    status.textContent=cancelled?'Anfrage gestoppt':'Modellserver momentan nicht erreichbar';
   }finally{
    if(activeController===controller)activeController=null;
@@ -561,7 +611,7 @@ html.tb-lite-mode .shell{background:transparent!important}
  document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{if(busy)return;if(button.dataset.mode&&$('core-mode'))$('core-mode').value=button.dataset.mode;void submit(button.dataset.prompt)}));
  stopButton.addEventListener('click',()=>{activeController?.abort()});
  newChat.addEventListener('click',()=>{
-  if(busy)return;history=[];sent=0;if(searchInput)searchInput.value='';if(searchPanel)searchPanel.hidden=true;searchButton?.setAttribute('aria-expanded','false');messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');
+  if(busy)return;saveChatSnapshot();activeChatId='';localStorage.removeItem(CHAT_ACTIVE_KEY);history=[];sent=0;if(searchInput)searchInput.value='';if(searchPanel)searchPanel.hidden=true;searchButton?.setAttribute('aria-expanded','false');messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');
   count.textContent='0 Nachrichten';status.textContent='Neuer Chat · kein vorheriger Gesprächskontext';input.value='';input.style.height='';send.disabled=true;input.focus();
  });
  function getTranscript(markdown=false){
