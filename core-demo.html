@@ -241,6 +241,17 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 }
 @media(prefers-reduced-motion:reduce){.status i{animation:none}}
 
+
+/* Conversation search */
+.chatSearchPanel{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid #2a3e5b;background:#101b2c}
+.chatSearchPanel[hidden]{display:none}
+.chatSearchPanel label{font-size:11px;color:#b9c7dc;font-weight:700}
+.chatSearchPanel input{flex:1;min-width:150px;min-height:36px;padding:8px 11px;border:1px solid #344d70;border-radius:10px;background:#091321;color:#f5f7ff}
+.chatSearchPanel span{font-size:10px;color:#a8b6cc}
+.chatSearchPanel button{min-height:34px;padding:6px 10px}
+.msg[hidden]{display:none}
+@media(max-width:680px){.chatSearchPanel{padding:9px 10px;gap:7px}.chatSearchPanel label{width:100%}.chatSearchPanel input{font-size:16px}}
+
 </style>
 <link rel="stylesheet" href="./christmas-theme.css?v=9">
 </head>
@@ -250,7 +261,8 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 <section class="hero"><span class="eyebrow">TILLBOT CORE · HAUPT-KI</span><h2>Ein zentraler KI-Arbeitsplatz für Ideen und Spiele.</h2><p>Chatte mit CORE, entwickle Projekte und erstelle eigenständige 3D-Spielprototypen direkt im Browser – mit echtem WebGL statt einer bloßen 2D-Attrappe.</p></section>
 <details class="noticeDisclosure"><summary>ⓘ Hinweise zu CORE & Datenschutz</summary><div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div></details>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
-<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="export-chat">Chat exportieren</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
+<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="search-chat" aria-expanded="false" aria-controls="chat-search-panel">Chat durchsuchen</button><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="export-chat">Chat exportieren</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
+<div id="chat-search-panel" class="chatSearchPanel" hidden><label for="chat-search">Nachrichten im aktuellen Chat finden</label><input id="chat-search" type="search" maxlength="120" placeholder="Suchbegriff eingeben …" autocomplete="off"><span id="chat-search-count" aria-live="polite">Alle Nachrichten sichtbar</span><button type="button" id="clear-chat-search">Zurücksetzen</button></div>
 <div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Stelle eine Frage oder wähle ein Beispiel. Ich antworte über den CORE-Forschungsendpunkt.</div></div>
 <div class="quickbar" aria-label="CORE-Arbeitsbereiche">
 <button type="button" data-prompt="Hilf mir beim Lernen: Erkläre das Thema verständlich, stelle Rückfragen und erstelle am Ende drei Übungsfragen.">Lernen</button>
@@ -310,6 +322,32 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
  if(!form||!input||!send||!messages||!stopButton)return;
  let sent=0,busy=false,history=[],activeController=null;
  input.maxLength=2000;
+ const searchButton=$('search-chat'),searchPanel=$('chat-search-panel'),searchInput=$('chat-search'),searchCount=$('chat-search-count'),clearSearch=$('clear-chat-search');
+ function applyChatSearch(){
+  if(!searchInput||!searchCount)return;
+  const query=searchInput.value.trim().toLocaleLowerCase('de');
+  const items=[...messages.querySelectorAll('.msg')];let matches=0;
+  items.forEach(item=>{
+   const hit=!query||(item.textContent||'').toLocaleLowerCase('de').includes(query);
+   item.hidden=!hit;if(hit)matches++;
+  });
+  searchCount.textContent=query?matches+' von '+items.length+' Nachrichten gefunden':'Alle '+items.length+' Nachrichten sichtbar';
+ }
+ searchButton?.addEventListener('click',()=>{
+  const opening=searchPanel.hidden;searchPanel.hidden=!opening;
+  searchButton.setAttribute('aria-expanded',String(opening));
+  if(opening)searchInput.focus();else{searchInput.value='';applyChatSearch()}
+ });
+ searchInput?.addEventListener('input',applyChatSearch);
+ clearSearch?.addEventListener('click',()=>{searchInput.value='';applyChatSearch();searchInput.focus()});
+ document.addEventListener('keydown',event=>{
+  if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){
+   event.preventDefault();input.focus();
+  }
+  if(event.key==='Escape'&&searchPanel&&!searchPanel.hidden){
+   searchInput.value='';applyChatSearch();searchPanel.hidden=true;searchButton?.setAttribute('aria-expanded','false');
+  }
+ });
  const setBusy=value=>{
   busy=value;send.disabled=value||!input.value.trim();input.disabled=value;
   stopButton.disabled=!value;newChat.disabled=value;exportChat.disabled=value;
@@ -319,7 +357,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
   const item=document.createElement('div');item.className='msg '+role;
   const who=document.createElement('div');who.className='who';who.textContent=role==='user'?'Du':'TILLBOT CORE';
   const body=document.createElement('div');body.className='message-text';body.textContent=text;
-  item.append(who,body);messages.append(item);messages.scrollTop=messages.scrollHeight;return item;
+  item.append(who,body);messages.append(item);applyChatSearch();if(!item.hidden)messages.scrollTop=messages.scrollHeight;return item;
  }
  async function copyText(value,button){
   try{
@@ -338,7 +376,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.error||'CORE ist momentan nicht erreichbar.');
    const answer=String(data.answer||'Keine Antwort erhalten.');
-   waiting.querySelector('.message-text').textContent=answer;
+   waiting.querySelector('.message-text').textContent=answer;applyChatSearch();
    const copy=document.createElement('button');copy.type='button';copy.className='copy-answer';copy.textContent='Antwort kopieren';copy.addEventListener('click',()=>copyText(answer,copy));waiting.append(copy);
    history.push({role:'user',content:value},{role:'assistant',content:answer});history=history.slice(-8);
    status.textContent='CORE ist bereit · Gesprächskontext aktiv';
@@ -357,7 +395,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
  document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{if(busy)return;if(button.dataset.mode&&$('core-mode'))$('core-mode').value=button.dataset.mode;void submit(button.dataset.prompt)}));
  stopButton.addEventListener('click',()=>{activeController?.abort()});
  newChat.addEventListener('click',()=>{
-  if(busy)return;history=[];sent=0;messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');
+  if(busy)return;history=[];sent=0;if(searchInput)searchInput.value='';if(searchPanel)searchPanel.hidden=true;searchButton?.setAttribute('aria-expanded','false');messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');
   count.textContent='0 Nachrichten';status.textContent='Neuer Chat · kein vorheriger Gesprächskontext';input.value='';input.style.height='';send.disabled=true;input.focus();
  });
  exportChat.addEventListener('click',()=>{
