@@ -733,7 +733,7 @@ app.post("/api/core/chat", auth, coreAccountLimit, rateLimit({ windowMs: 60_000,
   }) : [];
   const answerMode = ["short", "balanced", "detailed"].includes(req.body?.answerMode) ? req.body.answerMode : "balanced";
   const answerGuidance = { short: "Antworte sehr knapp und auf den Punkt, möglichst in wenigen Sätzen.", balanced: "Halte Antworten standardmäßig kompakt, erweitere sie bei komplexen Fragen.", detailed: "Antworte ausführlich und strukturiert mit Erklärungen, Beispielen und sinnvollen Zwischenschritten." }[answerMode];
-  const coreMode = ["general","learning","coding","writing","research","planning","creative","analysis"].includes(req.body?.mode) ? req.body.mode : "general";
+  const coreMode = ["general","learning","coding","writing","research","planning","creative","analysis","roblox"].includes(req.body?.mode) ? req.body.mode : "general";
   const modeGuidance = {
     general: "Arbeite als vielseitiger Assistent und wähle die passende Vorgehensweise.",
     learning: "Lernmodus: Erkläre schrittweise und verständlich, prüfe das Verständnis mit kleinen Fragen und gib hilfreiche Übungsaufgaben. Verrate bei Lernaufgaben nicht sofort jede Lösung.",
@@ -742,7 +742,8 @@ app.post("/api/core/chat", auth, coreAccountLimit, rateLimit({ windowMs: 60_000,
     research: "Recherchemodus: Trenne bekannte Fakten von Unsicherheiten, nenne sinnvolle Suchbegriffe und Quellentypen und erfinde niemals Quellen oder Zitate.",
     planning: "Planungsmodus: Erstelle realistische, priorisierte Schritte mit Abhängigkeiten und einem klaren nächsten Schritt.",
     creative: "Kreativmodus: Entwickle originelle Ideen und mehrere unterscheidbare Varianten, bleibe aber bei den Vorgaben.",
-    analysis: "Analysemodus: Zerlege das Problem, mache Annahmen sichtbar, vergleiche Optionen und begründe das Ergebnis."
+    analysis: "Analysemodus: Zerlege das Problem, mache Annahmen sichtbar, vergleiche Optionen und begründe das Ergebnis.",
+    roblox: "Roblox-Studio-Modus: Du bist ein erfahrener Roblox-Luau-Entwickler und erklärst altersgerecht auf Deutsch. Erstelle originale Roblox-Spielsysteme für Roblox Studio, keine Exploits, Cheats, Executor-Skripte oder Umgehungen. Liefere vollständigen Luau-Code und sage exakt, ob jedes Script in ServerScriptService, StarterPlayerScripts, StarterGui, ReplicatedStorage oder Workspace gehört. Bei mehreren Scripts liste Dateiname, Typ (Script/LocalScript/ModuleScript) und Ort getrennt auf. Verwende serverseitige Validierung für RemoteEvents, vertraue niemals Client-Eingaben für Punkte, Käufe oder Belohnungen, und speichere Daten nur serverseitig mit DataStoreService samt pcall und sinnvollen Fehlerfällen. Erfinde keine Roblox-APIs. Beginne bei großen Ideen mit einem kleinen spielbaren Grundsystem und ergänze es in klaren Schritten. Füge eine kurze Studio-Einbauanleitung und einen Testplan hinzu. Verwende nur eigene Figuren, Namen und Spielwelten, keine kopierten Marken oder geschützten Assets."
   }[coreMode];
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 35_000);
