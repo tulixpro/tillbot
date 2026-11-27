@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "desktop": "electron .",
-    "check": "node --check server.js && node --check app.js && node --check sw.js && node --check windows/main.cjs"
+    "check": "node --check server.js && node --check app.js && node --check sw.js && node --check windows/main.cjs && node scripts/check-studio-inline.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
