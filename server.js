@@ -387,7 +387,21 @@ app.delete("/api/workspaces/:id",auth,async(req,res)=>{
 });
 
 app.post("/api/support/tickets",auth,rateLimit({windowMs:60000,limit:4}),async(req,res)=>{const subject=String(req.body.subject||"").trim().slice(0,120),message=String(req.body.message||"").trim().slice(0,4000);if(subject.length<4||message.length<10)return res.status(400).json({error:"Betreff (min. 4) und Nachricht (min. 10 Zeichen) erforderlich."});const {rows}=await pool.query("INSERT INTO support_tickets(user_id,subject,message) VALUES($1,$2,$3) RETURNING id,status,created_at",[req.user.id,subject,message]);res.status(201).json({ticket:rows[0]})});
-app.get("/api/support/tickets",auth,async(req,res)=>{const {rows}=req.user.role==="admin"?await pool.query("SELECT t.*,u.username FROM support_tickets t JOIN users u ON u.id=t.user_id ORDER BY t.updated_at DESC LIMIT 100"):await pool.query("SELECT id,subject,message,status,admin_reply,created_at,updated_at FROM support_tickets WHERE user_id=$1 ORDER BY updated_at DESC",[req.user.id]);res.json(rows)});
+app.get("/api/support/tickets",auth,async(req,res)=>{
+ if(req.user.role==="admin"){
+  try{
+   const {rows:overrides}=await pool.query("SELECT enabled FROM admin_permission_overrides WHERE user_id=$1 AND permission_key='support'",[req.user.id]);
+   if(overrides.length&&!overrides[0].enabled)return res.status(403).json({error:"Dir fehlt die Admin-Berechtigung: support"});
+  }catch(error){
+   console.error("Support permission check failed:",error.code||error.message);
+   return res.status(503).json({error:"Support-Berechtigung konnte nicht geprüft werden."});
+  }
+  const {rows}=await pool.query("SELECT t.*,u.username FROM support_tickets t JOIN users u ON u.id=t.user_id ORDER BY t.updated_at DESC LIMIT 100");
+  return res.set("Cache-Control","no-store").json(rows);
+ }
+ const {rows}=await pool.query("SELECT id,subject,message,status,admin_reply,created_at,updated_at FROM support_tickets WHERE user_id=$1 ORDER BY updated_at DESC",[req.user.id]);
+ res.set("Cache-Control","no-store").json(rows);
+});
 app.patch("/api/admin/tickets/:id",auth,admin,async(req,res)=>{const status=["open","in_progress","closed"].includes(req.body.status)?req.body.status:null,reply=typeof req.body.reply==="string"?req.body.reply.trim().slice(0,4000):null;if(!status&&reply===null)return res.status(400).json({error:"Status oder Antwort angeben"});const {rows}=await pool.query("UPDATE support_tickets SET status=COALESCE($1,status),admin_reply=COALESCE($2,admin_reply),updated_at=CURRENT_TIMESTAMP WHERE id=$3 RETURNING id,status,admin_reply,updated_at",[status,reply,Number(req.params.id)]);if(!rows[0])return res.status(404).json({error:"Ticket nicht gefunden"});res.json({ticket:rows[0]})});
 async function getMaintenance(){
  const {rows}=await pool.query("SELECT key,value FROM app_settings WHERE key IN ('maintenance_enabled','maintenance_message')");
