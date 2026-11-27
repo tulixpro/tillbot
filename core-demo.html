@@ -253,6 +253,17 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 .promptLibrary{padding:12px 15px;border-bottom:1px solid #2a3e5b;background:#101b2c}.promptLibrary[hidden]{display:none}.promptLibraryHead{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:9px}.promptLibraryHead strong{font-size:12px}.promptLibraryHead span,.promptLibraryEmpty{font-size:10px;color:#a8b6cc}.promptLibrarySave{display:flex;gap:7px;margin-bottom:8px}.promptLibrarySave input{flex:1;min-width:0;padding:8px 10px;border:1px solid #344d70;border-radius:9px;background:#091321;color:#f5f7ff}.savedPrompts{display:grid;gap:6px}.savedPrompt{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #2c4262;border-radius:9px;background:#142239}.savedPromptName{flex:1;min-width:0;overflow-wrap:anywhere;font-size:11px;color:#dce7f8}.savedPrompt button{min-height:29px;padding:5px 8px;font-size:10px}.savedPrompt .deleteSavedPrompt{border-color:#69434b;background:#34232b}.promptLibraryEmpty{margin:4px 0}@media(max-width:680px){.promptLibrary{padding:10px}.promptLibraryHead{align-items:flex-start;flex-direction:column}.promptLibrarySave{flex-wrap:wrap}.promptLibrarySave input{flex-basis:100%}.savedPrompt{flex-wrap:wrap}}
 @media(max-width:680px){.chatSearchPanel{padding:9px 10px;gap:7px}.chatSearchPanel label{width:100%}.chatSearchPanel input{font-size:16px}}\n#scroll-latest[hidden]{display:none}.toolbar button:disabled{opacity:.45}@media(max-width:680px){.toolbar #copy-chat,.toolbar #export-chat-md{display:none}}
 
+
+/* Project Studio: lightweight local project workspace */
+.projectStudio{margin:0 13px 12px;padding:14px;border:1px solid #344d70;border-radius:14px;background:linear-gradient(145deg,#111e32,#0d1728)}
+.projectStudio[hidden]{display:none}.projectStudioHead,.projectStudioActions,.projectStudioMeta{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.projectStudioHead strong{font-size:13px}.projectStudioHead span,.projectStudioHint{font-size:10px;color:var(--muted)}
+.projectStudioGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:9px;margin-top:10px}
+.projectStudio input,.projectStudio textarea,.projectStudio select{width:100%;min-width:0;padding:9px 10px;border:1px solid #354c6d;border-radius:9px;background:#0a1424;color:var(--text)}
+.projectStudio textarea{min-height:110px;resize:vertical}.projectStudio label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:#b9c7dc}
+.projectStudioActions{justify-content:flex-start;margin-top:9px}.projectStudioActions button{min-height:34px}.projectStudio .danger{border-color:#744b5b;color:#f1c6d1}
+.projectStudioMeta{margin-top:8px;color:var(--muted);font-size:10px}
+@media(max-width:680px){.projectStudio{margin:0 9px 10px;padding:11px}.projectStudioGrid{grid-template-columns:1fr}.projectStudio textarea{min-height:90px}}
 </style>
 <link rel="stylesheet" href="./christmas-theme.css?v=9">
 </head>
@@ -262,9 +273,21 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 <section class="hero"><span class="eyebrow">TILLBOT CORE · HAUPT-KI</span><h2>Ein zentraler KI-Arbeitsplatz für Ideen und Spiele.</h2><p>Chatte mit CORE, entwickle Projekte und erstelle eigenständige 3D-Spielprototypen direkt im Browser – mit echtem WebGL statt einer bloßen 2D-Attrappe.</p></section>
 <details class="noticeDisclosure"><summary>ⓘ Hinweise zu CORE & Datenschutz</summary><div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div></details>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
-<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="search-chat" aria-expanded="false" aria-controls="chat-search-panel">Chat durchsuchen</button><button type="button" id="open-prompt-library" aria-expanded="false" aria-controls="prompt-library">Prompt-Sammlung</button><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="copy-chat">Chat kopieren</button><button type="button" id="export-chat">TXT exportieren</button><button type="button" id="export-chat-md">Markdown exportieren</button><button type="button" id="scroll-latest" title="Zum Ende springen">↓ Neueste</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
+<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="search-chat" aria-expanded="false" aria-controls="chat-search-panel">Chat durchsuchen</button><button type="button" id="open-prompt-library" aria-expanded="false" aria-controls="prompt-library">Prompt-Sammlung</button><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="copy-chat">Chat kopieren</button><button type="button" id="export-chat">TXT exportieren</button><button type="button" id="export-chat-md">Markdown exportieren</button><button type="button" id="scroll-latest" title="Zum Ende springen">↓ Neueste</button><button type="button" id="stop-chat" disabled>Stoppen</button></div><button type="button" id="open-project-studio" aria-expanded="false" aria-controls="project-studio">Projekt-Studio</button></div></div>
 <div id="chat-search-panel" class="chatSearchPanel" hidden><label for="chat-search">Nachrichten im aktuellen Chat finden</label><input id="chat-search" type="search" maxlength="120" placeholder="Suchbegriff eingeben …" autocomplete="off"><span id="chat-search-count" aria-live="polite">Alle Nachrichten sichtbar</span><button type="button" id="clear-chat-search">Zurücksetzen</button></div>
 <div id="prompt-library" class="promptLibrary" hidden><div class="promptLibraryHead"><strong>Deine gespeicherten Prompts</strong><span>Nur in diesem Browser gespeichert</span></div><div class="promptLibrarySave"><input id="prompt-title" type="text" maxlength="48" placeholder="Name (optional)" aria-label="Prompt-Name"><button type="button" id="save-prompt">Aktuelle Eingabe speichern</button></div><div id="saved-prompts" class="savedPrompts"><p class="promptLibraryEmpty">Noch keine Prompts gespeichert.</p></div></div>
+<section id="project-studio" class="projectStudio" hidden aria-label="Projekt-Studio">
+ <div class="projectStudioHead"><strong>🧩 Projekt-Studio</strong><span>Projekte werden nur in diesem Browser gespeichert</span></div>
+ <div class="projectStudioActions"><button type="button" id="project-new">＋ Neues Projekt</button><button type="button" id="project-export">Projekt als JSON exportieren</button><button type="button" id="project-delete" class="danger">Projekt löschen</button></div>
+ <div class="projectStudioGrid">
+  <label>Aktives Projekt<select id="project-select" aria-label="Aktives Projekt"></select></label>
+  <label>Projektname<input id="project-name" maxlength="70" placeholder="z. B. Mein Roblox-Obby"></label>
+  <label style="grid-column:1/-1">Beschreibung / Ziel<textarea id="project-notes" maxlength="5000" placeholder="Was möchtest du bauen? Was soll am Ende funktionieren?"></textarea></label>
+  <label style="grid-column:1/-1">Aufgabenliste (eine Aufgabe pro Zeile)<textarea id="project-tasks" maxlength="5000" placeholder="Idee sammeln&#10;Grundversion erstellen&#10;Testen und verbessern"></textarea></label>
+ </div>
+ <div class="projectStudioMeta"><span id="project-count">0 Projekte</span><span id="project-save-status" aria-live="polite">Noch kein Projekt angelegt</span></div>
+ <p class="projectStudioHint">Tipp: Nutze die Aufgabenliste für nächste Schritte. Die Daten bleiben lokal und werden nicht mit deinem Konto synchronisiert.</p>
+</section>
 <div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Stelle eine Frage oder wähle ein Beispiel. Ich antworte über den CORE-Forschungsendpunkt.</div></div>
 <div class="quickbar" aria-label="CORE-Arbeitsbereiche">
 <button type="button" data-prompt="Hilf mir beim Lernen: Erkläre das Thema verständlich, stelle Rückfragen und erstelle am Ende drei Übungsfragen.">Lernen</button>
@@ -327,6 +350,41 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
  const searchButton=$('search-chat'),searchPanel=$('chat-search-panel'),searchInput=$('chat-search'),searchCount=$('chat-search-count'),clearSearch=$('clear-chat-search');
  const libraryButton=$('open-prompt-library'),libraryPanel=$('prompt-library'),promptTitle=$('prompt-title'),savePromptButton=$('save-prompt'),savedPrompts=$('saved-prompts');
  const PROMPT_KEY='tillbot-core-prompts-v1';
+ const projectButton=$('open-project-studio'),projectPanel=$('project-studio'),projectSelect=$('project-select'),projectName=$('project-name'),projectNotes=$('project-notes'),projectTasks=$('project-tasks'),projectCount=$('project-count'),projectSaveStatus=$('project-save-status');
+ const PROJECT_KEY='tillbot-core-projects-v1';let activeProjectId=null,projectSaveTimer=null;
+ function readProjects(){try{const data=JSON.parse(localStorage.getItem(PROJECT_KEY)||'[]');return Array.isArray(data)?data.filter(p=>p&&typeof p.id==='string').slice(0,20):[]}catch{return []}}
+ function writeProjects(list){localStorage.setItem(PROJECT_KEY,JSON.stringify(list.slice(0,20)));projectCount.textContent=list.length+' '+(list.length===1?'Projekt':'Projekte')}
+ function persistActiveProject(){
+  if(!activeProjectId)return;const list=readProjects(),p=list.find(x=>x.id===activeProjectId);if(!p)return;
+  p.title=projectName.value.trim()||'Unbenanntes Projekt';p.notes=projectNotes.value;p.tasks=projectTasks.value;p.updatedAt=new Date().toISOString();
+  writeProjects(list);projectSaveStatus.textContent='Lokal gespeichert · '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+ }
+ function scheduleProjectSave(){projectSaveStatus.textContent='Änderungen werden gespeichert …';clearTimeout(projectSaveTimer);projectSaveTimer=setTimeout(persistActiveProject,250)}
+ function renderProjectSelect(){
+  const list=readProjects();projectSelect.replaceChildren();
+  list.forEach(p=>{const option=document.createElement('option');option.value=p.id;option.textContent=p.title||'Unbenanntes Projekt';projectSelect.append(option)});
+  projectCount.textContent=list.length+' '+(list.length===1?'Projekt':'Projekte');
+  const has=list.some(p=>p.id===activeProjectId);if(!has)activeProjectId=list[0]?.id||null;
+  projectSelect.value=activeProjectId||'';
+  const p=list.find(x=>x.id===activeProjectId);projectName.value=p?.title||'';projectNotes.value=p?.notes||'';projectTasks.value=p?.tasks||'';
+  projectSelect.disabled=!list.length;projectName.disabled=!list.length;projectNotes.disabled=!list.length;projectTasks.disabled=!list.length;
+  $('project-export').disabled=!list.length;$('project-delete').disabled=!list.length;
+  projectSaveStatus.textContent=p?'Projekt geladen':'Erstelle dein erstes Projekt';
+ }
+ function createProject(){
+  const list=readProjects();if(list.length>=20){projectSaveStatus.textContent='Maximal 20 Projekte pro Browser.';return}
+  const id='p-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+  list.unshift({id,title:'Neues Projekt',notes:'',tasks:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+  writeProjects(list);activeProjectId=id;renderProjectSelect();projectName.focus();projectName.select();
+ }
+ projectButton?.addEventListener('click',()=>{const opening=projectPanel.hidden;projectPanel.hidden=!opening;projectButton.setAttribute('aria-expanded',String(opening));if(opening)renderProjectSelect()});
+ $('project-new')?.addEventListener('click',createProject);
+ projectSelect?.addEventListener('change',()=>{persistActiveProject();activeProjectId=projectSelect.value;renderProjectSelect()});
+ [projectName,projectNotes,projectTasks].forEach(field=>field?.addEventListener('input',scheduleProjectSave));
+ $('project-delete')?.addEventListener('click',()=>{if(!activeProjectId)return;const list=readProjects().filter(p=>p.id!==activeProjectId);writeProjects(list);activeProjectId=list[0]?.id||null;renderProjectSelect()});
+ $('project-export')?.addEventListener('click',()=>{persistActiveProject();const p=readProjects().find(x=>x.id===activeProjectId);if(!p)return;const blob=new Blob([JSON.stringify(p,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='tillbot-projekt.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);projectSaveStatus.textContent='Projektdatei exportiert'});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&projectPanel&&!projectPanel.hidden){projectPanel.hidden=true;projectButton?.setAttribute('aria-expanded','false')}});
+
  function readSavedPrompts(){try{const data=JSON.parse(localStorage.getItem(PROMPT_KEY)||'[]');return Array.isArray(data)?data.filter(item=>item&&typeof item.text==='string').slice(0,30):[]}catch{return []}}
  function renderSavedPrompts(){
   if(!savedPrompts)return;savedPrompts.replaceChildren();const entries=readSavedPrompts();
