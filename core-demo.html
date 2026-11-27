@@ -402,8 +402,8 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
   return [...messages.querySelectorAll('.msg')].map(node=>{
    const who=node.querySelector('.who')?.textContent||'CORE';
    const body=node.querySelector('.message-text')?.textContent||node.textContent||'';
-   return markdown?'### '+who+'\\n\\n'+body:'['+who+']\\n'+body;
-  }).join(markdown?'\\n\\n---\\n\\n':'\\n\\n');
+   return markdown?'### '+who+'\n\n'+body:'['+who+']\n'+body;
+  }).join(markdown?'\n\n---\n\n':'\n\n');
  }
  function downloadTranscript(markdown){
   const content=getTranscript(markdown),blob=new Blob([content],{type:markdown?'text/markdown;charset=utf-8':'text/plain;charset=utf-8'});
