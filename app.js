@@ -91,7 +91,7 @@ window.tillbotAuthSubmit=async()=>{
     if(digest.startsWith(prefix)){solution=String(nonce);break;}
   }
   if(solution===null)throw Error("Sicherheitsprüfung konnte nicht abgeschlossen werden. Bitte erneut versuchen.");
-  const d=await authRequest(path,{username,password,email:registerMode?email:undefined,website:$("website").value,challengeId:challenge.id,challengeSolution:solution});
+  const d=await authRequest(path,{username,password,email:registerMode?email:undefined,website:$("website").value,challengeToken:challenge.token,challengeSolution:solution});
   $("website").value="";
   if(registerMode&&d.pendingVerification){$("authMsg").textContent=d.message||"Bitte bestätige deine E-Mail-Adresse.";$("resendVerification").classList.remove("hidden");return;}
   token=d.token;user=d.user;localStorage.setItem("tb-token",token);
