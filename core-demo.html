@@ -250,7 +250,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 .chatSearchPanel span{font-size:10px;color:#a8b6cc}
 .chatSearchPanel button{min-height:34px;padding:6px 10px}
 .msg[hidden]{display:none}
-@media(max-width:680px){.chatSearchPanel{padding:9px 10px;gap:7px}.chatSearchPanel label{width:100%}.chatSearchPanel input{font-size:16px}}
+@media(max-width:680px){.chatSearchPanel{padding:9px 10px;gap:7px}.chatSearchPanel label{width:100%}.chatSearchPanel input{font-size:16px}}\n#scroll-latest[hidden]{display:none}.toolbar button:disabled{opacity:.45}@media(max-width:680px){.toolbar #copy-chat,.toolbar #export-chat-md{display:none}}
 
 </style>
 <link rel="stylesheet" href="./christmas-theme.css?v=9">
@@ -261,7 +261,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 <section class="hero"><span class="eyebrow">TILLBOT CORE · HAUPT-KI</span><h2>Ein zentraler KI-Arbeitsplatz für Ideen und Spiele.</h2><p>Chatte mit CORE, entwickle Projekte und erstelle eigenständige 3D-Spielprototypen direkt im Browser – mit echtem WebGL statt einer bloßen 2D-Attrappe.</p></section>
 <details class="noticeDisclosure"><summary>ⓘ Hinweise zu CORE & Datenschutz</summary><div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div></details>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
-<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="search-chat" aria-expanded="false" aria-controls="chat-search-panel">Chat durchsuchen</button><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="export-chat">Chat exportieren</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
+<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="search-chat" aria-expanded="false" aria-controls="chat-search-panel">Chat durchsuchen</button><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="copy-chat">Chat kopieren</button><button type="button" id="export-chat">TXT exportieren</button><button type="button" id="export-chat-md">Markdown exportieren</button><button type="button" id="scroll-latest" title="Zum Ende springen">↓ Neueste</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
 <div id="chat-search-panel" class="chatSearchPanel" hidden><label for="chat-search">Nachrichten im aktuellen Chat finden</label><input id="chat-search" type="search" maxlength="120" placeholder="Suchbegriff eingeben …" autocomplete="off"><span id="chat-search-count" aria-live="polite">Alle Nachrichten sichtbar</span><button type="button" id="clear-chat-search">Zurücksetzen</button></div>
 <div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Stelle eine Frage oder wähle ein Beispiel. Ich antworte über den CORE-Forschungsendpunkt.</div></div>
 <div class="quickbar" aria-label="CORE-Arbeitsbereiche">
@@ -318,7 +318,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
  if(!params.has('embed'))document.body.classList.add('coreFullscreenDemo');
  if(params.has('embed'))document.querySelector('.currentAi')?.remove();
  const $=id=>document.getElementById(id);
- const form=$('chat-form'),input=$('message-input'),send=$('send'),messages=$('messages'),count=$('count'),status=$('demo-status'),newChat=$('new-chat'),exportChat=$('export-chat'),answerMode=$('answer-mode'),stopButton=$('stop-chat');
+ const form=$('chat-form'),input=$('message-input'),send=$('send'),messages=$('messages'),count=$('count'),status=$('demo-status'),newChat=$('new-chat'),exportChat=$('export-chat'),copyChat=$('copy-chat'),exportMarkdown=$('export-chat-md'),scrollLatest=$('scroll-latest'),answerMode=$('answer-mode'),stopButton=$('stop-chat');
  if(!form||!input||!send||!messages||!stopButton)return;
  let sent=0,busy=false,history=[],activeController=null;
  input.maxLength=2000;
@@ -350,7 +350,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
  });
  const setBusy=value=>{
   busy=value;send.disabled=value||!input.value.trim();input.disabled=value;
-  stopButton.disabled=!value;newChat.disabled=value;exportChat.disabled=value;
+  stopButton.disabled=!value;newChat.disabled=value;exportChat.disabled=value;if(copyChat)copyChat.disabled=value;if(exportMarkdown)exportMarkdown.disabled=value;
   document.querySelectorAll('[data-prompt]').forEach(button=>button.disabled=value);
  };
  function add(text,role){
@@ -398,11 +398,32 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
   if(busy)return;history=[];sent=0;if(searchInput)searchInput.value='';if(searchPanel)searchPanel.hidden=true;searchButton?.setAttribute('aria-expanded','false');messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');
   count.textContent='0 Nachrichten';status.textContent='Neuer Chat · kein vorheriger Gesprächskontext';input.value='';input.style.height='';send.disabled=true;input.focus();
  });
- exportChat.addEventListener('click',()=>{
-  const transcript=[...messages.querySelectorAll('.msg')].map(node=>(node.querySelector('.who')?.textContent||'CORE')+'\n'+(node.querySelector('.message-text')?.textContent||'')).join('\n\n');
-  const blob=new Blob([transcript],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');
-  link.href=url;link.download='tillbot-core-chat.txt';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ function getTranscript(markdown=false){
+  return [...messages.querySelectorAll('.msg')].map(node=>{
+   const who=node.querySelector('.who')?.textContent||'CORE';
+   const body=node.querySelector('.message-text')?.textContent||node.textContent||'';
+   return markdown?'### '+who+'\\n\\n'+body:'['+who+']\\n'+body;
+  }).join(markdown?'\\n\\n---\\n\\n':'\\n\\n');
+ }
+ function downloadTranscript(markdown){
+  const content=getTranscript(markdown),blob=new Blob([content],{type:markdown?'text/markdown;charset=utf-8':'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download=markdown?'tillbot-core-chat.md':'tillbot-core-chat.txt';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }
+ exportChat.addEventListener('click',()=>downloadTranscript(false));
+ exportMarkdown?.addEventListener('click',()=>downloadTranscript(true));
+ copyChat?.addEventListener('click',async()=>{
+  const value=getTranscript(true);
+  try{
+   if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(value);
+   else{const area=document.createElement('textarea');area.value=value;area.style.position='fixed';area.style.opacity='0';document.body.append(area);area.select();const ok=document.execCommand('copy');area.remove();if(!ok)throw new Error('copy failed')}
+   copyChat.textContent='Kopiert ✓';setTimeout(()=>copyChat.textContent='Chat kopieren',1400);
+  }catch{copyChat.textContent='Kopieren nicht möglich';setTimeout(()=>copyChat.textContent='Chat kopieren',1600)}
  });
+ scrollLatest?.addEventListener('click',()=>messages.scrollTo({top:messages.scrollHeight,behavior:'smooth'}));
+ messages.addEventListener('scroll',()=>{
+  if(scrollLatest)scrollLatest.hidden=messages.scrollHeight-messages.scrollTop-messages.clientHeight<100;
+ },{passive:true});
 
  const gamePrompt=$('game-prompt'),gameCreate=$('create-game'),gameDownload=$('download-game'),gameWindows=$('download-windows'),gameStop=$('stop-game'),gameStatus=$('game-status'),gameLoader=$('game-loader'),gameFrame=$('game-frame'),gameFrameWrap=$('game-frame-wrap'),gameTime=$('game-time');
  let gameController=null,gameStartedAt=0,gameTicker=null,generatedGame='';
