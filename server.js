@@ -12,7 +12,19 @@ const app = express();
 // so client-supplied X-Forwarded-For values cannot bypass rate-limit IP checks.
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
-app.use(helmet({ contentSecurityPolicy: false }));
+// The API serves JSON and ZIP downloads, not application HTML. A deny-by-default
+// CSP is therefore safe here and adds protection if an unexpected HTML response occurs.
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'none'"],
+      baseUri: ["'none'"],
+      formAction: ["'none'"],
+      frameAncestors: ["'none'"],
+      objectSrc: ["'none'"]
+    }
+  }
+}));
 app.use(express.json({ limit: "3mb" }));
 
 const SECRET = process.env.JWT_SECRET;
