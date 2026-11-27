@@ -176,7 +176,7 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
 <button type="button" data-prompt="Erstelle einen strukturierten Rechercheplan mit Leitfragen und verlässlichen Quellentypen.">Recherche</button>
 <button type="button" data-prompt="Erstelle einen realistischen Schritt-für-Schritt-Plan für mein Vorhaben.">Planung</button>
 <button type="button" data-prompt="Entwickle kreative Ideen und mehrere unterschiedliche Ansätze für mein Vorhaben.">Kreativ</button>
-<button type="button" data-prompt="Wechsle in den Roblox-Studio-Modus. Erstelle mir ein kleines, vollständiges Roblox-Spielkonzept mit allen nötigen Luau-Scripts, Dateinamen, Script-Typen und exakten Ablageorten in Roblox Studio. Beginne mit einem einfachen Obby mit Checkpoints und erkläre mir Schritt für Schritt, wie ich es teste.">Roblox-Spiel bauen</button>
+<button type="button" data-mode="roblox" data-prompt="Erstelle mir ein kleines, vollständiges Roblox-Spielkonzept mit allen nötigen Luau-Scripts, Dateinamen, Script-Typen und exakten Ablageorten in Roblox Studio. Beginne mit einem einfachen Obby mit Checkpoints und erkläre mir Schritt für Schritt, wie ich es teste.">Roblox-Spiel bauen</button>
 </div>
 <div class="quickbar" aria-label="Beispielfragen">
 <button type="button" data-prompt="Was kannst du?">Was kannst du?</button>
@@ -265,7 +265,7 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
  form.addEventListener('submit',event=>{event.preventDefault();const value=input.value.trim();if(!value||busy)return;input.value='';input.style.height='';send.disabled=true;void submit(value)});
  input.addEventListener('input',()=>{send.disabled=busy||!input.value.trim();input.style.height='auto';input.style.height=Math.min(input.scrollHeight,150)+'px'});
  input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();if(!send.disabled)form.requestSubmit()}});
- document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{if(!busy)void submit(button.dataset.prompt)}));
+ document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>{if(busy)return;if(button.dataset.mode&&$('core-mode'))$('core-mode').value=button.dataset.mode;void submit(button.dataset.prompt)}));
  stopButton.addEventListener('click',()=>{activeController?.abort()});
  newChat.addEventListener('click',()=>{
   if(busy)return;history=[];sent=0;messages.replaceChildren();add('Neuer Chat gestartet. Stelle eine Frage oder wähle ein Beispiel.','bot');
