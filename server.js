@@ -242,7 +242,7 @@ app.post("/api/auth/reset-password",rateLimit({windowMs:15*60_000,limit:5}),asyn
 });
 
 app.post("/api/login", async (req, res) => {
-  if (isBotTrapFilled(req)) return res.status(400).json({ error: "Anfrage konnte nicht verarbeitet werden." });
+  if (isBotTrapFilled(req) || !consumeAuthChallenge(req)) return res.status(400).json({ error: "Sicherheitsprüfung fehlgeschlagen. Bitte lade die Anmeldung neu und versuche es erneut." });
   try {
     const identity=String(req.body.username||"").trim().toLowerCase(); const { rows } = await pool.query("SELECT * FROM users WHERE username = $1 OR lower(email) = $2 LIMIT 1", [normalizeUsername(identity), identity]); const user = rows[0];
     if (!user || !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))) {
