@@ -5,7 +5,8 @@
   "main": "windows/main.cjs",
   "scripts": {
     "start": "node server.js",
-    "desktop": "electron ."
+    "desktop": "electron .",
+    "check": "node --check server.js && node --check app.js && node --check sw.js && node --check windows/main.cjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
