@@ -79,12 +79,12 @@ app.get("/api/auth/status", async (_req,res) => {
 });
 
 const normalizeUsername = (value) => String(value || "").trim().toLowerCase();
-const makeToken = (user) => jwt.sign({ sub: String(user.id) }, TOKEN_SECRET, { expiresIn: "7d" });
+const makeToken = (user) => jwt.sign({ sub: String(user.id) }, TOKEN_SECRET, { algorithm: "HS256", expiresIn: "7d" });
 
 async function auth(req, res, next) {
   try {
     const raw = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-    const payload = jwt.verify(raw, TOKEN_SECRET);
+    const payload = jwt.verify(raw, TOKEN_SECRET, { algorithms: ["HS256"] });
     const { rows } = await pool.query("SELECT id, username, role FROM users WHERE id = $1", [Number(payload.sub)]); const user = rows[0];
     if (!user) return res.status(401).json({ error: "Konto nicht gefunden" });
     req.user = user;
