@@ -158,6 +158,89 @@ button.game-create{background:linear-gradient(120deg,#718cff,#4d78d8);border:0;c
  details.tutorial{margin:0 12px}
  .footer{padding:0 12px 8px}
 }
+
+/* TILLBOT CORE — cohesive visual polish */
+:root{
+ --bg:#070b14;--surface:#0e1726;--surface-2:#152238;--border:#2a3d59;
+ --text:#f5f7ff;--muted:#a8b6cc;--accent:#8da7ff;
+}
+html{scrollbar-color:#405578 #0a1220;scrollbar-width:thin}
+body{background:
+ radial-gradient(900px 480px at 8% -10%,rgba(103,125,255,.22),transparent 65%),
+ radial-gradient(760px 420px at 100% 12%,rgba(55,207,198,.13),transparent 62%),
+ linear-gradient(160deg,#080d18 0%,#090f1d 55%,#07111b 100%)}
+.shell{width:min(1320px,calc(100% - 44px));gap:16px;padding:20px 0 24px}
+.topbar{position:relative;overflow:hidden;border:1px solid rgba(139,164,218,.25);
+ background:linear-gradient(115deg,rgba(23,35,62,.96),rgba(12,26,43,.96));
+ box-shadow:0 18px 55px rgba(0,0,0,.32);backdrop-filter:blur(16px)}
+.topbar:after{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(#9b8cff,#4dd6d0)}
+.brand{min-width:0}.mark{flex:0 0 46px;overflow:hidden}
+.mark img{display:block;width:100%;height:100%;object-fit:contain}
+.brand h1{font-size:16px;letter-spacing:.08em}.brand p{font-size:11px;letter-spacing:.02em}
+.status{font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.status i{animation:core-pulse 2.4s ease-in-out infinite}
+@keyframes core-pulse{50%{box-shadow:0 0 0 5px rgba(155,225,207,.08),0 0 15px rgba(155,225,207,.8)}}
+.hero{position:relative;overflow:hidden;text-align:left;padding:clamp(24px,4vw,48px);
+ background:linear-gradient(112deg,rgba(29,44,77,.96),rgba(17,42,61,.9) 65%,rgba(20,54,62,.84));
+ border:1px solid rgba(132,158,218,.28);box-shadow:0 22px 65px rgba(0,0,0,.24)}
+.hero:after{content:"✦";position:absolute;right:7%;top:5%;font-size:clamp(90px,17vw,190px);line-height:1;color:rgba(193,207,255,.055);pointer-events:none}
+.hero .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #6678a855;border-radius:99px;background:#111d36aa}
+.hero h2{position:relative;z-index:1;max-width:780px;margin:14px 0 10px;font-size:clamp(30px,5vw,54px);line-height:1.04;letter-spacing:-1.8px}
+.hero p{position:relative;z-index:1;max-width:720px;font-size:14px;line-height:1.75;color:#c1cee2}
+.chatCard{gap:0;padding:0;overflow:hidden;border:1px solid rgba(113,143,190,.28);background:rgba(12,20,34,.96);box-shadow:0 24px 70px rgba(0,0,0,.3)}
+.chatHead{padding:16px 18px;background:linear-gradient(90deg,rgba(27,41,67,.85),rgba(15,26,43,.85))}
+.chatHead strong{font-size:14px;letter-spacing:.01em}.chatHead span{font-size:11px}
+.toolbar{gap:7px}.answer-setting{gap:8px;color:#b9c7dc}
+.answer-setting select{min-height:38px;padding:7px 30px 7px 10px;border-radius:10px!important}
+button{min-height:38px;padding:8px 13px;border-radius:11px;font-size:12px}
+button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 7px 20px rgba(91,124,193,.18)}
+#messages{padding:22px;gap:14px;background:
+ radial-gradient(ellipse at 50% 0,rgba(70,94,145,.08),transparent 60%),#0b1422}
+.msg{max-width:min(82%,780px);padding:13px 15px;border-radius:16px;line-height:1.7;box-shadow:0 5px 16px rgba(0,0,0,.12)}
+.msg.bot{border-top-left-radius:5px;background:linear-gradient(145deg,#172943,#142238);border-color:#304866}
+.msg.user{border-top-right-radius:5px;background:linear-gradient(135deg,#455eaa,#334e8a);border-color:#7188c4}
+.who{font-size:9px;letter-spacing:1.35px;margin-bottom:6px}
+.message-text{white-space:pre-wrap}
+.quickbar{padding:10px 16px 0;gap:8px}
+.quickbar button{min-height:34px;border-radius:99px;padding:7px 12px;background:#14233a;border-color:#304866;color:#dce8ff}
+.quickbar[aria-label="CORE-Arbeitsbereiche"] button{background:linear-gradient(120deg,#1c3150,#17414b);border-color:#3b6979}
+.quickbar[aria-label="Roblox-Spielvorlagen"] button{background:#1b263b;border-color:#435777}
+.quickbar[aria-label="Beispielfragen"]{padding-bottom:12px}
+.composer{gap:10px;padding:14px 16px;background:#101b2c;border-top:1px solid #2a3e5b}
+.composer textarea{min-height:48px;padding:12px 14px;border:1px solid #344d70!important;border-radius:13px!important;background:#091321!important;line-height:1.5}
+.send{min-width:96px;min-height:48px;border-radius:13px!important;background:linear-gradient(120deg,#8f9fff,#58d6d1)!important;color:#091321!important;font-weight:850;box-shadow:0 8px 24px rgba(92,173,210,.2)}
+.chatFoot{padding:0 17px 12px;background:#101b2c}
+.noticeDisclosure,.tutorial,.game-disclosure{border-color:#2d4363;background:rgba(14,24,41,.92);box-shadow:0 12px 36px rgba(0,0,0,.16)}
+.noticeDisclosure>summary,.tutorial>summary{padding:13px 16px;font-size:12px}
+.noticeDisclosure .notice{padding:13px 16px}
+.game-disclosure>summary{padding:18px 19px;font-size:15px}
+.game-disclosure>summary span{font-size:12px}
+.game-disclosure .game-studio{padding:18px}
+.game-studio{gap:14px}
+.game-studio h3{font-size:18px}
+.game-prompt{min-height:110px;padding:14px;border-color:#3b5275!important;background:#091423!important;border-radius:13px!important}
+.game-frame-wrap{border-color:#385477;box-shadow:0 15px 40px rgba(0,0,0,.22)}
+.tutorialGrid article{padding:13px;border-radius:12px;background:#142239}
+.footer{padding:2px 3px 8px;font-size:10px}
+button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #9aafff;outline-offset:3px}
+::selection{background:#738ce8;color:#fff}
+@media(max-width:680px){
+ .shell,body.coreFullscreenDemo .shell{width:100%;gap:9px;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+ .topbar{padding:10px 14px}.hero{text-align:left;margin:0 10px;border-radius:17px;padding:19px 17px}
+ .hero h2{font-size:clamp(25px,7vw,34px);letter-spacing:-.9px}
+ .hero p{display:block;font-size:11px;line-height:1.5}
+ .chatCard{margin:0 7px;width:calc(100% - 14px);border-radius:16px}
+ .chatHead{padding:12px}.toolbar{display:flex;flex-wrap:wrap}
+ .answer-setting{font-size:10px}.answer-setting select{max-width:145px}
+ #messages{padding:12px;gap:10px}.msg{max-width:94%;font-size:13px;padding:10px 12px}
+ .quickbar{padding:9px 10px 0}
+ .composer{padding:10px}.send{min-width:72px}
+ .noticeDisclosure,.game-disclosure,.tutorial{margin-left:10px;margin-right:10px}
+ .game-disclosure .game-studio{padding:12px}
+ .footer{padding:0 12px 10px}
+}
+@media(prefers-reduced-motion:reduce){.status i{animation:none}}
+
 </style>
 <link rel="stylesheet" href="./christmas-theme.css?v=9">
 </head>
