@@ -56,26 +56,29 @@ function isBotTrapFilled(req) {
   return typeof req.body?.website === "string" && req.body.website.trim().length > 0;
 }
 
-const authChallenges = new Map();
 const AUTH_POW_DIFFICULTY = 3;
-function issueAuthChallenge(req, res) {
-  const now = Date.now();
-  for (const [id, item] of authChallenges) if (item.expiresAt <= now) authChallenges.delete(id);
-  while (authChallenges.size >= 5000) authChallenges.delete(authChallenges.keys().next().value);
-  const id = crypto.randomBytes(18).toString("hex");
+// Stateless signed challenges work across Render instances and restarts. The short
+// expiry limits reuse; endpoint rate limits remain the primary abuse control.
+function issueAuthChallenge(_req, res) {
   const nonce = crypto.randomBytes(24).toString("hex");
-  authChallenges.set(id, { nonce, ip: req.ip, expiresAt: now + 120000 });
-  res.set("Cache-Control", "no-store").json({ id, nonce, difficulty: AUTH_POW_DIFFICULTY, expiresIn: 120 });
+  const token = jwt.sign({ purpose: "auth-challenge", nonce }, TOKEN_SECRET, {
+    algorithm: "HS256",
+    expiresIn: "120s"
+  });
+  res.set("Cache-Control", "no-store").json({ token, nonce, difficulty: AUTH_POW_DIFFICULTY, expiresIn: 120 });
 }
 function consumeAuthChallenge(req) {
-  const id = String(req.body?.challengeId || "");
+  const token = String(req.body?.challengeToken || "");
   const solution = String(req.body?.challengeSolution || "");
-  const item = authChallenges.get(id);
-  if (!item) return false;
-  authChallenges.delete(id);
-  if (item.expiresAt <= Date.now() || item.ip !== req.ip || !/^[0-9]{1,12}$/.test(solution)) return false;
-  const digest = crypto.createHash("sha256").update(item.nonce + ":" + solution).digest("hex");
-  return digest.startsWith("0".repeat(AUTH_POW_DIFFICULTY));
+  if (!token || !/^[0-9]{1,12}$/.test(solution)) return false;
+  try {
+    const payload = jwt.verify(token, TOKEN_SECRET, { algorithms: ["HS256"] });
+    if (payload.purpose !== "auth-challenge" || typeof payload.nonce !== "string" || !/^[a-f0-9]{48}$/.test(payload.nonce)) return false;
+    const digest = crypto.createHash("sha256").update(payload.nonce + ":" + solution).digest("hex");
+    return digest.startsWith("0".repeat(AUTH_POW_DIFFICULTY));
+  } catch {
+    return false;
+  }
 }
 app.get("/api/auth/challenge", rateLimit({ windowMs: 60000, limit: 20, standardHeaders: true, legacyHeaders: false }), issueAuthChallenge);
 
