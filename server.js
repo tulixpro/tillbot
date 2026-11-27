@@ -754,7 +754,7 @@ app.post("/api/core/chat", auth, coreAccountLimit, rateLimit({ windowMs: 60_000,
     const adminInstructions=String(coreConfig.core_admin_instructions||"").trim().slice(0,4000);
     const adminStyle=({balanced:"Antworte ausgewogen: zuerst die direkte Lösung, dann eine kurze Erklärung.",concise:"Antworte knapp und direkt, ohne wichtige Details auszulassen.",detailed:"Antworte ausführlich, strukturiert und mit hilfreichen Beispielen."})[coreConfig.core_admin_style]||"Antworte ausgewogen und verständlich.";
     const coreTemperature=Math.min(0.9,Math.max(0.1,Number(coreConfig.core_admin_temperature)||0.55));
-    const coreMaxTokens=Math.min(1800,Math.max(256,Number(coreConfig.core_admin_max_tokens)||1100));
+    const coreMaxTokens=Math.min(coreMode==="roblox"?3200:1800,Math.max(256,Number(coreConfig.core_admin_max_tokens)||(coreMode==="roblox"?2600:1100)));
     const model = String(process.env.CORE_MODEL || "openai/gpt-oss-20b");
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
