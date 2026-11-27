@@ -79,14 +79,16 @@ app.get("/api/auth/status", async (_req,res) => {
 });
 
 const normalizeUsername = (value) => String(value || "").trim().toLowerCase();
-const makeToken = (user) => jwt.sign({ sub: String(user.id) }, TOKEN_SECRET, { algorithm: "HS256", expiresIn: "7d" });
+const makeToken = (user) => jwt.sign({ sub: String(user.id), ver: Number(user.token_version || 0) }, TOKEN_SECRET, { algorithm: "HS256", expiresIn: "7d" });
 
 async function auth(req, res, next) {
   try {
     const raw = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
     const payload = jwt.verify(raw, TOKEN_SECRET, { algorithms: ["HS256"] });
-    const { rows } = await pool.query("SELECT id, username, role FROM users WHERE id = $1", [Number(payload.sub)]); const user = rows[0];
+    const { rows } = await pool.query("SELECT id, username, role, token_version FROM users WHERE id = $1", [Number(payload.sub)]); const user = rows[0];
     if (!user) return res.status(401).json({ error: "Konto nicht gefunden" });
+    // Password changes increment token_version, immediately revoking every existing session.
+    if (Number(payload.ver || 0) !== Number(user.token_version || 0)) return res.status(401).json({ error: "Sitzung abgelaufen. Bitte erneut anmelden." });
     req.user = user;
     next();
   } catch {
@@ -235,7 +237,7 @@ app.post("/api/auth/reset-password",rateLimit({windowMs:15*60_000,limit:5}),asyn
  if(!/^[a-f0-9]{64}$/.test(token))return res.status(400).json({error:"Link ungültig oder abgelaufen."});
  if(password.length<10||password.length>128)return res.status(400).json({error:"Passwort muss 10–128 Zeichen haben."});
  const hash=await bcrypt.hash(password,12);
- const result=await pool.query("WITH consumed AS (DELETE FROM email_action_tokens WHERE token_hash=$1 AND purpose='reset' AND expires_at>NOW() RETURNING user_id) UPDATE users SET password_hash=$2 WHERE id=(SELECT user_id FROM consumed) RETURNING id",[hashActionToken(token),hash]);
+ const result=await pool.query("WITH consumed AS (DELETE FROM email_action_tokens WHERE token_hash=$1 AND purpose='reset' AND expires_at>NOW() RETURNING user_id) UPDATE users SET password_hash=$2, token_version=token_version+1 WHERE id=(SELECT user_id FROM consumed) RETURNING id",[hashActionToken(token),hash]);
  if(!result.rowCount)return res.status(400).json({error:"Link ungültig oder abgelaufen."});
  await pool.query("DELETE FROM email_action_tokens WHERE user_id=$1",[result.rows[0].id]);
  res.json({ok:true,message:"Passwort geändert. Bitte melde dich neu an."});
