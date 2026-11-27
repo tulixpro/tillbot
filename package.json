@@ -15,7 +15,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^10.6.1",
-    "archiver": "^7.0.1"
+    "archiver": "^8.0.0"
   },
   "devDependencies": {
     "electron": "^39.0.0"
