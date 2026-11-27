@@ -690,6 +690,7 @@ html.tb-lite-mode .shell{background:transparent!important}
  });
  gamePrompt.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='Enter')void createGame()});
 
+ const lastChatId=localStorage.getItem(CHAT_ACTIVE_KEY);if(lastChatId&&readSavedChats().some(chat=>chat.id===lastChatId))loadSavedChat(lastChatId);
  fetch(API+'/api/core/status',{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('tb-token')||'')}}).then(response=>{if(!response.ok)throw new Error('status');return response.json()}).then(data=>{
   status.textContent=data.available?'CORE bereit · '+(data.model||'Modellserver konfiguriert'):'CORE nicht verfügbar · Modellserver nicht konfiguriert';
   const indicator=document.querySelector('.status');if(indicator){indicator.lastChild.textContent=data.available?' Verbunden':' Nicht verfügbar';indicator.style.borderColor=data.available?'#456b59':'#754b4b';}
