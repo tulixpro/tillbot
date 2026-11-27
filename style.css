@@ -2893,3 +2893,48 @@ html.tb-lite-mode #app.layout,html.tb-lite-mode #app.layout>main{background:#081
 .performanceModeBtn{white-space:nowrap!important;font-size:11px!important;padding:8px 10px!important;border:1px solid #6c8caa!important;background:#102b40!important}
 html.tb-lite-mode .performanceModeBtn{border-color:#65c7a6!important;color:#b8f5dc!important}
 @media(max-width:820px){.performanceModeBtn{padding:7px!important;font-size:10px!important}}
+
+
+/* TILLBOT tablet layout: balanced sidebar, readable workspace and touch-friendly controls. */
+@media screen and (min-width: 821px) and (max-width: 1180px) {
+  html, body { min-width: 0; }
+  body > #app.layout {
+    width: 100%; min-width: 0; height: 100vh; height: 100dvh;
+    min-height: 0; overflow: hidden;
+  }
+  #app.layout > aside, #sidebar {
+    flex: 0 0 clamp(205px, 23vw, 250px);
+    width: clamp(205px, 23vw, 250px); min-width: 0;
+    padding: 17px 14px; gap: 11px; overflow-x: hidden; overflow-y: auto;
+  }
+  #app.layout > main { flex: 1 1 0; width: auto; min-width: 0; min-height: 0; }
+  #app.layout > main > header {
+    min-width: 0; height: 64px; min-height: 64px;
+    padding: 0 clamp(14px, 2.2vw, 25px); gap: 11px;
+  }
+  #app.layout > main > header .headTitle { min-width: 0; }
+  #app.layout > main > header .tag { min-width: 0; max-width: 34%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #app.layout > main > .chat {
+    min-width: 0; min-height: 0; padding: clamp(20px, 3vw, 38px);
+    gap: 13px; overscroll-behavior: contain;
+  }
+  #app.layout .welcome { width: min(100%, 620px); margin: auto; padding: 10px 18px; }
+  #app.layout .welcome h1 { font-size: clamp(30px, 3.6vw, 42px); }
+  #app.layout .suggestions { gap: 8px; }
+  #app.layout .suggestions button { min-height: 42px; padding: 10px 13px; }
+  #app.layout .bubble { max-width: min(84%, 760px); }
+  #app.layout > main > .composerArea { padding: 12px clamp(16px, 3vw, 34px) 18px; }
+  #app.layout .composer { width: min(100%, 940px); gap: 8px; }
+  #app.layout .composer textarea { min-width: 0; font-size: 16px; }
+  #app.layout .composer #photoBtn, #app.layout .composer #voiceBtn { min-width: 48px; padding-inline: 9px; }
+  #app.layout .composer #send { min-width: 58px; }
+  .auth { padding: 28px; }
+  .authbox { width: min(480px, 100%); }
+  dialog { max-width: min(620px, calc(100vw - 48px)); max-height: min(84dvh, 760px); overflow-y: auto; }
+}
+
+@media screen and (min-width: 821px) and (max-width: 940px) {
+  #app.layout > aside, #sidebar { flex-basis: 196px; width: 196px; padding-inline: 11px; }
+  #app.layout > main > header .tag { display: none; }
+  #app.layout .composer #photoBtn, #app.layout .composer #voiceBtn { min-width: 42px; font-size: 12px; }
+}
