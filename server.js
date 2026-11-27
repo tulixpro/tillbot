@@ -12,17 +12,16 @@ const app = express();
 // so client-supplied X-Forwarded-For values cannot bypass rate-limit IP checks.
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
-// The API serves JSON and ZIP downloads, not application HTML. A deny-by-default
-// CSP is therefore safe here and adds protection if an unexpected HTML response occurs.
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'none'"],
-      baseUri: ["'none'"],
-      formAction: ["'none'"],
-      frameAncestors: ["'none'"],
-      objectSrc: ["'none'"]
-    }
+// Keep Helmet's standard security headers on every response. Apply a strict CSP
+// only to /api: the root route serves the frontend HTML and has its own asset policy.
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use("/api", helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'none'"],
+    baseUri: ["'none'"],
+    formAction: ["'none'"],
+    frameAncestors: ["'none'"],
+    objectSrc: ["'none'"]
   }
 }));
 app.use(express.json({ limit: "3mb" }));
