@@ -525,10 +525,11 @@ html.tb-lite-mode .shell{background:transparent!important}
   flushParagraph();flushList();
  }
  async function copyText(value,button){
+  const originalLabel=button.textContent;
   try{
    if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(value);
    else{const area=document.createElement('textarea');area.value=value;area.style.position='fixed';area.style.opacity='0';document.body.append(area);area.select();const ok=document.execCommand('copy');area.remove();if(!ok)throw new Error('copy failed')}
-   button.textContent='Kopiert';button.disabled=true;setTimeout(()=>{button.textContent='Antwort kopieren';button.disabled=false},1300);
+   button.textContent='Kopiert';button.disabled=true;setTimeout(()=>{button.textContent=originalLabel;button.disabled=false},1300);
   }catch{button.textContent='Kopieren nicht möglich';setTimeout(()=>button.textContent='Antwort kopieren',1600)}
  }
  async function submit(raw){
