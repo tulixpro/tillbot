@@ -349,6 +349,22 @@ html.tb-lite-mode .shell{background:transparent!important}
  if(!params.has('embed'))document.body.classList.add('coreFullscreenDemo');
  if(params.has('embed'))document.querySelector('.currentAi')?.remove();
  const $=id=>document.getElementById(id);
+ // Low-effects mode: remember the user's choice and enable it automatically on modest hardware.
+ const performanceKey='tillbot-performance-mode',performanceButton=$('core-performance-mode');
+ let liteMode=false;
+ try{
+  const saved=localStorage.getItem(performanceKey);
+  liteMode=saved===null?(Number(navigator.deviceMemory||8)<=4||Number(navigator.hardwareConcurrency||8)<=4):saved==='1';
+ }catch{liteMode=Number(navigator.hardwareConcurrency||8)<=4}
+ const applyPerformanceMode=()=>{
+  document.documentElement.classList.toggle('tb-lite-mode',liteMode);
+  if(performanceButton){performanceButton.setAttribute('aria-pressed',String(liteMode));performanceButton.textContent=liteMode?'⚡ Sparmodus: AN':'⚡ Sparmodus: AUS'}
+ };
+ applyPerformanceMode();
+ performanceButton?.addEventListener('click',()=>{
+  liteMode=!liteMode;applyPerformanceMode();
+  try{localStorage.setItem(performanceKey,liteMode?'1':'0')}catch{}
+ });
  const form=$('chat-form'),input=$('message-input'),send=$('send'),messages=$('messages'),count=$('count'),status=$('demo-status'),newChat=$('new-chat'),exportChat=$('export-chat'),copyChat=$('copy-chat'),exportMarkdown=$('export-chat-md'),scrollLatest=$('scroll-latest'),answerMode=$('answer-mode'),stopButton=$('stop-chat');
  if(!form||!input||!send||!messages||!stopButton)return;
  let sent=0,busy=false,history=[],activeController=null;
@@ -446,7 +462,11 @@ html.tb-lite-mode .shell{background:transparent!important}
   const item=document.createElement('div');item.className='msg '+role;
   const who=document.createElement('div');who.className='who';who.textContent=role==='user'?'Du':'TILLBOT CORE';
   const body=document.createElement('div');body.className='message-text';body.textContent=text;
-  item.append(who,body);messages.append(item);applyChatSearch();if(!item.hidden)messages.scrollTop=messages.scrollHeight;return item;
+  item.append(who,body);messages.append(item);
+  // Bound the live DOM so very long sessions cannot slow down scrolling/search.
+  while(messages.children.length>100)messages.firstElementChild?.remove();
+  if(searchPanel&&!searchPanel.hidden)applyChatSearch();
+  messages.scrollTop=messages.scrollHeight;return item;
  }
  async function copyText(value,button){
   try{
