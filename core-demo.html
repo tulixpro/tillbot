@@ -250,6 +250,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 .chatSearchPanel span{font-size:10px;color:#a8b6cc}
 .chatSearchPanel button{min-height:34px;padding:6px 10px}
 .msg[hidden]{display:none}
+.promptLibrary{padding:12px 15px;border-bottom:1px solid #2a3e5b;background:#101b2c}.promptLibrary[hidden]{display:none}.promptLibraryHead{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:9px}.promptLibraryHead strong{font-size:12px}.promptLibraryHead span,.promptLibraryEmpty{font-size:10px;color:#a8b6cc}.promptLibrarySave{display:flex;gap:7px;margin-bottom:8px}.promptLibrarySave input{flex:1;min-width:0;padding:8px 10px;border:1px solid #344d70;border-radius:9px;background:#091321;color:#f5f7ff}.savedPrompts{display:grid;gap:6px}.savedPrompt{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #2c4262;border-radius:9px;background:#142239}.savedPromptName{flex:1;min-width:0;overflow-wrap:anywhere;font-size:11px;color:#dce7f8}.savedPrompt button{min-height:29px;padding:5px 8px;font-size:10px}.savedPrompt .deleteSavedPrompt{border-color:#69434b;background:#34232b}.promptLibraryEmpty{margin:4px 0}@media(max-width:680px){.promptLibrary{padding:10px}.promptLibraryHead{align-items:flex-start;flex-direction:column}.promptLibrarySave{flex-wrap:wrap}.promptLibrarySave input{flex-basis:100%}.savedPrompt{flex-wrap:wrap}}
 @media(max-width:680px){.chatSearchPanel{padding:9px 10px;gap:7px}.chatSearchPanel label{width:100%}.chatSearchPanel input{font-size:16px}}\n#scroll-latest[hidden]{display:none}.toolbar button:disabled{opacity:.45}@media(max-width:680px){.toolbar #copy-chat,.toolbar #export-chat-md{display:none}}
 
 </style>
@@ -261,8 +262,9 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 <section class="hero"><span class="eyebrow">TILLBOT CORE · HAUPT-KI</span><h2>Ein zentraler KI-Arbeitsplatz für Ideen und Spiele.</h2><p>Chatte mit CORE, entwickle Projekte und erstelle eigenständige 3D-Spielprototypen direkt im Browser – mit echtem WebGL statt einer bloßen 2D-Attrappe.</p></section>
 <details class="noticeDisclosure"><summary>ⓘ Hinweise zu CORE & Datenschutz</summary><div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div></details>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
-<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="search-chat" aria-expanded="false" aria-controls="chat-search-panel">Chat durchsuchen</button><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="copy-chat">Chat kopieren</button><button type="button" id="export-chat">TXT exportieren</button><button type="button" id="export-chat-md">Markdown exportieren</button><button type="button" id="scroll-latest" title="Zum Ende springen">↓ Neueste</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
+<div class="chatHead"><div><strong>CORE-Arbeitsplatz</strong><span>Wähle einen Bereich und arbeite fokussiert</span></div><div class="toolbar"><label class="answer-setting" for="core-mode">Arbeitsbereich <select id="core-mode"><option value="general">Allgemein</option><option value="learning">Lernen</option><option value="coding">Programmieren</option><option value="writing">Schreiben</option><option value="research">Recherche</option><option value="planning">Planung</option><option value="creative">Kreativ</option><option value="analysis">Analyse</option><option value="roblox">Roblox Studio</option></select></label><label class="answer-setting" for="answer-mode">Antwortstil <select id="answer-mode"><option value="balanced">Ausgewogen</option><option value="short">Kurz</option><option value="detailed">Ausführlich</option></select></label><button type="button" id="search-chat" aria-expanded="false" aria-controls="chat-search-panel">Chat durchsuchen</button><button type="button" id="open-prompt-library" aria-expanded="false" aria-controls="prompt-library">Prompt-Sammlung</button><button type="button" id="new-chat">Neuer Chat</button><button type="button" id="copy-chat">Chat kopieren</button><button type="button" id="export-chat">TXT exportieren</button><button type="button" id="export-chat-md">Markdown exportieren</button><button type="button" id="scroll-latest" title="Zum Ende springen">↓ Neueste</button><button type="button" id="stop-chat" disabled>Stoppen</button></div></div>
 <div id="chat-search-panel" class="chatSearchPanel" hidden><label for="chat-search">Nachrichten im aktuellen Chat finden</label><input id="chat-search" type="search" maxlength="120" placeholder="Suchbegriff eingeben …" autocomplete="off"><span id="chat-search-count" aria-live="polite">Alle Nachrichten sichtbar</span><button type="button" id="clear-chat-search">Zurücksetzen</button></div>
+<div id="prompt-library" class="promptLibrary" hidden><div class="promptLibraryHead"><strong>Deine gespeicherten Prompts</strong><span>Nur in diesem Browser gespeichert</span></div><div class="promptLibrarySave"><input id="prompt-title" type="text" maxlength="48" placeholder="Name (optional)" aria-label="Prompt-Name"><button type="button" id="save-prompt">Aktuelle Eingabe speichern</button></div><div id="saved-prompts" class="savedPrompts"><p class="promptLibraryEmpty">Noch keine Prompts gespeichert.</p></div></div>
 <div id="messages" aria-live="polite" aria-label="Chatverlauf"><div class="msg bot"><div class="who">TILLBOT CORE</div>Willkommen bei TILLBOT CORE. Stelle eine Frage oder wähle ein Beispiel. Ich antworte über den CORE-Forschungsendpunkt.</div></div>
 <div class="quickbar" aria-label="CORE-Arbeitsbereiche">
 <button type="button" data-prompt="Hilf mir beim Lernen: Erkläre das Thema verständlich, stelle Rückfragen und erstelle am Ende drei Übungsfragen.">Lernen</button>
@@ -323,6 +325,28 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
  let sent=0,busy=false,history=[],activeController=null;
  input.maxLength=2000;
  const searchButton=$('search-chat'),searchPanel=$('chat-search-panel'),searchInput=$('chat-search'),searchCount=$('chat-search-count'),clearSearch=$('clear-chat-search');
+ const libraryButton=$('open-prompt-library'),libraryPanel=$('prompt-library'),promptTitle=$('prompt-title'),savePromptButton=$('save-prompt'),savedPrompts=$('saved-prompts');
+ const PROMPT_KEY='tillbot-core-prompts-v1';
+ function readSavedPrompts(){try{const data=JSON.parse(localStorage.getItem(PROMPT_KEY)||'[]');return Array.isArray(data)?data.filter(item=>item&&typeof item.text==='string').slice(0,30):[]}catch{return []}}
+ function renderSavedPrompts(){
+  if(!savedPrompts)return;savedPrompts.replaceChildren();const entries=readSavedPrompts();
+  if(!entries.length){const empty=document.createElement('p');empty.className='promptLibraryEmpty';empty.textContent='Noch keine Prompts gespeichert.';savedPrompts.append(empty);return}
+  entries.forEach((entry,index)=>{
+   const row=document.createElement('div');row.className='savedPrompt';
+   const name=document.createElement('span');name.className='savedPromptName';name.textContent=entry.title||entry.text.slice(0,64);name.title=entry.text;
+   const use=document.createElement('button');use.type='button';use.textContent='Einfügen';use.addEventListener('click',()=>{input.value=entry.text;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus()});
+   const remove=document.createElement('button');remove.type='button';remove.className='deleteSavedPrompt';remove.textContent='Löschen';remove.setAttribute('aria-label','Prompt löschen');remove.addEventListener('click',()=>{const next=readSavedPrompts();next.splice(index,1);localStorage.setItem(PROMPT_KEY,JSON.stringify(next));renderSavedPrompts()});
+   row.append(name,use,remove);savedPrompts.append(row);
+  });
+ }
+ libraryButton?.addEventListener('click',()=>{const opening=libraryPanel.hidden;libraryPanel.hidden=!opening;libraryButton.setAttribute('aria-expanded',String(opening));if(opening){renderSavedPrompts();promptTitle.focus()}});
+ savePromptButton?.addEventListener('click',()=>{
+  const text=input.value.trim();if(!text){status.textContent='Schreibe zuerst einen Prompt in das Eingabefeld.';input.focus();return}
+  const entries=readSavedPrompts();if(entries.length>=30){status.textContent='Maximal 30 Prompts können gespeichert werden.';return}
+  if(entries.some(entry=>entry.text===text)){status.textContent='Dieser Prompt ist bereits gespeichert.';return}
+  entries.unshift({title:promptTitle.value.trim()||text.slice(0,48),text});localStorage.setItem(PROMPT_KEY,JSON.stringify(entries));promptTitle.value='';renderSavedPrompts();status.textContent='Prompt wurde lokal in diesem Browser gespeichert.';
+ });
+
  function applyChatSearch(){
   if(!searchInput||!searchCount)return;
   const query=searchInput.value.trim().toLocaleLowerCase('de');
@@ -344,6 +368,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
   if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){
    event.preventDefault();input.focus();
   }
+  if(event.key==='Escape'&&libraryPanel&&!libraryPanel.hidden){libraryPanel.hidden=true;libraryButton?.setAttribute('aria-expanded','false')}
   if(event.key==='Escape'&&searchPanel&&!searchPanel.hidden){
    searchInput.value='';applyChatSearch();searchPanel.hidden=true;searchButton?.setAttribute('aria-expanded','false');
   }
