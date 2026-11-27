@@ -264,12 +264,18 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
 .projectStudioActions{justify-content:flex-start;margin-top:9px}.projectStudioActions button{min-height:34px}.projectStudio .danger{border-color:#744b5b;color:#f1c6d1}
 .projectStudioMeta{margin-top:8px;color:var(--muted);font-size:10px}
 @media(max-width:680px){.projectStudio{margin:0 9px 10px;padding:11px}.projectStudioGrid{grid-template-columns:1fr}.projectStudio textarea{min-height:90px}}
+
+/* Shared TILLBOT low-effects mode */
+html.tb-lite-mode body{background:#11111b!important}
+html.tb-lite-mode body:before{display:none!important}
+html.tb-lite-mode *,html.tb-lite-mode *:before,html.tb-lite-mode *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;filter:none!important;box-shadow:none!important}
+html.tb-lite-mode .shell{background:transparent!important}
 </style>
 <link rel="stylesheet" href="./christmas-theme.css?v=9">
 </head>
 <body>
 <main class="shell">
-<header class="topbar"><div class="brand"><div class="mark"><img src="./icons/tillbot.svg?v=9" alt="TILLBOT Cloud"></div><div><h1>TILLBOT CORE</h1><p>Haupt-KI · 3D Game Studio</p></div></div><div class="status"><i></i> CORE SYSTEM</div></header>
+<header class="topbar"><div class="brand"><div class="mark"><img src="./icons/tillbot.svg?v=9" alt="TILLBOT Cloud"></div><div><h1>TILLBOT CORE</h1><p>Haupt-KI · 3D Game Studio</p></div></div><div class="status"><i></i> CORE SYSTEM <button type="button" id="core-performance-mode" aria-pressed="false">⚡ Sparmodus</button></div></header>
 <section class="hero"><span class="eyebrow">TILLBOT CORE · HAUPT-KI</span><h2>Ein zentraler KI-Arbeitsplatz für Ideen und Spiele.</h2><p>Chatte mit CORE, entwickle Projekte und erstelle eigenständige 3D-Spielprototypen direkt im Browser – mit echtem WebGL statt einer bloßen 2D-Attrappe.</p></section>
 <details class="noticeDisclosure"><summary>ⓘ Hinweise zu CORE & Datenschutz</summary><div class="notice"><span class="noticeIcon" aria-hidden="true">ⓘ</span><div><strong>Wichtige Einordnung:</strong> Diese Forschungsdemo nutzt für Antworten einen extern bereitgestellten Modellserver. CORE ist noch kein selbst trainiertes Grundmodell. Deine Nachrichten werden zur Antwortverarbeitung an diesen Anbieter übertragen, aber von TILLBOT nicht als Chatverlauf gespeichert.</div></div></details>
 <section class="chatCard" aria-label="TILLBOT CORE Demo-Chat">
@@ -519,7 +525,7 @@ button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px sol
  function makePreviewDocument(html){
   const policy='<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'unsafe-inline\'; style-src \'unsafe-inline\'; img-src data: blob:; font-src data:; media-src data: blob:; connect-src \'none\'; object-src \'none\'; base-uri \'none\'; form-action \'none\'">';
   if(/<head[^>]*>/i.test(html))return html.replace(/<head([^>]*)>/i,'<head$1>'+policy);
-  return '<!doctype html><html><head>'+policy+'</head><body>'+html+'</body></html>';
+  return '<!doctype html><html><head>'+policy+'</head><body>'+html+'<script>(()=>{const key="tillbot-performance-mode",btn=document.getElementById("core-performance-mode"),root=document.documentElement;let enabled=localStorage.getItem(key)==="1";const apply=()=>{root.classList.toggle("tb-lite-mode",enabled);if(btn){btn.setAttribute("aria-pressed",String(enabled));btn.textContent=enabled?"⚡ Sparmodus: AN":"⚡ Sparmodus: AUS"}};apply();btn?.addEventListener("click",()=>{enabled=!enabled;try{localStorage.setItem(key,enabled?"1":"0")}catch{}apply()});})();</script></body></html>';
  }
  async function createGame(){
   const prompt=String(gamePrompt.value||'').trim();if(!prompt||gameController)return;
